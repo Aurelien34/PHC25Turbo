@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "InjectPhcInSaveState/1.0.0": {
+        "dependencies": {
+          "Phc25SaveState": "1.0.0"
+        },
+        "runtime": {
+          "InjectPhcInSaveState.dll": {}
+        }
+      },
+      "Phc25SaveState/1.0.0": {
+        "runtime": {
+          "Phc25SaveState.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "InjectPhcInSaveState/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Phc25SaveState/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
