@@ -74,15 +74,14 @@ draw_circuit_tile:
     call compute_tile_address ; get tile address in [de]
     ; load tile number
     ld a,(de)
-    and %11111100
+    and %11111000
     ; check if the tile should be drawn
     or a
     jr z,.enddraw
-    sub 4; decrement tile number, as we skip blank tile (#0)
+    sub 8; decrement tile number, as we skip blank tile (#0)
     ; compute circuit bitmap address
     ld l,a
     ld h,0
-    add hl,hl
     add hl,hl
     add hl,hl
     ld de,RAM_MAP_PRECALC_AREA

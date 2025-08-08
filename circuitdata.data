@@ -1,4 +1,4 @@
-Z equ 4
+Z equ 8
 
 ; Circuit 0
 ; 16x12 = 192 octets

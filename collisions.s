@@ -162,7 +162,8 @@ compute_collisions_xy:
     ld a,(hl); a contains the tile data
     ; read tile data
     ld iyl,a ; backup tile data to register [iyl]
-    and %11111100
+    and %11111000
+    srl a
     srl a
     ld h,0
     ld l,a

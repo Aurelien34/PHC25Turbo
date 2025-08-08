@@ -107,7 +107,7 @@ decompress_huffman_byte:
 	call get_next_bit
 	jr c,.n11 ; Jump size: 3
 .n10:
-	ld a,$0c
+	ld a,$18
 	ret
 .n11:
 	call get_next_bit
@@ -119,16 +119,16 @@ decompress_huffman_byte:
 	call get_next_bit
 	jr c,.n11001 ; Jump size: 3
 .n11000:
-	ld a,$14
+	ld a,$28
 	ret
 .n11001:
 	call get_next_bit
 	jr c,.n110011 ; Jump size: 3
 .n110010:
-	ld a,$18
+	ld a,$30
 	ret
 .n110011:
-	ld a,$04
+	ld a,$08
 	ret
 .n1101:
 	call get_next_bit
@@ -137,13 +137,13 @@ decompress_huffman_byte:
 	call get_next_bit
 	jr c,.n110101 ; Jump size: 3
 .n110100:
-	ld a,$10
+	ld a,$20
 	ret
 .n110101:
 	call get_next_bit
 	jr c,.n1101011 ; Jump size: 3
 .n1101010:
-	ld a,$30
+	ld a,$60
 	ret
 .n1101011:
 	ld a,$91
@@ -158,10 +158,10 @@ decompress_huffman_byte:
 	call get_next_bit
 	jr c,.n11011001 ; Jump size: 3
 .n11011000:
-	ld a,$28
+	ld a,$50
 	ret
 .n11011001:
-	ld a,$20
+	ld a,$40
 	ret
 .n1101101:
 	call get_next_bit
@@ -173,10 +173,10 @@ decompress_huffman_byte:
 	ld a,$d9
 	ret
 .n110111:
-	ld a,$1c
+	ld a,$38
 	ret
 .n111:
-	ld a,$08
+	ld a,$10
 	ret
 
 ;END_UNCOMPRESS_GENERATION
