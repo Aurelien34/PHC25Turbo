@@ -43,13 +43,7 @@ autodrive_current_car:
     ld c,INPUT_VALUE_FIRE ; controler value to be returned
     ; Load current orientation
     ld a,(ix+CAR_OFFSET_ANGLE)
-    ld d,a ; backup current orientation
-    ; Anti-vibrations    
-    sub b
-    cp $02
-    jp c,.ok ; Don't move if less than 2 increments away
-    ; Compare current orientation with target orientation
-    ld a,d ; restore a
+    and $f0
     sub b
     jp z,.ok
     jp nc,.positive
