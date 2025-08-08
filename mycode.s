@@ -13,6 +13,7 @@
     ; dérapage en fonction de la vitesse?
     ; photos des voitures
     ; images en niveaux de gris
+    ; collisions entre voitures
 
 start:
     di ; Disable interrupts
@@ -48,11 +49,13 @@ start:
     call update_inputs;
 
     ld ix,data_car0 ; current car is number 0
-    ld a,(RAM_MAP_CONTROLLERS_VALUES)
+    ;ld a,(RAM_MAP_CONTROLLERS_VALUES)
+    call autodrive_current_car
     call update_car_angle_and_throttle
     call update_car_speed
     ld ix,data_car1 ; current car is number 1
-    ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
+    call autodrive_current_car
+    ;ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
     call update_car_angle_and_throttle
     call update_car_speed
     
