@@ -6,7 +6,6 @@
 
     global autodrive_current_car
 
-    dc.b "                  Breakpoint!!!                    "
 ; returns input byte value in register [a]
 autodrive_current_car:
     ; Determine most representative tile based on car position
