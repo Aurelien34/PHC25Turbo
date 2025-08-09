@@ -3,7 +3,6 @@
 
     global start
 
-    ; conduite autonome
     ; sound ?
     ; nouveaux circuits enchaînes
     ; détection des tours
@@ -14,6 +13,7 @@
     ; photos des voitures
     ; images en niveaux de gris
     ; collisions entre voitures
+    ; Accueil en couleur et qui bouge!
 
 start:
     di ; Disable interrupts
@@ -22,9 +22,7 @@ start:
 
     call clear_screen
     call switch_to_mode_graphics;
-
-.infinite
-    ;jr .infinite
+    call init_joysticks
 
     ; load the circuit
     ld hl,huf_circuitdata
@@ -49,13 +47,13 @@ start:
     call update_inputs;
 
     ld ix,data_car0 ; current car is number 0
-    ;ld a,(RAM_MAP_CONTROLLERS_VALUES)
-    call autodrive_current_car
+    ld a,(RAM_MAP_CONTROLLERS_VALUES)
+    ;call autodrive_current_car
     call update_car_angle_and_throttle
     call update_car_speed
     ld ix,data_car1 ; current car is number 1
-    call autodrive_current_car
-    ;ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
+    ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
+    ;call autodrive_current_car
     call update_car_angle_and_throttle
     call update_car_speed
     
@@ -84,7 +82,7 @@ start:
     ld a,%10110110
     out ($40),a
 
-    call emulator_security_idle;
+    ;call emulator_security_idle;
 
     ld ix,data_car1 ; ; current car is number 1
     call erase_car

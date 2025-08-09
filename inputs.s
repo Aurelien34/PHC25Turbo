@@ -3,7 +3,14 @@
 
     section	code,text
 
-    global update_inputs
+    global init_joysticks, update_inputs
+
+init_joysticks:
+    ld a,7
+    out ($c1),a ; push address for VOICE ENABLE register
+    ld a,%11000000 ; mask for ports A and B
+    out ($c0),a ; activate ports A and B
+    ret
 
 ; Mapping is here: https://github.com/mamedev/mame/blob/master/src/mame/sanyo/phc25.cpp (line 323...)
 ; Joystick ports (registers for ports A and B) are here: https://github.com/mamedev/mame/blob/master/src/devices/sound/ay8910.h
