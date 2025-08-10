@@ -1,7 +1,7 @@
     include inc/rammap.inc
     section	code,text
 
-    global start
+    global start, players_count
 
     ; sound ?
     ; nouveaux circuits enchaînes
@@ -15,14 +15,21 @@
     ; collisions entre voitures
     ; Accueil en couleur et qui bouge!
 
+players_count:
+    dc.b 0
+
 start:
     di ; Disable interrupts
     
     ld sp,RAM_MAP_STACK_END
 
-    call clear_screen
-    call switch_to_mode_graphics;
     call init_joysticks
+
+    call show_intro
+
+    ld a,$ff
+    call clear_screen
+    call switch_to_mode_graphics_hd;
 
     ; load the circuit
     ld hl,huf_circuitdata
@@ -48,12 +55,17 @@ start:
 
     ld ix,data_car0 ; current car is number 0
     ld a,(RAM_MAP_CONTROLLERS_VALUES)
-    ;call autodrive_current_car
     call update_car_angle_and_throttle
     call update_car_speed
     ld ix,data_car1 ; current car is number 1
+    ld a,(players_count)
+    cp 2
+    jp z,.realplayer2
+    call autodrive_current_car
+    jp .common_player2
+.realplayer2:
     ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
-    ;call autodrive_current_car
+.common_player2
     call update_car_angle_and_throttle
     call update_car_speed
     

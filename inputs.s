@@ -6,10 +6,10 @@
     global init_joysticks, update_inputs
 
 init_joysticks:
-    ld a,7
-    out ($c1),a ; push address for VOICE ENABLE register
-    ld a,%11000000 ; mask for ports A and B
-    out ($c0),a ; activate ports A and B
+    ;ld a,7
+    ;out ($c1),a ; push address for VOICE ENABLE register
+    ;ld a,%11000000 ; mask for ports A and B
+    ;out ($c0),a ; activate ports A and B
     ret
 
 ; Mapping is here: https://github.com/mamedev/mame/blob/master/src/mame/sanyo/phc25.cpp (line 323...)
@@ -20,21 +20,21 @@ update_inputs:
     ld b,0 ; b <- 0
 
     ;  Joystick
-    ld a,$0e
-    out ($c1),a
-    in a,($c1)
-    bit 4,a
-    jp nz,.jp1notfire
-    set INPUT_BIT_FIRE,b
-.jp1notfire
-    bit 2,a
-    jp nz,.jp1notleft
-    set INPUT_BIT_LEFT,b
-.jp1notleft
-    bit 3,a
-    jp nz,.jp1notright
-    set INPUT_BIT_RIGHT,b
-.jp1notright
+;    ld a,$0e
+;    out ($c1),a
+;    in a,($c1)
+;    bit 4,a
+;    jp nz,.jp1notfire
+;    set INPUT_BIT_FIRE,b
+;.jp1notfire
+;    bit 2,a
+;    jp nz,.jp1notleft
+;    set INPUT_BIT_LEFT,b
+;.jp1notleft
+;    bit 3,a
+;    jp nz,.jp1notright
+;    set INPUT_BIT_RIGHT,b
+;.jp1notright
 
     ; Keyboard
     in a,($83)
@@ -52,6 +52,11 @@ update_inputs:
     jp nz,.p1notright
     set INPUT_BIT_RIGHT,b
 .p1notright
+    in a,($80)
+    bit 0,a
+    jp nz,.p1notstart
+    set INPUT_BIT_START,b
+.p1notstart
     ld hl,RAM_MAP_CONTROLLERS_VALUES
     ld (hl),b ; store values
 
@@ -60,21 +65,21 @@ update_inputs:
     ld b,0 ; b <- 0
 
     ;  Joystick
-    ld a,$0f
-    out ($c1),a
-    in a,($c1)
-    bit 4,a
-    jp nz,.jp2notfire
-    set INPUT_BIT_FIRE,b
-.jp2notfire
-    bit 2,a
-    jp nz,.jp2notleft
-    set INPUT_BIT_LEFT,b
-.jp2notleft
-    bit 3,a
-    jp nz,.jp2notright
-    set INPUT_BIT_RIGHT,b
-.jp2notright
+;    ld a,$0f
+;    out ($c1),a
+;    in a,($c1)
+;    bit 4,a
+;    jp nz,.jp2notfire
+;    set INPUT_BIT_FIRE,b
+;.jp2notfire
+;    bit 2,a
+;    jp nz,.jp2notleft
+;    set INPUT_BIT_LEFT,b
+;.jp2notleft
+;    bit 3,a
+;    jp nz,.jp2notright
+;    set INPUT_BIT_RIGHT,b
+;.jp2notright
 
     in a,($80)
     bit 2,a
@@ -91,6 +96,11 @@ update_inputs:
     jp nz,.p2notright
     set INPUT_BIT_RIGHT,b
 .p2notright
+    in a,($83)
+    bit 0,a
+    jp nz,.p2notstart
+    set INPUT_BIT_START,b
+.p2notstart
     ld hl,RAM_MAP_CONTROLLERS_VALUES+1
     ld (hl),b ; store values
 
