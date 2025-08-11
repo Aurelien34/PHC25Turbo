@@ -19,7 +19,6 @@
     ; images en niveaux de gris
     ; collisions entre voitures
     ; Compression RLE
-    ; Editeur: grouper les dalles par 2 par couleurs
 
 players_count:
     dc.b 0
