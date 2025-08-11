@@ -1,3 +1,6 @@
+# Debug
+DEBUG = 0
+
 # Path
 TO_COMPRESS_PATH = res_to_compress
 TO_EXTRACT_AND_COMPRESS_PATH = bmp_to_extract_and_compress
@@ -94,10 +97,7 @@ $(TO_COMPRESS_PATH)/%.raw: $(TO_EXTRACT_AND_COMPRESS_PATH)/%.bmp
 $(COMPRESSED_FILES_INCLUDER): $(EXTRACTED_TO_COMPRESS) $(TO_COMPRESS_PATH)/circuitdata.bin $(INTRO_SCREENS_RAW)
 
 $(OBJ_PATH)/%.o: %.s $(INC) $(PRECOMP_PATH)
-	$(AS) $(ASFLAGS) -L $(PRECOMP_PATH)/$<.txt -o $@ $<
-
-$(OBJ_PATH)/%.o: %.s $(INC) $(PRECOMP_PATH)
-	$(AS) $(ASFLAGS) -L $(PRECOMP_PATH)/$<.txt -o $@ $<
+	$(AS) $(ASFLAGS) -L $(PRECOMP_PATH)/$<.txt -o $@ $< -DDEBUG=$(DEBUG)
 
 $(HUFFMAN_COMPRESSOR_SOURCE_FILE) $(COMPRESSED_FILES_INCLUDER) $(COMPRESSED): $(TO_COMPRESS_ALL) $(HUFFMAN_PATH) $(TO_COMPRESS_PATH) $(INTRO_SCREENS_RAW)
 	$(HUFF80) $(foreach file,$(notdir $(TO_COMPRESS_BMP)),$(TO_COMPRESS_PATH)/$(basename $(file)).bmp,$(HUFFMAN_PATH)/$(basename $(file)).huf,62) $(foreach file,$(notdir $(TO_COMPRESS_OTHER)),$(TO_COMPRESS_PATH)/$(file),$(HUFFMAN_PATH)/$(basename $(file)).huf) $(HUFFMAN_COMPRESSOR_SOURCE_FILE)
@@ -146,4 +146,4 @@ ifneq ($(wildcard $(SAVESTATE)),)
 endif
 	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(EXTRACTED_TO_COMPRESS),del $(notdir $(FILE)) &)
 	cd $(TO_COMPRESS_PATH) & del circuitdata.bin
-	cd $(TO_COMPRESS_PATH) & del introscreen.raw & del intro20a.raw & del intro0a.raw & del intro0b.raw & del intro0c.raw
+	cd $(TO_COMPRESS_PATH) & del introscreen.raw & del intro0a.raw & del intro0b.raw & del intro0c.raw

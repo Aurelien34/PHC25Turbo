@@ -3,7 +3,10 @@
     section	code,text
 
     global start, players_count
+
+    if DEBUG = 1
     global emulator_security_idle
+    endif
 
     ; sound ?
     ; nouveaux circuits enchaînes
@@ -15,7 +18,6 @@
     ; photos des voitures
     ; images en niveaux de gris
     ; collisions entre voitures
-    ; Gérer le security idle mode par constante d'assemblage / mode release
     ; Compression RLE
     ; Editeur: grouper les dalles par 2 par couleurs
 
@@ -109,7 +111,9 @@ start:
     ld a,%10110110
     out ($40),a
 
+    if DEBUG = 1
     call emulator_security_idle;
+    endif
 
     ; Erase the car sprites
     ld ix,data_car1 ; ; current car is number 1
@@ -131,8 +135,8 @@ start:
 
     ret
 
+    if DEBUG = 1
 emulator_security_idle:
-    ret
     ; wait for a known amount of cycles to mimic the real hardware => 29 lines
     ld b,2
     ld c,125
@@ -142,3 +146,4 @@ emulator_security_idle:
     dec b
     jr nz,.innerloop
     ret
+    endif
