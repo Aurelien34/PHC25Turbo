@@ -71,7 +71,6 @@ write_string:
 
 ; Font address in [hl]
 ; Message block in ix
-    dc.b "                        blocks                        "
 write_text_block:
     call wait_for_vbl
     ld e,(ix)

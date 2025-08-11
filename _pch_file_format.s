@@ -8,7 +8,7 @@
     dc.b $A5,$A5,$A5,$A5,$A5,$A5,$A5,$A5,$A5,$A5
 
     ; --- [2] Nom du fichier BASIC (6 caractères ASCII)
-    dc.b "turbo "
+    dc.b "ST2000"
 
     section basic,data
 

@@ -6,6 +6,12 @@
 
     global show_intro
 
+INTRO_RAM_MAP_IMAGE_0_A equ RAM_MAP_PRECALC_AREA
+INTRO_RAM_MAP_IMAGE_0_B equ INTRO_RAM_MAP_IMAGE_0_A+81
+INTRO_RAM_MAP_IMAGE_0_C equ INTRO_RAM_MAP_IMAGE_0_B+81
+INTRO_RAM_MAP_FONT equ INTRO_RAM_MAP_IMAGE_0_C+81
+
+
 block_texts_to_display:
     ; x is in 8 pixels increments, 32 increments for one row
     ; y is pixel perfect
@@ -14,11 +20,11 @@ block_texts_to_display:
     dc.w 0+98*32+VRAM_ADDRESS, sz_line_0
     dc.w 0+109*32+VRAM_ADDRESS, sz_line_1
     dc.w 0+118*32+VRAM_ADDRESS, sz_line_2
-    dc.w 0+129*32+VRAM_ADDRESS, sz_line_3
+    dc.w 10+129*32+VRAM_ADDRESS, sz_line_3
     dc.w 0+141*32+VRAM_ADDRESS, sz_line_4
     dc.w 0+151*32+VRAM_ADDRESS, sz_line_5
     dc.w 0+161*32+VRAM_ADDRESS, sz_line_6
-    dc.w 0+184*32+VRAM_ADDRESS, sz_line_7
+    dc.w 4+184*32+VRAM_ADDRESS, sz_line_7
     dc.w 23+104*32+VRAM_ADDRESS, sz_joy_0
     dc.w 23+114*32+VRAM_ADDRESS, sz_joy_1
     dc.w 23+124*32+VRAM_ADDRESS, sz_joy_2
@@ -32,7 +38,7 @@ sz_line_1:
 sz_line_2:
     dc.b "> 2 players start : 2",0
 sz_line_3:
-    dc.b "          P1     P2",0
+    dc.b "P1     P2",0
 sz_line_4:
     dc.b "> Left:   Left   d",0
 sz_line_5:
@@ -40,7 +46,7 @@ sz_line_5:
 sz_line_6:
     dc.b "> Accel:  Space  s",0
 sz_line_7:
-    dc.b "Bouz<@AurelienBricole for RPUFOS",0
+    dc.b "PHC25 < Bouz 2025 for RPUFOS",0
 sz_joy_0:
     dc.b "Joysticks",0
 sz_joy_1:
@@ -48,24 +54,72 @@ sz_joy_1:
 sz_joy_2:
     dc.b "soon;",0
 
-cycle_count_half_screen:
-    dc.w 0
+DIGIT_COUNT equ 3
+DIGIT_IMAGE_SEQUENCE_COUNT equ 9
 
+digit_image_sequences: ; 3 is the empty image
+    dc.b (1<<2)+2
+    dc.b (0<<2)+0
+    dc.b (1<<2)+1
+    dc.b (0<<2)+1
+    dc.b (2<<2)+2
+    dc.b (0<<2)+2
+
+digit_positions:
+    dc.w 20/4+51*32+VRAM_ADDRESS
+    dc.w 32/4+50*32+VRAM_ADDRESS
+    dc.w 44/4+49*32+VRAM_ADDRESS
+
+digit_color_bitmaps_addresses:
+    dc.w INTRO_RAM_MAP_IMAGE_0_A
+    dc.w INTRO_RAM_MAP_IMAGE_0_B
+    dc.w INTRO_RAM_MAP_IMAGE_0_C
+
+WHEELS_UP_BIT equ 0
+WHEELS_SWAP_BIT equ 1
+IMAGE_SWAP_BIT equ 2
+WHEEL_HEIGHT equ 11
+WHEELS_ANIMATION_STEP equ 100
+DIGIT_IMAGE_HEIGHT equ 27
+DIGIT_ANIMATION_STEP equ 8
+IMAGE_ANIMATION_STEP equ 4
+
+    dc.b "                Animations                 "
+digit_animation_counter:
+    dc.w 0
+image_current_digit_number:
+    dc.b 0
+image_animation_counter:
+    dc.w 0
+image_current_digit_sequence_index:
+    dc.b 0
+wheels_animation_counter:
+    dc.w 0
+anim_status:
+    dc.b 1<<WHEELS_UP_BIT
+wheel1_address_up:
+    dc.w 72/4+65*32+VRAM_ADDRESS     ; wheel 1 coordinates in the image
+wheel2_address_up:
+    dc.w 96/4+65*32+VRAM_ADDRESS    ; wheel 2 coordinates in the image
+wheel1_address_down:
+    dc.w 72/4+66*32+VRAM_ADDRESS
+wheel2_address_down:
+    dc.w 96/4+66*32+VRAM_ADDRESS
+
+    dc.b "                                                  intro                                       "
 show_intro:
 
     call switch_to_mode_graphics_sd_white
     ld a,$00
     call clear_screen ; clear whole screen, but we don't have the color we want for the bottom of the screen
 
-    call count_screen_cycles
-
     ; Decompress font
     ld hl,huf_smallfont
-    ld de,RAM_MAP_PRECALC_AREA
+    ld de,INTRO_RAM_MAP_FONT
     call decompress_huffman
 
     ; Write text
-    ld hl,RAM_MAP_PRECALC_AREA
+    ld hl,INTRO_RAM_MAP_FONT
     ld ix,block_texts_to_display
     call write_text_block
 
@@ -74,11 +128,31 @@ show_intro:
     ld de,VRAM_ADDRESS
     call decompress_huffman
 
+    ; Decompress 0 digits
+    ld hl,huf_intro0a
+    ld de,INTRO_RAM_MAP_IMAGE_0_A
+    call decompress_huffman
+    ld hl,huf_intro0b
+    ld de,INTRO_RAM_MAP_IMAGE_0_B
+    call decompress_huffman
+    ld hl,huf_intro0c
+    ld de,INTRO_RAM_MAP_IMAGE_0_C
+    call decompress_huffman
+
 .intro_loop:
 
-    call wait_half_screen
-    call switch_to_mode_graphics_hd
+    call wait_for_vbl
+    call switch_to_mode_graphics_sd_green
 
+    call animate_wheels
+    call animate_digits
+
+    call emulator_security_idle
+    call switch_to_mode_graphics_sd_white
+
+    call update_animation
+
+    ; Read inputs
     call update_inputs
     ld a,(RAM_MAP_CONTROLLERS_VALUES)
     bit INPUT_BIT_START,a
@@ -94,70 +168,325 @@ show_intro:
     ld (players_count),a
     ret
 .notstart2:
-
-
-    call wait_for_vbl
-    call switch_to_mode_graphics_sd_white
     jr .intro_loop
 
     ret
 
-count_screen_cycles:
-    ld bc,0 ; loop counter in [bc]
-    ; wait for vbl
-.vbl:
-    in a,($40)
-    bit 4,a
-    jr z,.vbl
-    ; wait for end of VBL => top of the screen
-.novbl:
-    in a,($40)
-    bit 4,a
-    jr nz,.novbl
-    ; now we count until next VBL => bottom of the screen
-.count_loop
-    inc bc              ; 6 cycles
-    in a,($40)          ; 11 cycles
-    bit 4,a             ; 8 cycles
-    jr z,.count_loop   ; 12 cycles => Total 37 cycles
-
-.end_count
-    srl b ; divide by 2
-    rr c
-    ; Add security margin (argl) due to differences between emulator and real machine
-    ld hl,50
-    add hl,bc
-    ld b,h
-    ld c,l
-    ld hl,cycle_count_half_screen
-    ld (hl),c
+animate_wheels:
+    ld hl,wheels_animation_counter+1
+    ld a,(hl)
+    ld hl,anim_status
+    ld c,(hl) ; status in [c]
+    xor c
+    bit WHEELS_SWAP_BIT,a
+    jp z,.wheels_swap_ok
+    
+    ; Need to swap wheels
+    ; Determine the addresses to use for data transfer
+    call .load_wheels_positions
+    ld de,31
+    exx
+    ld de,31
+    exx
+    ld b,WHEEL_HEIGHT
+.copy_loop:
+    ld a,(hl)
+    exx
+    ld c,(hl)
+    ld (hl),a
+    ld a,c
     inc hl
-    ld (hl),b
+    exx
+    ld (hl),a
+    inc hl
+    ld a,(hl)
+    exx
+    ld c,(hl)
+    ld (hl),a
+    ld a,c
+    add hl,de
+    exx
+    ld (hl),a
+    add hl,de
+    dec b
+    jp nz,.copy_loop
+    ; Update status
+    ld a,(anim_status)
+    bit WHEELS_SWAP_BIT,a
+    jp z,.swap_to_1
+    res WHEELS_SWAP_BIT,a
+    jp .swapped
+.swap_to_1:
+    set WHEELS_SWAP_BIT,a
+.swapped:
+    ld (anim_status),a
+.wheels_swap_ok
+
+    ; Time to animate wheels vertically
+    ld hl,wheels_animation_counter+1
+    ld a,(hl)
+    ld hl,anim_status
+    ld c,(hl) ; status in [c]
+    xor c
+    bit WHEELS_UP_BIT,a
+    jp z,.wheels_position_ok
+    ; need to move wheels
+    ; Determine the addresses to use for data transfer
+    call .load_wheels_positions
+    bit WHEELS_UP_BIT,c ; up or down?
+    jp nz,.move_down
+    ; move up
+    call .do_move_up
+    exx 
+    call .do_move_up
+    jp .update_position_status
+.move_down:
+    call .do_move_down    
+    exx
+    call .do_move_down
+.update_position_status:
+    ; Update status
+    ld a,(anim_status)
+    bit WHEELS_UP_BIT,a
+    jp z,.position_to_1
+    res WHEELS_UP_BIT,a
+    jp .ok_position_bit
+.position_to_1:
+    set WHEELS_UP_BIT,a
+.ok_position_bit:
+    ld (anim_status),a
+.wheels_position_ok:
+    ; Increment animation counter
+    ld hl,(wheels_animation_counter)
+    ld bc,WHEELS_ANIMATION_STEP
+    add hl,bc
+    ld (wheels_animation_counter),hl
     ret
 
-wait_half_screen:
-    ld hl,cycle_count_half_screen
+; status in [C]
+.load_wheels_positions:
+    bit WHEELS_UP_BIT,c
+    jp z,.wheels_down
+    ; wheels are up
+    ld hl,(wheel1_address_up)
+    exx
+    ld hl,(wheel2_address_up)
+    exx
+    ret
+.wheels_down:
+    ; wheels are down
+    ld hl,(wheel1_address_down)
+    exx
+    ld hl,(wheel2_address_down)
+    exx
+    ret
+
+; [hl] contains top of the wheel
+.do_move_down:
+    ; Point to the correct rows
+    ld d,h
+    ld e,l
+    ld bc,32*(WHEEL_HEIGHT-1)
+    add hl,bc
+    ld bc,32*(WHEEL_HEIGHT)
+    ex de,hl
+    add hl,bc
+    ex de,hl
+    ld bc,$ffdf ; -33
+    ld ixl,WHEEL_HEIGHT
+.do_move_down_loop:
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc de
+    ld a,(hl)
+    ld (de),a
+    add hl,bc
+    ex de,hl
+    add hl,bc
+    ex de,hl
+    dec ixl
+    jp nz,.do_move_down_loop
+    xor a
+    ld (de),a
+    inc de
+    ld (de),a
+    ret
+
+; [hl] contains top of the wheel
+.do_move_up:
+    ; Point to the correct rows
+    ld d,h
+    ld e,l
+    ld bc,$ffe0 ; -32
+    add hl,bc
+    ex de,hl
+    ld bc,31
+    ld ixl,WHEEL_HEIGHT
+.do_move_up_loop:
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc de
+    ld a,(hl)
+    ld (de),a
+    add hl,bc
+    ex de,hl
+    add hl,bc
+    ex de,hl
+    dec ixl
+    jp nz,.do_move_up_loop
+    xor a
+    ld (de),a
+    inc de
+    ld (de),a
+    ret
+
+animate_digits:
+    ; determine the target digit
+    ld a,(image_current_digit_number)
+    add a ; times 2 as we will read a VRAM address
+    ld h,0
+    ld l,a
+    ld bc,digit_positions
+    add hl,bc
+    ld a,(hl)
+    inc hl
+    ld h,(hl)
+    ld l,a ; hl nowpoints to the screen
+    ex de,hl ; back it up in de
+    ; Now we whe to decide what image to show
+    ld hl,digit_image_sequences
+    ld b,0
+    ld a,(image_current_digit_sequence_index)
+    ld c,a
+    add hl,bc
+    ld b,(hl) ; [b] now contains the sequence
+    ; Decide on what part of the sequence to point to
+    ld a,(anim_status)
+    bit IMAGE_SWAP_BIT,a
+    ld a,b
+    jp z,.show_second
+    ; show first
+    srl a
+    srl a
+.show_second:
+    and %11 ; a now points to the bitmap index to be displayed
+    cp 3
+    jp nz,.continue_with_an_image
+    ; We need to clear the digit on the screen
+    call .clear_digit
+    jp .flip_anim_bit
+.continue_with_an_image:
+    add a
+    ld b,0
+    ld c,a
+    ld hl,digit_color_bitmaps_addresses
+    add hl,bc
+    ld a,(hl)
+    inc hl
+    ld h,(hl)
+    ld l,a ; hl now points to the bitmap data
+    ex de,hl
+    call .show_0_bloc ; Show the digit
+.flip_anim_bit
+    ; Now flip the animation bit
+    ld a,(anim_status)
+    bit IMAGE_SWAP_BIT,a
+    jp z,.flipTo1
+    ; flip to 0
+    res IMAGE_SWAP_BIT,a
+    jp .end
+.flipTo1
+    set IMAGE_SWAP_BIT,a
+.end
+    ld (anim_status),a
+    ret
+
+; source in de, target in hl (to be able to quickly add bc to target)
+.show_0_bloc
+    ld bc,32-2
+    ld iyl,DIGIT_IMAGE_HEIGHT
+.show_0_bloc_loop
+    ld a,(de)
+    ld (hl),a
+    inc hl
+    inc de
+    ld a,(de)
+    ld (hl),a
+    inc hl
+    inc de
+    ld a,(de)
+    ld (hl),a
+    inc de
+    add hl,bc
+    dec iyl
+    jp nz,.show_0_bloc_loop
+    ret
+
+; de points to the area to be cleared
+.clear_digit
+    ex de,hl
+    ld bc,32-2
+    xor a
+    ld d,DIGIT_IMAGE_HEIGHT
+.clear_digit_loop
+    ld (hl),a
+    inc hl
+    ld (hl),a
+    inc hl
+    ld (hl),a
+    add hl,bc
+    dec d
+    jp nz,.clear_digit_loop
+    ret
+
+update_animation:
+    ; Increment image animation counter
+    ld hl,image_animation_counter
     ld c,(hl)
     inc hl
     ld b,(hl)
-    ; wait for end of VBL => top of the screen
-.novblwait:
-    in a,($40)
-    bit 4,a
-    jr nz,.novblwait
-.half_wait_loop
-    in a,($40)              ; 11 cycles (only here to consume cycles)
-    dec bc                  ; 6 cycles
-    ld a,b                  ; 4 cycles
-    or c                    ; 4 cycles
-    jr nz,.half_wait_loop   ; 12 cycles
+    ld hl,IMAGE_ANIMATION_STEP
+    add hl,bc
+    ld b,h
+    ld c,l
+    ld a,b ; the high byte is now in a
+    cp 6 ; reached the maximum number of sequences
+    jp nz,.ok_image_sequence
+    xor a
+    ld b,a
+    ld c,a
+.ok_image_sequence    
+    ld hl,image_animation_counter
+    ld (hl),c
+    inc hl
+    ld (hl),b
+    ld a,b
+    ld (image_current_digit_sequence_index),a ; store sequence index
 
-    ret
+    ; Now increment digit animation counter
+    ld hl,digit_animation_counter
+    ld c,(hl)
+    inc hl
+    ld b,(hl)
+    ld hl,DIGIT_ANIMATION_STEP
+    add hl,bc
+    ld b,h
+    ld c,l
+    ld a,b ; th high byte is in a
+    cp 3 ; reached the maximum number of sequences
+    jp c,.ok_digit
+    xor a
+    ld b,a
+    ld c,a
+.ok_digit
+    ld hl,digit_animation_counter
+    ld (hl),c
+    inc hl
+    ld (hl),b
+    ld a,b
+    ld (image_current_digit_number),a ; store digit index
 
-clear_screen_bottom:
-    ld hl,VRAM_ADDRESS+6144/2
-    ld de,VRAM_ADDRESS+6144/2+1
-    ld (hl),$ff
-    ld bc,256/8*192/2-1
-    ldir
+
     ret

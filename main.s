@@ -2,6 +2,7 @@
     section	code,text
 
     global start, players_count
+    global emulator_security_idle
 
     ; sound ?
     ; nouveaux circuits enchaînes
@@ -14,6 +15,9 @@
     ; images en niveaux de gris
     ; collisions entre voitures
     ; Accueil en couleur et qui bouge!
+    ; Gérer le security idle mode par constante d'assemblage / mode release
+    ; Couleurs sur l'accueil
+    ; Compression RLE
 
 players_count:
     dc.b 0
@@ -94,7 +98,7 @@ start:
     ld a,%10110110
     out ($40),a
 
-    ;call emulator_security_idle;
+    call emulator_security_idle;
 
     ld ix,data_car1 ; ; current car is number 1
     call erase_car
@@ -115,6 +119,7 @@ start:
     ret
 
 emulator_security_idle:
+    ;ret
     ; wait for a known amount of cycles to mimic the real hardware => 29 lines
     ld b,2
     ld c,125

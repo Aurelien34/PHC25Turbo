@@ -12,6 +12,15 @@ huf_circuit_tiles_0:
 	global huf_circuitdata  
 huf_circuitdata:  
 	incbin "huf/circuitdata.huf"  
+	global huf_intro0a  
+huf_intro0a:  
+	incbin "huf/intro0a.huf"  
+	global huf_intro0b  
+huf_intro0b:  
+	incbin "huf/intro0b.huf"  
+	global huf_intro0c  
+huf_intro0c:  
+	incbin "huf/intro0c.huf"  
 	global huf_introscreen  
 huf_introscreen:  
 	incbin "huf/introscreen.huf"  
