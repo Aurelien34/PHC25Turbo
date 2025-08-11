@@ -15,13 +15,9 @@
     ; photos des voitures
     ; images en niveaux de gris
     ; collisions entre voitures
-    ; Accueil en couleur et qui bouge!
     ; Gérer le security idle mode par constante d'assemblage / mode release
-    ; Couleurs sur l'accueil
     ; Compression RLE
-    ; Condition pour mode sécu (constante DEBUG)
     ; Editeur: grouper les dalles par 2 par couleurs
-    ; intro: taper directement le poids fort du compteur d'animation
 
 players_count:
     dc.b 0

@@ -86,12 +86,8 @@ IMAGE_ANIMATION_STEP equ 8
     dc.b "                Animations                 "
 digit_animation_counter:
     dc.w 0
-image_current_digit_number:
-    dc.b 0
 image_animation_counter:
     dc.w 0
-image_current_digit_sequence_index:
-    dc.b 0
 wheels_animation_counter:
     dc.w 0
 anim_status:
@@ -343,7 +339,7 @@ animate_wheels:
 
 animate_digits:
     ; determine the target digit
-    ld a,(image_current_digit_number)
+    ld a,(digit_animation_counter+1)
     add a ; times 2 as we will read a VRAM address
     ld h,0
     ld l,a
@@ -357,7 +353,7 @@ animate_digits:
     ; Now we whe to decide what image to show
     ld hl,digit_image_sequences
     ld b,0
-    ld a,(image_current_digit_sequence_index)
+    ld a,(image_animation_counter+1)
     ld c,a
     add hl,bc
     ld b,(hl) ; [b] now contains the sequence
@@ -461,8 +457,6 @@ update_animation:
     ld (hl),c
     inc hl
     ld (hl),b
-    ld a,b
-    ld (image_current_digit_sequence_index),a ; store sequence index
 
     ; Now increment digit animation counter
     ld hl,digit_animation_counter
@@ -484,8 +478,6 @@ update_animation:
     ld (hl),c
     inc hl
     ld (hl),b
-    ld a,b
-    ld (image_current_digit_number),a ; store digit index
 
 
     ret
