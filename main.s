@@ -18,6 +18,7 @@
     ; Gérer le security idle mode par constante d'assemblage / mode release
     ; Couleurs sur l'accueil
     ; Compression RLE
+    ; Condition pour mode sécu (constante DEBUG)
 
 players_count:
     dc.b 0
@@ -119,7 +120,7 @@ start:
     ret
 
 emulator_security_idle:
-    ;ret
+    ret
     ; wait for a known amount of cycles to mimic the real hardware => 29 lines
     ld b,2
     ld c,125

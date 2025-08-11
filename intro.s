@@ -55,14 +55,11 @@ sz_joy_2:
     dc.b "soon;",0
 
 DIGIT_COUNT equ 3
-DIGIT_IMAGE_SEQUENCE_COUNT equ 9
+DIGIT_IMAGE_SEQUENCE_COUNT equ 3
 
 digit_image_sequences: ; 3 is the empty image
     dc.b (1<<2)+2
-    dc.b (0<<2)+0
-    dc.b (1<<2)+1
     dc.b (0<<2)+1
-    dc.b (2<<2)+2
     dc.b (0<<2)+2
 
 digit_positions:
@@ -81,8 +78,8 @@ IMAGE_SWAP_BIT equ 2
 WHEEL_HEIGHT equ 11
 WHEELS_ANIMATION_STEP equ 100
 DIGIT_IMAGE_HEIGHT equ 27
-DIGIT_ANIMATION_STEP equ 8
-IMAGE_ANIMATION_STEP equ 4
+DIGIT_ANIMATION_STEP equ 4
+IMAGE_ANIMATION_STEP equ 8
 
     dc.b "                Animations                 "
 digit_animation_counter:
@@ -452,7 +449,7 @@ update_animation:
     ld b,h
     ld c,l
     ld a,b ; the high byte is now in a
-    cp 6 ; reached the maximum number of sequences
+    cp DIGIT_IMAGE_SEQUENCE_COUNT ; reached the maximum number of sequences
     jp nz,.ok_image_sequence
     xor a
     ld b,a
