@@ -1,4 +1,5 @@
     include inc/rammap.inc
+    include inc/inputs.inc
     section	code,text
 
     global start, players_count
@@ -19,6 +20,8 @@
     ; Couleurs sur l'accueil
     ; Compression RLE
     ; Condition pour mode sécu (constante DEBUG)
+    ; Editeur: grouper les dalles par 2 par couleurs
+    ; intro: taper directement le poids fort du compteur d'animation
 
 players_count:
     dc.b 0
@@ -30,6 +33,7 @@ start:
 
     call init_joysticks
 
+.show_intro
     call show_intro
 
     ld a,$ff
@@ -58,6 +62,7 @@ start:
 
     call update_inputs;
 
+    ; Compute car speed vector
     ld ix,data_car0 ; current car is number 0
     ld a,(RAM_MAP_CONTROLLERS_VALUES)
     call update_car_angle_and_throttle
@@ -74,25 +79,34 @@ start:
     call update_car_angle_and_throttle
     call update_car_speed
     
+    ; Compute circuit tiles interactions
     ld ix,data_car0 ; current car is number 0
     call compute_circuit_interactions
     ld ix,data_car1 ; current car is number 1
     call compute_circuit_interactions
 
+    ; Update car position
     ld ix,data_car0 ; current car is number 0
     call update_car_position
     ld ix,data_car1 ; current car is number 1
     call update_car_position
 
+    ; Prepare to draw the car
     ld ix,data_car0 ; current car is number 0
     call prepare_draw_car
     ld ix,data_car1 ; current car is number 1
     call prepare_draw_car
+
+    ; check [back to menu] key    
+    ld a,(RAM_MAP_CONTROLLERS_VALUES)
+    bit INPUT_BIT_ESC,a
+    jp nz,.show_intro
 
     ; Black on white
     ;ld a,%11110110
     ;out ($40),a
 
+    ; Wait until the end of the frame
     call wait_for_vbl
 
     ; Black on green
@@ -101,11 +115,13 @@ start:
 
     call emulator_security_idle;
 
+    ; Erase the car sprites
     ld ix,data_car1 ; ; current car is number 1
     call erase_car
     ld ix,data_car0 ; current car is number 0
     call erase_car
 
+    ; Draw the cars
     ld ix,data_car0 ; current car is number 0
     call draw_car
     ld ix,data_car1 ; current car is number 1

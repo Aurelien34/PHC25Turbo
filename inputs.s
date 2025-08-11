@@ -16,7 +16,7 @@ init_joysticks:
 ; Joystick ports (registers for ports A and B) are here: https://github.com/mamedev/mame/blob/master/src/devices/sound/ay8910.h
 update_inputs:
 
-    ; Player 1 / Space, left, right
+    ; Player 1 / s, d, f
     ld b,0 ; b <- 0
 
     ;  Joystick
@@ -37,18 +37,18 @@ update_inputs:
 ;.jp1notright
 
     ; Keyboard
-    in a,($83)
-    bit 7,a
+    in a,($80)
+    bit 2,a
     jp nz,.p1notfire
     set INPUT_BIT_FIRE,b
 .p1notfire
-    in a,($82)
-    bit 4,a
+    in a,($83)
+    bit 2,a
     jp nz,.p1notleft
     set INPUT_BIT_LEFT,b
 .p1notleft
-    in a,($83)
-    bit 4,a
+    in a,($82)
+    bit 2,a
     jp nz,.p1notright
     set INPUT_BIT_RIGHT,b
 .p1notright
@@ -57,11 +57,16 @@ update_inputs:
     jp nz,.p1notstart
     set INPUT_BIT_START,b
 .p1notstart
+    in a,($81)
+    bit 1,a
+    jp nz,.p1notesc
+    set INPUT_BIT_ESC,b
+.p1notesc
     ld hl,RAM_MAP_CONTROLLERS_VALUES
     ld (hl),b ; store values
 
 
-    ; Player 2 / s, d, f
+    ; Player 2 / j, k, l
     ld b,0 ; b <- 0
 
     ;  Joystick
@@ -81,18 +86,18 @@ update_inputs:
 ;    set INPUT_BIT_RIGHT,b
 ;.jp2notright
 
-    in a,($80)
+    in a,($86)
     bit 2,a
     jp nz,.p2notfire
     set INPUT_BIT_FIRE,b
 .p2notfire
-    in a,($83)
+    in a,($87)
     bit 2,a
     jp nz,.p2notleft
     set INPUT_BIT_LEFT,b
 .p2notleft
-    in a,($82)
-    bit 2,a
+    in a,($87)
+    bit 6,a
     jp nz,.p2notright
     set INPUT_BIT_RIGHT,b
 .p2notright

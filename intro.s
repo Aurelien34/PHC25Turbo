@@ -20,32 +20,34 @@ block_texts_to_display:
     dc.w 0+98*32+VRAM_ADDRESS, sz_line_0
     dc.w 0+109*32+VRAM_ADDRESS, sz_line_1
     dc.w 0+118*32+VRAM_ADDRESS, sz_line_2
-    dc.w 10+129*32+VRAM_ADDRESS, sz_line_3
-    dc.w 0+141*32+VRAM_ADDRESS, sz_line_4
-    dc.w 0+151*32+VRAM_ADDRESS, sz_line_5
-    dc.w 0+161*32+VRAM_ADDRESS, sz_line_6
-    dc.w 4+184*32+VRAM_ADDRESS, sz_line_7
+    dc.w 0+127*32+VRAM_ADDRESS, sz_line_3
+    dc.w 10+139*32+VRAM_ADDRESS, sz_line_4
+    dc.w 0+150*32+VRAM_ADDRESS, sz_line_5
+    dc.w 0+160*32+VRAM_ADDRESS, sz_line_6
+    dc.w 0+170*32+VRAM_ADDRESS, sz_line_7
+    dc.w 4+184*32+VRAM_ADDRESS, sz_line_8
     dc.w 23+104*32+VRAM_ADDRESS, sz_joy_0
     dc.w 23+114*32+VRAM_ADDRESS, sz_joy_1
     dc.w 23+124*32+VRAM_ADDRESS, sz_joy_2
-
     dc.w $0000
 
 sz_line_0:
     dc.b "Keys are:",0
 sz_line_1:
-    dc.b "> 1 player start  : 1",0
+    dc.b "> 1 player start : 1",0
 sz_line_2:
-    dc.b "> 2 players start : 2",0
+    dc.b "> 2 players start: 2",0
 sz_line_3:
-    dc.b "P1     P2",0
+    dc.b "> Back to menu: Q",0
 sz_line_4:
-    dc.b "> Left:   Left   d",0
+    dc.b "P1     P2",0
 sz_line_5:
-    dc.b "> Right:  Right  f",0
+    dc.b "> Left:   D      K",0
 sz_line_6:
-    dc.b "> Accel:  Space  s",0
+    dc.b "> Right:  F      L",0
 sz_line_7:
+    dc.b "> Accel:  S      J",0
+sz_line_8:
     dc.b "PHC25 < Bouz 2025 for RPUFOS",0
 sz_joy_0:
     dc.b "Joysticks",0
