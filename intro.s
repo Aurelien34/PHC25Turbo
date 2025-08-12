@@ -75,10 +75,13 @@ digit_color_bitmaps_addresses:
     dc.w INTRO_RAM_MAP_IMAGE_0_C
 
 WHEELS_UP_BIT equ 0
-WHEELS_SWAP_BIT equ 1
-IMAGE_SWAP_BIT equ 2
+WHEELS_SWAPPED_BIT equ 1
+WHEELS_MOVED_BIT equ 2
+
+IMAGE_SWAP_BIT equ 3
+
 WHEEL_HEIGHT equ 11
-WHEELS_ANIMATION_STEP equ 100
+WHEELS_ANIMATION_STEP equ 200
 DIGIT_IMAGE_HEIGHT equ 27
 DIGIT_ANIMATION_STEP equ 4
 IMAGE_ANIMATION_STEP equ 8
@@ -167,19 +170,26 @@ show_intro:
     ret
 .notstart2:
     jr .intro_loop
-
     ret
 
 animate_wheels:
     ld hl,wheels_animation_counter+1
     ld a,(hl)
     ld hl,anim_status
-    ld c,(hl) ; status in [c]
-    xor c
-    bit WHEELS_SWAP_BIT,a
-    jp z,.wheels_swap_ok
+    bit 0,a
+    jp z,.clear_swapped
+    bit WHEELS_SWAPPED_BIT,(hl)
+    jp nz,.introscreenwheels_swap_end
+    jp .go_swap
+
+.clear_swapped:
+    res WHEELS_SWAPPED_BIT,(hl)
+    jp .introscreenwheels_swap_end
     
+.go_swap:
     ; Need to swap wheels
+    ; Update status
+    set WHEELS_SWAPPED_BIT,(hl)
     ; Determine the addresses to use for data transfer
     call .load_wheels_positions
     ld de,31
@@ -208,27 +218,25 @@ animate_wheels:
     add hl,de
     dec b
     jp nz,.copy_loop
-    ; Update status
-    ld a,(anim_status)
-    bit WHEELS_SWAP_BIT,a
-    jp z,.swap_to_1
-    res WHEELS_SWAP_BIT,a
-    jp .swapped
-.swap_to_1:
-    set WHEELS_SWAP_BIT,a
-.swapped:
-    ld (anim_status),a
-.wheels_swap_ok
+
+.introscreenwheels_swap_end:
 
     ; Time to animate wheels vertically
     ld hl,wheels_animation_counter+1
     ld a,(hl)
     ld hl,anim_status
-    ld c,(hl) ; status in [c]
-    xor c
-    bit WHEELS_UP_BIT,a
-    jp z,.wheels_position_ok
+    and %11
+    jp nz,.clear_moved
+    bit WHEELS_MOVED_BIT,(hl)
+    jp nz,.introscreenwheels_move_end
+    jp .go_move
+.clear_moved:
+    res WHEELS_MOVED_BIT,(hl)
+    jp .introscreenwheels_move_end
+.go_move:
     ; need to move wheels
+    ; Update status
+    set WHEELS_MOVED_BIT,(hl)
     ; Determine the addresses to use for data transfer
     call .load_wheels_positions
     bit WHEELS_UP_BIT,c ; up or down?
@@ -253,7 +261,7 @@ animate_wheels:
     set WHEELS_UP_BIT,a
 .ok_position_bit:
     ld (anim_status),a
-.wheels_position_ok:
+.introscreenwheels_move_end:
     ; Increment animation counter
     ld hl,(wheels_animation_counter)
     ld bc,WHEELS_ANIMATION_STEP
@@ -263,7 +271,9 @@ animate_wheels:
 
 ; status in [C]
 .load_wheels_positions:
-    bit WHEELS_UP_BIT,c
+    ld hl,anim_status
+    ld c,(hl) ; status in [c]
+     bit WHEELS_UP_BIT,c
     jp z,.wheels_down
     ; wheels are up
     ld hl,(wheel1_address_up)
