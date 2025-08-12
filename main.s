@@ -18,6 +18,8 @@
     ; photos des voitures
     ; images en niveaux de gris
     ; collisions entre voitures
+    ; faire un casque bleu? un échappement?
+    ; faire arriver la voiture par le côté?
     ; Compression RLE
 
 players_count:

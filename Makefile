@@ -1,5 +1,5 @@
 # Debug
-DEBUG = 0
+DEBUG = 1
 
 # Path
 TO_COMPRESS_PATH = res_to_compress
