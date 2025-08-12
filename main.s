@@ -21,6 +21,8 @@
     ; faire un casque bleu? un échappement?
     ; faire arriver la voiture par le côté?
     ; Compression RLE
+    ; nettoyer le Makefile pour les fichiers couleurs
+    ; Afficher la taille totale initiale dans l'outil de compression
 
 players_count:
     dc.b 0

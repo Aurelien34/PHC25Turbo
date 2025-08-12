@@ -9,7 +9,9 @@
 INTRO_RAM_MAP_IMAGE_0_A equ RAM_MAP_PRECALC_AREA
 INTRO_RAM_MAP_IMAGE_0_B equ INTRO_RAM_MAP_IMAGE_0_A+81
 INTRO_RAM_MAP_IMAGE_0_C equ INTRO_RAM_MAP_IMAGE_0_B+81
-INTRO_RAM_MAP_FONT equ INTRO_RAM_MAP_IMAGE_0_C+81
+INTRO_RAM_MAP_IMAGE_HELMET_A equ INTRO_RAM_MAP_IMAGE_0_C+81
+INTRO_RAM_MAP_IMAGE_HELMET_B equ INTRO_RAM_MAP_IMAGE_HELMET_A+20
+INTRO_RAM_MAP_FONT equ INTRO_RAM_MAP_IMAGE_HELMET_B+20
 
 
 block_texts_to_display:
@@ -74,6 +76,13 @@ digit_color_bitmaps_addresses:
     dc.w INTRO_RAM_MAP_IMAGE_0_B
     dc.w INTRO_RAM_MAP_IMAGE_0_C
 
+helmets_compressed_bitmaps_addresses:
+    dc.w huf_intro_helmet_a
+    dc.w huf_intro_helmet_b
+    dc.w huf_intro_helmet_c
+    dc.w huf_intro_helmet_a
+    dc.w huf_intro_helmet_b
+
 WHEELS_UP_BIT equ 0
 WHEELS_SWAPPED_BIT equ 1
 WHEELS_MOVED_BIT equ 2
@@ -85,6 +94,9 @@ WHEELS_ANIMATION_STEP equ 200
 DIGIT_IMAGE_HEIGHT equ 27
 DIGIT_ANIMATION_STEP equ 4
 IMAGE_ANIMATION_STEP equ 8
+
+HELMET_POSITION equ 84/4+48*32+VRAM_ADDRESS
+HELMET_IMAGE_HEIGHT equ 10
 
     dc.b "                Animations                 "
 digit_animation_counter:
@@ -104,7 +116,6 @@ wheel1_address_down:
 wheel2_address_down:
     dc.w 96/4+66*32+VRAM_ADDRESS
 
-    dc.b "                                                  intro                                       "
 show_intro:
 
     call switch_to_mode_graphics_sd_white
@@ -137,6 +148,33 @@ show_intro:
     ld de,INTRO_RAM_MAP_IMAGE_0_C
     call decompress_huffman
 
+    ; Decompress helmets
+    ld a,r ; a bit of random here
+    and %11
+    add a
+    ld b,0
+    ld c,a
+    ld hl,helmets_compressed_bitmaps_addresses
+    add hl,bc
+    ex de,hl
+    ld a,(de)
+    ld l,a
+    inc de
+    ld a,(de)
+    ld h,a
+    inc de
+    push de
+    ld de,INTRO_RAM_MAP_IMAGE_HELMET_A
+    call decompress_huffman
+    pop de
+    ld a,(de)
+    ld l,a
+    inc de
+    ld a,(de)
+    ld h,a
+    ld de,INTRO_RAM_MAP_IMAGE_HELMET_B
+    call decompress_huffman
+
 .intro_loop:
 
     call wait_for_vbl
@@ -144,6 +182,7 @@ show_intro:
 
     call animate_wheels
     call animate_digits
+    call animate_helmet
 
     if DEBUG = 1
     call emulator_security_idle
@@ -493,4 +532,29 @@ update_animation:
     ld (hl),b
 
 
+    ret
+
+animate_helmet:
+    ld hl,anim_status
+    bit IMAGE_SWAP_BIT,(hl)
+    jp z,.image_a
+    ld de,INTRO_RAM_MAP_IMAGE_HELMET_B
+    jp .go
+.image_a
+    ld de,INTRO_RAM_MAP_IMAGE_HELMET_A
+.go
+    ld hl,HELMET_POSITION
+    ld bc,32-1
+    ld iyl,HELMET_IMAGE_HEIGHT
+.row_loop
+    ld a,(de)
+    ld (hl),a
+    inc hl
+    inc de
+    ld a,(de)
+    ld (hl),a
+    inc de
+    add hl,bc
+    dec iyl
+    jp nz,.row_loop
     ret

@@ -46,7 +46,7 @@ TO_COMPRESS_OTHER = $(filter-out %.bmp,$(TO_COMPRESS_ALL))
 GENERATED_RESOURCE_CODE_FILE = $(COMPRESSED_FILES_INCLUDER)
 TO_EXTRACT_AND_COMPRESS_BMP = $(wildcard $(TO_EXTRACT_AND_COMPRESS_PATH)/*.bmp)
 EXTRACTED_TO_COMPRESS = $(patsubst $(TO_EXTRACT_AND_COMPRESS_PATH)/%.bmp,$(TO_COMPRESS_PATH)/%.raw,$(TO_EXTRACT_AND_COMPRESS_BMP))
-INTRO_SCREENS_RAW = $(TO_COMPRESS_PATH)/introscreen.raw $(TO_COMPRESS_PATH)/intro0a.raw $(TO_COMPRESS_PATH)/intro0b.raw $(TO_COMPRESS_PATH)/intro0c.raw
+INTRO_SCREENS_RAW = $(TO_COMPRESS_PATH)/introscreen.raw $(TO_COMPRESS_PATH)/intro0a.raw $(TO_COMPRESS_PATH)/intro0b.raw $(TO_COMPRESS_PATH)/intro0c.raw $(TO_COMPRESS_PATH)/intro_helmet_a.raw $(TO_COMPRESS_PATH)/intro_helmet_b.raw $(TO_COMPRESS_PATH)/intro_helmet_c.raw
 
 define RESOURCE_FILE_TEMPLATE
 echo 	global huf_$(basename $(FILE)) >> $(GENERATED_RESOURCE_CODE_FILE) &
@@ -78,6 +78,12 @@ $(TO_COMPRESS_PATH)/intro0b.raw: $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro0b.b
 	$(EXTRACT_COLOR_IMAGE_DATA) $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro0b.bmp $(TO_COMPRESS_PATH)/intro0b.raw
 $(TO_COMPRESS_PATH)/intro0c.raw: $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro0c.bmp
 	$(EXTRACT_COLOR_IMAGE_DATA) $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro0c.bmp $(TO_COMPRESS_PATH)/intro0c.raw
+$(TO_COMPRESS_PATH)/intro_helmet_a.raw: $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro_helmet_a.bmp
+	$(EXTRACT_COLOR_IMAGE_DATA) $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro_helmet_a.bmp $(TO_COMPRESS_PATH)/intro_helmet_a.raw
+$(TO_COMPRESS_PATH)/intro_helmet_b.raw: $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro_helmet_b.bmp
+	$(EXTRACT_COLOR_IMAGE_DATA) $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro_helmet_b.bmp $(TO_COMPRESS_PATH)/intro_helmet_b.raw
+$(TO_COMPRESS_PATH)/intro_helmet_c.raw: $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro_helmet_c.bmp
+	$(EXTRACT_COLOR_IMAGE_DATA) $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro_helmet_c.bmp $(TO_COMPRESS_PATH)/intro_helmet_c.raw
 
 $(RESOURCES_PATH)/%.raw: $(BMP_TO_EXTRACT_PATH)/%.bmp
 	$(EXTRACT_RAW_IMAGE_DATA) $< $@
@@ -146,4 +152,4 @@ ifneq ($(wildcard $(SAVESTATE)),)
 endif
 	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(EXTRACTED_TO_COMPRESS),del $(notdir $(FILE)) &)
 	cd $(TO_COMPRESS_PATH) & del circuitdata.bin
-	cd $(TO_COMPRESS_PATH) & del introscreen.raw & del intro0a.raw & del intro0b.raw & del intro0c.raw
+	cd $(TO_COMPRESS_PATH) & del introscreen.raw & del intro0a.raw & del intro0b.raw & del intro0c.raw & del intro_helmet_a.raw & del intro_helmet_b.raw & del intro_helmet_c.raw

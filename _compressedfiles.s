@@ -21,6 +21,15 @@ huf_intro0b:
 	global huf_intro0c  
 huf_intro0c:  
 	incbin "huf/intro0c.huf"  
+	global huf_intro_helmet_a  
+huf_intro_helmet_a:  
+	incbin "huf/intro_helmet_a.huf"  
+	global huf_intro_helmet_b  
+huf_intro_helmet_b:  
+	incbin "huf/intro_helmet_b.huf"  
+	global huf_intro_helmet_c  
+huf_intro_helmet_c:  
+	incbin "huf/intro_helmet_c.huf"  
 	global huf_introscreen  
 huf_introscreen:  
 	incbin "huf/introscreen.huf"  
