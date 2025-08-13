@@ -18,11 +18,11 @@
     ; photos des voitures
     ; images en niveaux de gris
     ; collisions entre voitures
-    ; faire un casque bleu? un échappement?
+    ; fun échappement?
     ; faire arriver la voiture par le côté?
     ; Compression RLE
-    ; nettoyer le Makefile pour les fichiers couleurs
-    ; Afficher la taille totale initiale dans l'outil de compression
+    ; Mutualiser les bitmaps d'animations
+    ; faire marcher les joysticks!
 
 players_count:
     dc.b 0

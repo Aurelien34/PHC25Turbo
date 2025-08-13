@@ -138,14 +138,8 @@ show_intro:
     call decompress_huffman
 
     ; Decompress 0 digits
-    ld hl,huf_intro0a
+    ld hl,huf_intro_0
     ld de,INTRO_RAM_MAP_IMAGE_0_A
-    call decompress_huffman
-    ld hl,huf_intro0b
-    ld de,INTRO_RAM_MAP_IMAGE_0_B
-    call decompress_huffman
-    ld hl,huf_intro0c
-    ld de,INTRO_RAM_MAP_IMAGE_0_C
     call decompress_huffman
 
     ; Decompress helmets
