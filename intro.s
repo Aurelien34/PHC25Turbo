@@ -106,7 +106,7 @@ image_animation_counter:
 wheels_animation_counter:
     dc.w 0
 anim_status:
-    dc.b 1<<WHEELS_UP_BIT
+    dc.b 0
 wheel1_address_up:
     dc.w 72/4+65*32+VRAM_ADDRESS     ; wheel 1 coordinates in the image
 wheel2_address_up:
@@ -121,6 +121,10 @@ show_intro:
     call switch_to_mode_graphics_sd_white
     ld a,$00
     call clear_screen ; clear whole screen, but we don't have the color we want for the bottom of the screen
+
+    ; Initialize variables
+    ld a,1<<WHEELS_UP_BIT
+    ld (anim_status),a
 
     ; Decompress font
     ld hl,huf_smallfont
