@@ -5,6 +5,13 @@
 
     global load_circuit, draw_circuit, compute_tile_address
 
+TILE_DATA_SIZE equ 16*12
+CAR_DATA_SIZE equ 3
+OFFSET_CAR_0_DATA equ TILE_DATA_SIZE
+OFFSET_CAR_1_DATA equ OFFSET_CAR_0_DATA+CAR_DATA_SIZE
+OFFSSET_CIRCUIT_LAPS_TOTAL equ OFFSET_CAR_1_DATA+CAR_DATA_SIZE
+
+
 load_circuit:
     ; hl points to compressed circuit data
     ld de,RAM_MAP_CIRCUIT_DATA
@@ -12,32 +19,22 @@ load_circuit:
     ld hl,huf_circuit_tiles_0
     ld de,RAM_MAP_PRECALC_AREA
     call decompress_huffman
-    ret
 
-draw_circuit:
-    ld bc,0
-.loopy ; 12 rows
-    call wait_for_vbl
-    ld b,0
-.loopx ; 16 columns
-    call draw_circuit_tile
-    inc b
-    bit 4,b
-    jp z,.loopx
-    inc c
-    ld a,c
-    cp 12
-    jr nz,.loopy
     ; now load car positions in circuit
-    ld hl,RAM_MAP_CIRCUIT_DATA+192
+    ld hl,RAM_MAP_CIRCUIT_DATA+OFFSET_CAR_0_DATA
     ld de,data_car0
-    call .copy_car_characteristics
-    ld hl,RAM_MAP_CIRCUIT_DATA+192+3
+    call copy_car_characteristics
+    ld hl,RAM_MAP_CIRCUIT_DATA+OFFSET_CAR_1_DATA
     ld de,data_car1
-    call .copy_car_characteristics
+    call copy_car_characteristics
+
+    ; Load lap count
+    ld a,(RAM_MAP_CIRCUIT_DATA+OFFSSET_CIRCUIT_LAPS_TOTAL)
+    call set_laps_count ; store in race info
+
     ret
 
-.copy_car_characteristics
+copy_car_characteristics
     xor a
     ld (de),a
     inc de
@@ -64,6 +61,22 @@ draw_circuit:
     jr nz,.loopclear
 
     ret
+    ret
+
+draw_circuit:
+    ld bc,0
+.loopy ; 12 rows
+    call wait_for_vbl
+    ld b,0
+.loopx ; 16 columns
+    call draw_circuit_tile
+    inc b
+    bit 4,b
+    jp z,.loopx
+    inc c
+    ld a,c
+    cp 12
+    jr nz,.loopy
 
 ; b = x
 ; c = y

@@ -26,4 +26,5 @@ Z equ 8
     dc.b 217, 145, 0
 ; Car 1 x, y, angle
     dc.b 230, 145, 0
-
+; Lap count
+    dc.b 3
