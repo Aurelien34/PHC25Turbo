@@ -2,11 +2,11 @@
 DEBUG = 1
 
 # Path
+MAME_SAVESTATE_PATH = C:\MameNew\sta\phc25
 TO_COMPRESS_PATH = res_to_compress
 TO_EXTRACT_AND_COMPRESS_PATH = bmp_to_extract_and_compress
 TO_EXTRACT_AND_COMPRESS_COLOR_PATH = color_bmp_to_extract_and_compress
 BMP_TO_EXTRACT_PATH = bmp_to_extract
-RESOURCES_PATH = res
 OUTPUT_PATH = .
 PRECOMP_PATH = precomp
 HUFFMAN_PATH = huf
@@ -46,12 +46,18 @@ TO_COMPRESS_OTHER = $(filter-out %.bmp,$(TO_COMPRESS_ALL))
 GENERATED_RESOURCE_CODE_FILE = $(COMPRESSED_FILES_INCLUDER)
 TO_EXTRACT_AND_COMPRESS_BMP = $(wildcard $(TO_EXTRACT_AND_COMPRESS_PATH)/*.bmp)
 EXTRACTED_TO_COMPRESS = $(patsubst $(TO_EXTRACT_AND_COMPRESS_PATH)/%.bmp,$(TO_COMPRESS_PATH)/%.raw,$(TO_EXTRACT_AND_COMPRESS_BMP))
-INTRO_SCREENS_RAW = $(TO_COMPRESS_PATH)/introscreen.raw $(TO_COMPRESS_PATH)/intro0a.raw $(TO_COMPRESS_PATH)/intro0b.raw $(TO_COMPRESS_PATH)/intro0c.raw $(TO_COMPRESS_PATH)/intro_helmet_a.raw $(TO_COMPRESS_PATH)/intro_helmet_b.raw $(TO_COMPRESS_PATH)/intro_helmet_c.raw
+COLOR_IMAGES_BMP = $(wildcard $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/*.bmp)
+COLOR_IMAGES_RAW = $(patsubst $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/%.bmp,$(TO_COMPRESS_PATH)/%.raw,$(COLOR_IMAGES_BMP))
 
 define RESOURCE_FILE_TEMPLATE
 echo 	global huf_$(basename $(FILE)) >> $(GENERATED_RESOURCE_CODE_FILE) &
 echo huf_$(basename $(FILE)): >> $(GENERATED_RESOURCE_CODE_FILE) &
 echo 	incbin "$(HUFFMAN_PATH)/$(basename $(FILE)).huf" >> $(GENERATED_RESOURCE_CODE_FILE) &
+endef
+
+define COLOR_IMAGES_RAW_EXTRACTION_TEMPLATE
+$(TO_COMPRESS_PATH)/$(1).raw: $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/$(1).bmp
+	$(EXTRACT_COLOR_IMAGE_DATA) $$< $$@
 endef
 
 all:
@@ -68,44 +74,27 @@ rebuild:
 	make all
 
 $(TO_COMPRESS_PATH)/circuitdata.bin: circuitdata.data
-	$(AS) circuitdata.data -Fbin -o $(TO_COMPRESS_PATH)/circuitdata.bin -quiet 
+	$(AS) circuitdata.data -Fbin -o $(TO_COMPRESS_PATH)/circuitdata.bin -quiet
 
-$(TO_COMPRESS_PATH)/introscreen.raw: $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/introscreen.bmp
-	$(EXTRACT_COLOR_IMAGE_DATA) $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/introscreen.bmp $(TO_COMPRESS_PATH)/introscreen.raw
-$(TO_COMPRESS_PATH)/intro0a.raw: $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro0a.bmp
-	$(EXTRACT_COLOR_IMAGE_DATA) $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro0a.bmp $(TO_COMPRESS_PATH)/intro0a.raw
-$(TO_COMPRESS_PATH)/intro0b.raw: $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro0b.bmp
-	$(EXTRACT_COLOR_IMAGE_DATA) $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro0b.bmp $(TO_COMPRESS_PATH)/intro0b.raw
-$(TO_COMPRESS_PATH)/intro0c.raw: $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro0c.bmp
-	$(EXTRACT_COLOR_IMAGE_DATA) $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro0c.bmp $(TO_COMPRESS_PATH)/intro0c.raw
-$(TO_COMPRESS_PATH)/intro_helmet_a.raw: $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro_helmet_a.bmp
-	$(EXTRACT_COLOR_IMAGE_DATA) $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro_helmet_a.bmp $(TO_COMPRESS_PATH)/intro_helmet_a.raw
-$(TO_COMPRESS_PATH)/intro_helmet_b.raw: $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro_helmet_b.bmp
-	$(EXTRACT_COLOR_IMAGE_DATA) $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro_helmet_b.bmp $(TO_COMPRESS_PATH)/intro_helmet_b.raw
-$(TO_COMPRESS_PATH)/intro_helmet_c.raw: $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro_helmet_c.bmp
-	$(EXTRACT_COLOR_IMAGE_DATA) $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/intro_helmet_c.bmp $(TO_COMPRESS_PATH)/intro_helmet_c.raw
-
-$(RESOURCES_PATH)/%.raw: $(BMP_TO_EXTRACT_PATH)/%.bmp
+$(TO_COMPRESS_PATH)/%.raw: $(TO_EXTRACT_AND_COMPRESS_PATH)/%.bmp
 	$(EXTRACT_RAW_IMAGE_DATA) $< $@
+
+$(foreach file,$(notdir $(basename $(COLOR_IMAGES_RAW))),$(eval $(call COLOR_IMAGES_RAW_EXTRACTION_TEMPLATE,$(file))))
 
 $(OUTPUT_PATH)/$(SAVESTATE): $(OUTPUT_PATH)/$(TARGET) $(STUFFING_SAVESTATE)
 	$(INJECT) $(STUFFING_SAVESTATE) $(OUTPUT_PATH)/$(TARGET) $(OUTPUT_PATH)/$(SAVESTATE)
-#Pas bien, ca:
-	copy $(OUTPUT_PATH)\$(SAVESTATE) C:\MameNew\sta\phc25\
+	copy $(OUTPUT_PATH)\$(SAVESTATE) $(MAME_SAVESTATE_PATH)
 
 $(OUTPUT_PATH)/$(TARGET): $(OUTPUT_PATH) $(OBJ_PATH) $(OBJ) main.ld
 	$(LD) $(LDFLAGS) -o $(OUTPUT_PATH)/$(TARGET) $(OBJ) -M > $(SECTION_MAP_FILE)
 	$(APPLY_PHC_MASK) $(OUTPUT_PATH)/$(TARGET) $(OUTPUT_PATH)/$(SECTION_MAP_FILE)
 
-$(TO_COMPRESS_PATH)/%.raw: $(TO_EXTRACT_AND_COMPRESS_PATH)/%.bmp
-	$(EXTRACT_RAW_IMAGE_DATA) $< $@
-
-$(COMPRESSED_FILES_INCLUDER): $(EXTRACTED_TO_COMPRESS) $(TO_COMPRESS_PATH)/circuitdata.bin $(INTRO_SCREENS_RAW)
+$(COMPRESSED_FILES_INCLUDER): $(EXTRACTED_TO_COMPRESS) $(TO_COMPRESS_PATH)/circuitdata.bin $(COLOR_IMAGES_BMP) $(COLOR_IMAGES_RAW)
 
 $(OBJ_PATH)/%.o: %.s $(INC) $(PRECOMP_PATH)
 	$(AS) $(ASFLAGS) -L $(PRECOMP_PATH)/$<.txt -o $@ $< -DDEBUG=$(DEBUG)
 
-$(HUFFMAN_COMPRESSOR_SOURCE_FILE) $(COMPRESSED_FILES_INCLUDER) $(COMPRESSED): $(TO_COMPRESS_ALL) $(HUFFMAN_PATH) $(TO_COMPRESS_PATH) $(INTRO_SCREENS_RAW)
+$(HUFFMAN_COMPRESSOR_SOURCE_FILE) $(COMPRESSED_FILES_INCLUDER) $(COMPRESSED): $(TO_COMPRESS_ALL) $(HUFFMAN_PATH) $(TO_COMPRESS_PATH) $(COLOR_IMAGES_RAW)
 	$(HUFF80) $(foreach file,$(notdir $(TO_COMPRESS_BMP)),$(TO_COMPRESS_PATH)/$(basename $(file)).bmp,$(HUFFMAN_PATH)/$(basename $(file)).huf,62) $(foreach file,$(notdir $(TO_COMPRESS_OTHER)),$(TO_COMPRESS_PATH)/$(file),$(HUFFMAN_PATH)/$(basename $(file)).huf) $(HUFFMAN_COMPRESSOR_SOURCE_FILE)
 	echo ; This file is automatically generated. Please don't change it manually > $(GENERATED_RESOURCE_CODE_FILE)
 	echo 	section	compressed,text >> $(GENERATED_RESOURCE_CODE_FILE)
@@ -123,9 +112,6 @@ $(OBJ_PATH):
 
 $(PRECOMP_PATH):
 	mkdir $(PRECOMP_PATH)
-
-$(RESOURCES_PATH):
-	mkdir $(RESOURCES_PATH)
 
 $(TO_COMPRESS_PATH):
 	mkdir $(TO_COMPRESS_PATH)
@@ -151,5 +137,5 @@ ifneq ($(wildcard $(SAVESTATE)),)
 	del $(SAVESTATE)
 endif
 	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(EXTRACTED_TO_COMPRESS),del $(notdir $(FILE)) &)
+	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(COLOR_IMAGES_RAW),del $(notdir $(FILE)) &)
 	cd $(TO_COMPRESS_PATH) & del circuitdata.bin
-	cd $(TO_COMPRESS_PATH) & del introscreen.raw & del intro0a.raw & del intro0b.raw & del intro0c.raw & del intro_helmet_a.raw & del intro_helmet_b.raw & del intro_helmet_c.raw
