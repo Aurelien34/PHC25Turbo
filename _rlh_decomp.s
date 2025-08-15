@@ -23,18 +23,10 @@ FLAG_CLEAR_COMPRESSION_RLE_MASK equ %10111111
 ; c => current byte
 ; b => bits left to process in current byte
 ; ix => output bytes left to be decoded
+; iyh => Huffman compression flag (for mixed huffman / RLE compression)
+; iyl => RLE compression key
 
 decompress_rlh:
-	push af
-	push bc
-	push ix
-	call decompress_rlh_unsafe
-	pop ix
-	pop bc
-	pop af
-	ret
-
-decompress_rlh_unsafe:
 
     ; initialization
     ; load target size and compress flag in ix
@@ -51,12 +43,12 @@ decompress_rlh_unsafe:
 
 	; decode compression flag
 	bit FLAG_COMPRESSION_HUFFMAN,a
-	jp nz,decomp_huffman
+	jr nz,decomp_huffman
 
 	; data is not compressed
 	; load data size in bc
-	ld b,ixh
-	ld c,ixl
+	push ix
+	pop bc
 	; copy uncompressed data
 	ldir
 	ret
@@ -83,8 +75,8 @@ decomp_rle:
 	; iterate on bytes
 .loopDecomp
 	ld a,ixl ; ix is 0?
-	or ixh
-    jr z,.endLoopDecomp
+	or ixh	; OR between high and low bytes and see if it is zero
+	dc.b $c8 ; "ret z" not assembled correctly by VASM!
 
 	call rle_read_one_byte
 	cp iyl
@@ -94,8 +86,7 @@ decomp_rle:
 	inc de
     dec ix
 	jr .loopDecomp
-.endLoopDecomp
-	ret
+
 .byte_is_compressed
 	; regular
 	call rle_read_one_byte ; a <- move to count to replicate
@@ -128,14 +119,10 @@ rle_read_one_byte:
 	; Check if data is Huffman compressed
 	ld a,iyh
 	or a
-	jr nz,.huff
+	jr nz,decompress_huffman_byte 	; ; Huffman data, decompress it warning here: optimization => jump instead of call to skip the expected RET
 	; raw data, read it
 	ld a,(hl)
 	inc hl
-	ret
-.huff
-	; Huffman data, decompress it
-    call decompress_huffman_byte
 	ret
 
 decomp_huffman:
@@ -151,15 +138,13 @@ decomp_huffman:
 
     ; now we can loop on decoding code
 .loopDecomp
-	ld a,ixl ; ix is 0?
-	or ixh
-    jr z,.endLoopDecomp
-
     call decompress_huffman_byte
     ld (de),a
     inc de
     dec ix
-    jr .loopDecomp
+	ld a,ixl ; ix is 0?
+	or ixh
+    jr nz,.loopDecomp
 .endLoopDecomp
     ret
 
@@ -168,7 +153,7 @@ get_next_bit:
     sll c; shift left and store bit of interest in carry flag
     ex af,af' ; '; backup status flags to shadow registers
     dec b ; point to the next bit
-    jp nz,.end ; still some bits to process
+    jr nz,.end ; still some bits to process
 
     ld b,8 ; back to first bit
     inc hl ; point to next byte
