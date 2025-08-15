@@ -15,6 +15,8 @@ start_race:
     call clear_screen
     call switch_to_mode_graphics_hd;
 
+    call ay8910_init_cars
+
     ; load the circuit
     ld hl,rlh_circuitdata
     call load_circuit
@@ -42,6 +44,7 @@ start_race:
     ld a,(RAM_MAP_CONTROLLERS_VALUES)
     call update_car_angle_and_throttle
     call update_car_speed
+    call update_car_engine_sound
     ld ix,data_car1 ; current car is number 1
     ld a,(players_count)
     cp 2
@@ -53,6 +56,7 @@ start_race:
 .common_player2
     call update_car_angle_and_throttle
     call update_car_speed
+    call update_car_engine_sound
     
     ; Compute circuit tiles interactions
     ld ix,data_car0 ; current car is number 0

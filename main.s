@@ -16,7 +16,7 @@ start:
     
     ld sp,RAM_MAP_STACK_END
 
-    call init_joysticks
+    call ay8910_init
 
 .loop
 

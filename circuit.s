@@ -36,20 +36,20 @@ load_circuit:
 
 copy_car_characteristics
     xor a
-    ld (de),a
+    ld (de),a   ; x lower
     inc de
-    ld a,(hl)
+    ld a,(hl)   ; x upper
     inc hl
     ld (de),a
     inc de
     xor a
-    ld (de),a
+    ld (de),a   ; y lower
     inc de
-    ld a,(hl)
+    ld a,(hl)   ; y upper
     inc hl
     ld (de),a
     inc de
-    ld a,(hl)
+    ld a,(hl)   ; angle
     ld (de),a
     ; clear throttle and speed
     xor a

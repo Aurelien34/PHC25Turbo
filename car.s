@@ -2,13 +2,13 @@
     include inc/screen.inc
     include inc/inputs.inc
     include inc/car.inc
+    include inc/ay8910.inc
 
     section	code,text
 
     global data_car0, data_car1
     global precalc_shifted_cars
-    global prepare_draw_car, draw_car, erase_car, update_car_position, update_car_angle_and_throttle, update_car_speed
-    global temp_compute_bounce
+    global prepare_draw_car, draw_car, erase_car, update_car_position, update_car_angle_and_throttle, update_car_speed, update_car_engine_sound
 
 THROTTLE_INCREMENT equ 2
 THROTTLE_DECREMENT equ 4
@@ -21,6 +21,7 @@ data_car0:
     dc.w $ffff ; speed x
     dc.w $ffff ; speed y
     dc.w RAM_MAP_PRECALC_VEHICLE_0; precalc sprites base address
+    dc.b AY8910_REGISTER_FREQUENCY_A_LOWER ; AY8910 sound frequency register
     dc.w 0 ; sprite VRAM address (precomp)
     dc.w 0 ; shifted sprite data address (precomp)
     dc.w 0 ; background VRAM address (precomp)
@@ -36,6 +37,7 @@ data_car1:
     dc.w $ffff ; speed x
     dc.w $ffff ; speed y
     dc.w RAM_MAP_PRECALC_VEHICLE_1; precalc sprites base address
+    dc.b AY8910_REGISTER_FREQUENCY_B_LOWER ; AY8910 sound frequency register
     dc.w 0 ; sprite VRAM address (precomp)
     dc.w 0 ; shifted sprite data address (precomp)
     dc.w 0 ; background VRAM address (precomp)
@@ -272,61 +274,6 @@ update_car_position:
     ld (ix+CAR_OFFSET_Y+1),h
     ret
 
-temp_compute_bounce:
-.testleft:
-    ld a,(ix+CAR_OFFSET_X+1)
-    cp 16
-    jp nc,.okleft
-    add 2
-    jp .swapx
-.okleft:
-    cp 232
-    jp c,.okh
-.koright:
-    sub 2
-.swapx:
-    ld (ix+CAR_OFFSET_X+1),a
-    ld l,(ix+CAR_OFFSET_SPEED_X)
-    ld h,(ix+CAR_OFFSET_SPEED_X+1)
-    ; neg hl
-    xor a
-    sub l
-    ld l,a
-    sbc a,a
-    sub h
-    ld h,a
-    ld (ix+CAR_OFFSET_SPEED_X),l
-    ld (ix+CAR_OFFSET_SPEED_X+1),h
-.okh
-.testtop:
-    ld a,(ix+CAR_OFFSET_Y+1)
-    cp 16
-    jp nc,.oktop
-    add 2
-    jp .swapy
-.oktop:
-    cp 168
-    jp c,.okv
-.kobottom:
-    sub 2
-.swapy:
-    ld (ix+CAR_OFFSET_Y+1),a
-    ld l,(ix+CAR_OFFSET_SPEED_Y)
-    ld h,(ix+CAR_OFFSET_SPEED_Y+1)
-
-    ; neg hl
-    xor a
-    sub l
-    ld l,a
-    sbc a,a
-    sub h
-    ld h,a
-
-    ld (ix+CAR_OFFSET_SPEED_Y),l
-    ld (ix+CAR_OFFSET_SPEED_Y+1),h
-.okv
-    ret
-
 update_car_angle_and_throttle:
     ; [a] contains keyboard state for this car
     bit INPUT_BIT_LEFT,a
@@ -512,6 +459,17 @@ update_car_speed:
     ;sra h
     ;rr l
     ;ret
+
+update_car_engine_sound:
+    ld c,(ix+CAR_OFFSET_THROTTLE)
+    ld a,255
+    sub c
+    ld c,a
+    ld a,(ix+CAR_OFFSET_AY8910_SOUND_FREQUENCY_REGISTER)
+    AY_PUSH_REG
+    ld a,c
+    AY_PUSH_VAL
+    ret
 
 ; xx yy - one row for each 4 bits orientation value (2+2 bytes x 16 = 64 bytes)
 speed_vectors:

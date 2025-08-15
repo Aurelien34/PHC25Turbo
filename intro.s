@@ -117,6 +117,7 @@ wheel2_address_down:
     dc.w 96/4+66*32+VRAM_ADDRESS
 
 show_intro:
+    call ay8910_init
 
     ld a,$00
     call clear_screen ; clear whole screen, but we don't have the color we want for the bottom of the screen
