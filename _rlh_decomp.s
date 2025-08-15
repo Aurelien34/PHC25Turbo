@@ -180,7 +180,7 @@ get_next_bit:
 
 decompress_huffman_byte:
 ;BEGIN_UNCOMPRESS_GENERATION
-;Decompression algorithm takes 792 bytes
+;Decompression algorithm takes 791 bytes
 
 .n:
 	call get_next_bit
@@ -568,7 +568,7 @@ decompress_huffman_byte:
 	ret
 .n1:
 	call get_next_bit
-	jr c,.n11 ; Jump size: 59
+	jr c,.n11 ; Jump size: 58
 .n10:
 	call get_next_bit
 	jr c,.n101 ; Jump size: 51
@@ -612,7 +612,7 @@ decompress_huffman_byte:
 	ld a,$41
 	ret
 .n101:
-	ld a,$00
+	xor a
 	ret
 .n11:
 	call get_next_bit
