@@ -15,10 +15,10 @@ OFFSSET_CIRCUIT_LAPS_TOTAL equ OFFSET_CAR_1_DATA+CAR_DATA_SIZE
 load_circuit:
     ; hl points to compressed circuit data
     ld de,RAM_MAP_CIRCUIT_DATA
-    call decompress_huffman
-    ld hl,huf_circuit_tiles_0
+    call decompress_rlh
+    ld hl,rlh_circuit_tiles_0
     ld de,RAM_MAP_PRECALC_AREA
-    call decompress_huffman
+    call decompress_rlh
 
     ; now load car positions in circuit
     ld hl,RAM_MAP_CIRCUIT_DATA+OFFSET_CAR_0_DATA

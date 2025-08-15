@@ -16,7 +16,7 @@ start_race:
     call switch_to_mode_graphics_hd;
 
     ; load the circuit
-    ld hl,huf_circuitdata
+    ld hl,rlh_circuitdata
     call load_circuit
 
     ; draw the circuit

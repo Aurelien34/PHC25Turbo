@@ -45,9 +45,9 @@ data_car1:
 
 precalc_shifted_cars:
     ; First, decompress the sprite to its target RAM area
-    ld hl,huf_car0 ; compressed image in hl
+    ld hl,rlh_car0 ; compressed image in hl
     ld de,RAM_MAP_PRECALC_VEHICLE_0 ; target shifter car data memory area
-    call decompress_huffman
+    call decompress_rlh
     ld hl,RAM_MAP_PRECALC_VEHICLE_0
     ld (.ram_precalc_address),hl
     ld hl,RAM_MAP_PRECALC_VEHICLE_0+127
@@ -56,9 +56,9 @@ precalc_shifted_cars:
     ld (.ram_precalc_address_255),hl
     call .shiftcompute
 
-    ld hl,huf_car1 ; compressed image in hl
+    ld hl,rlh_car1 ; compressed image in hl
     ld de,RAM_MAP_PRECALC_VEHICLE_1 ; target shifter car data memory area
-    call decompress_huffman
+    call decompress_rlh
     ld hl,RAM_MAP_PRECALC_VEHICLE_1
     ld (.ram_precalc_address),hl
     ld hl,RAM_MAP_PRECALC_VEHICLE_1+127

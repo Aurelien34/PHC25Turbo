@@ -9,9 +9,9 @@
 ; Font contains 0123456789:!/'>?@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 
 decompress_font:
-    ld hl,huf_smallfont
+    ld hl,rlh_smallfont
     ld de,RAM_MAP_PRECALC_AREA
-    call decompress_huffman
+    call decompress_rlh
     ret
 
 ; Screen address in [de]

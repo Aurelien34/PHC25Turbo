@@ -77,11 +77,11 @@ digit_color_bitmaps_addresses:
     dc.w INTRO_RAM_MAP_IMAGE_0_C
 
 helmets_compressed_bitmaps_addresses:
-    dc.w huf_intro_helmet_a
-    dc.w huf_intro_helmet_b
-    dc.w huf_intro_helmet_c
-    dc.w huf_intro_helmet_a
-    dc.w huf_intro_helmet_b
+    dc.w rlh_intro_helmet_a
+    dc.w rlh_intro_helmet_b
+    dc.w rlh_intro_helmet_c
+    dc.w rlh_intro_helmet_a
+    dc.w rlh_intro_helmet_b
 
 WHEELS_UP_BIT equ 0
 WHEELS_SWAPPED_BIT equ 1
@@ -118,33 +118,33 @@ wheel2_address_down:
 
 show_intro:
 
-    call switch_to_mode_graphics_sd_white
     ld a,$00
     call clear_screen ; clear whole screen, but we don't have the color we want for the bottom of the screen
+    call switch_to_mode_graphics_sd_white
 
     ; Initialize variables
     ld a,1<<WHEELS_UP_BIT
     ld (anim_status),a
 
+    ; Decompress top image
+    ld hl,rlh_introscreen
+    ld de,VRAM_ADDRESS
+    call decompress_rlh
+
     ; Decompress font
-    ld hl,huf_smallfont
+    ld hl,rlh_smallfont
     ld de,INTRO_RAM_MAP_FONT
-    call decompress_huffman
+    call decompress_rlh
 
     ; Write text
     ld hl,INTRO_RAM_MAP_FONT
     ld ix,block_texts_to_display
     call write_text_block
 
-    ; Decompress top image
-    ld hl,huf_introscreen
-    ld de,VRAM_ADDRESS
-    call decompress_huffman
-
     ; Decompress 0 digits
-    ld hl,huf_intro_0
+    ld hl,rlh_intro_0
     ld de,INTRO_RAM_MAP_IMAGE_0_A
-    call decompress_huffman
+    call decompress_rlh
 
     ; Decompress helmets
     ld a,r ; a bit of random here
@@ -163,7 +163,7 @@ show_intro:
     inc de
     push de
     ld de,INTRO_RAM_MAP_IMAGE_HELMET_A
-    call decompress_huffman
+    call decompress_rlh
     pop de
     ld a,(de)
     ld l,a
@@ -171,7 +171,7 @@ show_intro:
     ld a,(de)
     ld h,a
     ld de,INTRO_RAM_MAP_IMAGE_HELMET_B
-    call decompress_huffman
+    call decompress_rlh
 
 .intro_loop:
 
