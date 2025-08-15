@@ -1,16 +1,14 @@
-- decompress optimization for size
+- fix joystick handling
 - sound FX
 - music
-- new chained circuits
-- lap detection
 - remaining laps display
-- oil puddles
+- lap detection
+- new chained circuits
 - car profiles (rotation speed, acceleration profiles, drifting profiles)
-- drift factor depending on speed
-- car pictures
-- grey scale car pictures
+- oil puddles
+- drift factor depending on speed?
+- grey scale ingame pictures
 - car collisions
 - moving car on intro screen?
-- fix joystick handling
-- progressive / selective decompression
+- progressive / selective decompression (for potentially large fonts)
 - add greetings!
