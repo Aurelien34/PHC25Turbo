@@ -1,6 +1,6 @@
 # Super Turbo 2000 !!!
 
-My contribution to the summer game jame "Retro Programmers United for Obscure Systems" dedicated to the Sanyo PHC-25 obscure computer.
+My contribution to the summer game jam "Retro Programmers United for Obscure Systems" dedicated to the Sanyo PHC-25 obscure computer.
 
 ## Some screen captures
 
