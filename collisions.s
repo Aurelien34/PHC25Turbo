@@ -127,7 +127,8 @@ compute_circuit_interactions:
     ld a,(ix+CAR_OFFSET_THROTTLE)
     srl a
     ld (ix+CAR_OFFSET_THROTTLE),a
-
+    ; Send call collision sound
+    call ay8910_queue_sequence_wall_collision
     ret
 
 .status:

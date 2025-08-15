@@ -1,6 +1,6 @@
 ; memory map
 ; $C000... : Bootstrapper + program code
-; 2048 bytes per vehicle for shift precompute (8 128 bytes strips twice the width)
+; 2048 bytes per vehicle for shift precompute (8x128 bytes strips twice the width)
 ; 
 ; $ee38-eefd : decompressed circuit data
 ; $eefe-eeff : input controllers values (2 bytes)

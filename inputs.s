@@ -13,21 +13,21 @@ update_inputs:
     ld b,0 ; b <- 0
 
     ;  Joystick
-;    ld a,$0e
-;    out ($c1),a
-;    in a,($c1)
-;    bit 4,a
-;    jp nz,.jp1notfire
-;    set INPUT_BIT_FIRE,b
-;.jp1notfire
-;    bit 2,a
-;    jp nz,.jp1notleft
-;    set INPUT_BIT_LEFT,b
-;.jp1notleft
-;    bit 3,a
-;    jp nz,.jp1notright
-;    set INPUT_BIT_RIGHT,b
-;.jp1notright
+    ld a,$0e
+    out ($c1),a
+    in a,($c1)
+    bit 4,a
+    jp nz,.jp1notfire
+    set INPUT_BIT_FIRE,b
+.jp1notfire
+    bit 2,a
+    jp nz,.jp1notleft
+    set INPUT_BIT_LEFT,b
+.jp1notleft
+    bit 3,a
+    jp nz,.jp1notright
+    set INPUT_BIT_RIGHT,b
+.jp1notright
 
     ; Keyboard
     in a,($80)
@@ -63,21 +63,21 @@ update_inputs:
     ld b,0 ; b <- 0
 
     ;  Joystick
-;    ld a,$0f
-;    out ($c1),a
-;    in a,($c1)
-;    bit 4,a
-;    jp nz,.jp2notfire
-;    set INPUT_BIT_FIRE,b
-;.jp2notfire
-;    bit 2,a
-;    jp nz,.jp2notleft
-;    set INPUT_BIT_LEFT,b
-;.jp2notleft
-;    bit 3,a
-;    jp nz,.jp2notright
-;    set INPUT_BIT_RIGHT,b
-;.jp2notright
+    ld a,$0f
+    out ($c1),a
+    in a,($c1)
+    bit 4,a
+    jp nz,.jp2notfire
+    set INPUT_BIT_FIRE,b
+.jp2notfire
+    bit 2,a
+    jp nz,.jp2notleft
+    set INPUT_BIT_LEFT,b
+.jp2notleft
+    bit 3,a
+    jp nz,.jp2notright
+    set INPUT_BIT_RIGHT,b
+.jp2notright
 
     in a,($86)
     bit 2,a

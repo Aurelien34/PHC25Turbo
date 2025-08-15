@@ -38,6 +38,7 @@ start_race:
 .loop
 
     call update_inputs;
+    call ay8910_loop
 
     ; Compute car speed vector
     ld ix,data_car0 ; current car is number 0

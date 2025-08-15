@@ -98,7 +98,6 @@ IMAGE_ANIMATION_STEP equ 8
 HELMET_POSITION equ 84/4+48*32+VRAM_ADDRESS
 HELMET_IMAGE_HEIGHT equ 10
 
-    dc.b "                Animations                 "
 digit_animation_counter:
     dc.w 0
 image_animation_counter:
@@ -119,7 +118,7 @@ wheel2_address_down:
 show_intro:
     call ay8910_init
 
-    ld a,$00
+    xor a
     call clear_screen ; clear whole screen, but we don't have the color we want for the bottom of the screen
     call switch_to_mode_graphics_sd_white
 
@@ -190,6 +189,7 @@ show_intro:
     call switch_to_mode_graphics_sd_white
 
     call update_animation
+    call ay8910_loop
 
     ; Read inputs
     call update_inputs
