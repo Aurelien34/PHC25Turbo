@@ -12,3 +12,4 @@
 - moving car on intro screen?
 - progressive / selective decompression (for potentially large fonts)
 - add greetings!
+- divide ny 2 the size of car sprites using horitontal mirror effect!
