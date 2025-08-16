@@ -18,64 +18,64 @@ music_pointer:
 music_instructions:
     dc.w play_chord_EM4
     dc.w play_percussion
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_EM4
     dc.w play_percussion
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_EM4
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_AM3
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_AM3
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_BM3
     dc.w 0
     dc.w play_chord_BM3
     dc.w 0
     dc.w play_chord_EM4
     dc.w play_percussion
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_EM4
     dc.w play_percussion
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_EM4
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_GM4
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_GM4
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_AM4
     dc.w 0
     dc.w play_chord_AM4
     dc.w 0
     dc.w play_chord_EM4
     dc.w play_percussion
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_EM4
     dc.w play_percussion
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_EM4
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_AM3
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_AM3
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_BM3
     dc.w 0
     dc.w play_chord_BM3
     dc.w 0
     dc.w play_chord_EM4
     dc.w play_percussion
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_EM4
     dc.w play_percussion
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_EM4
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_GM4
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_GM4
-    dc.w 0
+    dc.w play_bass
     dc.w play_chord_AM4
     dc.w 0
     dc.w play_chord_BM4
@@ -139,8 +139,15 @@ set_lower_frequency_registers_3_voices_and_play:
     call .load_and_push
     ld a,AY8910_REGISTER_FREQUENCY_C_LOWER
     call .load_and_push
-    AYOUT AY8910_REGISTER_ENVELOPPE_SHAPE, AY_ENVELOPPE_TYPE_SINGLE_DECAY_THEN_OFF
-    ret
+    ld hl,.settings
+    ld b,(.settings_end-.settings)/2
+    jp ay8910_read_command_sequence
+.settings
+    dc.b AY8910_REGISTER_VOLUME_A, AY8910_FLAG_VOLUME_WITH_ENVELOPPE
+    dc.b AY8910_REGISTER_VOLUME_B, AY8910_FLAG_VOLUME_WITH_ENVELOPPE
+    dc.b AY8910_REGISTER_VOLUME_C, AY8910_FLAG_VOLUME_WITH_ENVELOPPE
+    dc.b AY8910_REGISTER_ENVELOPPE_SHAPE, AY_ENVELOPPE_TYPE_SINGLE_DECAY_THEN_OFF
+.settings_end    
 .load_and_push
     AY_PUSH_REG 
     ld a,(hl)
@@ -217,4 +224,15 @@ play_percussion:
     or a
     dc.b $c8 ; "ret z" not assembled correctly by VASM!
     AYOUT AY8910_REGISTER_MIXER, AY8910_MASK_MIXER_NOISE_A&AY8910_MASK_MIXER_TONE_B&AY8910_MASK_MIXER_TONE_C&AY8910_MASK_MIXER_PORT_A_IN&AY8910_MASK_MIXER_PORT_B_IN 
+    ret
+
+play_bass:
+    ld hl,.settings
+    ld b,(.settings_end-.settings)/2
+    jp ay8910_read_command_sequence
+.settings ; E2
+    dc.b AY8910_REGISTER_FREQUENCY_B_UPPER, $02
+    dc.b AY8910_REGISTER_FREQUENCY_B_LOWER, $f6
+    dc.b AY8910_REGISTER_VOLUME_B, 12
+.settings_end    
     ret
