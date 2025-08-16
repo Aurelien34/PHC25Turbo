@@ -1,15 +1,35 @@
     section	code,text
 
-    global decompress_rlh
+    global decompress_rlh, decompress_rlh_advanced
+	global rlh_param_offset_start, rlh_param_extract_length
 
 FLAG_COMPRESSION_HUFFMAN equ 7
 FLAG_COMPRESSION_RLE equ 6
 FLAG_CLEAR_MASK equ %00111111
 FLAG_CLEAR_COMPRESSION_RLE_MASK equ %10111111
 
+rlh_param_offset_start:
+	dc.w 0
+rlh_param_extract_length:
+	dc.w 0
+
 ; Compression is made in 2 optional layers:
 ; - Layer 1 is RLE or RAW
 ; - Layer 2 is Huffman or RAW
+
+; Input registers:
+;-----------------
+; interrupts should be disabled
+; registers assignment:
+; hl => source buffer pointer
+; de => target buffer pointer
+decompress_rlh:
+	; Indicate we want to extract the whole data
+	ld bc,0
+	ld (rlh_param_extract_length),bc
+	ld (rlh_param_offset_start),bc
+	jr decompress_rlh_advanced
+	
 
 ; Input registers:
 ;-----------------
@@ -26,17 +46,32 @@ FLAG_CLEAR_COMPRESSION_RLE_MASK equ %10111111
 ; iyh => Huffman compression flag (for mixed huffman / RLE compression)
 ; iyl => RLE compression key
 
-decompress_rlh:
-
+decompress_rlh_advanced:
     ; initialization
+	; see if we have a user defined size limit
+	; rlh_param_extract_length should not be null
+	ld bc,(rlh_param_extract_length)
+	ld a,c
+	or b
+	jr z,.load_target_size_from_stream
+	; we still need to load size and compression flags in ix
+	ld ixl,c
+	; point hl to upper byte
+	inc hl
+	ld a,(hl) ; load upper byte
+	and %11000000 ; extract compression flags
+	or b ; apply mask to our upper byte of stream length
+	ld ixh,a
+	jr .target_size_loaded
+.load_target_size_from_stream:
     ; load target size and compress flag in ix
     ld a,(hl)
     ld ixl,a
     inc hl
     ld a,(hl)
     ld ixh,a
+.target_size_loaded:
     inc hl
-
 	; decode RLE compression flag
 	bit FLAG_COMPRESSION_RLE,a
 	jr nz,decomp_rle
@@ -46,6 +81,9 @@ decompress_rlh:
 	jr nz,decomp_huffman
 
 	; data is not compressed
+	; compute starting address in hl
+	ld bc,(rlh_param_offset_start)
+	add hl,bc
 	; load data size in bc
 	push ix
 	pop bc
@@ -74,6 +112,7 @@ decomp_rle:
 
 	; iterate on bytes
 .loopDecomp
+	; check if the decompression is complete
 	ld a,ixl ; ix is 0?
 	or ixh	; OR between high and low bytes and see if it is zero
 	dc.b $c8 ; "ret z" not assembled correctly by VASM!
@@ -82,9 +121,7 @@ decomp_rle:
 	cp iyl
 	jr z,.byte_is_compressed
 	; byte is not compressed
-	ld (de),a
-	inc de
-    dec ix
+	call store_reg_a_to_output_stream_or_not
 	jr .loopDecomp
 
 .byte_is_compressed
@@ -103,10 +140,8 @@ decomp_rle:
 	pop de
 	ld a,c
 .loop_multi_instances
-	ld (de),a
+	call store_reg_a_to_output_stream_or_not
 	; shadow
-	inc de
-    dec ix
 	dec b
 	jr nz,.loop_multi_instances
 	push de
@@ -139,9 +174,7 @@ decomp_huffman:
     ; now we can loop on decoding code
 .loopDecomp
     call decompress_huffman_byte
-    ld (de),a
-    inc de
-    dec ix
+    call store_reg_a_to_output_stream_or_not
 	ld a,ixl ; ix is 0?
 	or ixh
     jr nz,.loopDecomp
@@ -162,6 +195,32 @@ get_next_bit:
 .end
     ex af,af' ; '; restore carry flag
     ret
+
+store_reg_a_to_output_stream_or_not:
+	; determine if we have reached the offset
+	push af
+	push bc
+	; load the offset
+	ld bc,(rlh_param_offset_start)
+	; check if it is 0
+	ld a,b
+	or c
+	jr z,.store_value ; no offset or offset aleady reached
+	; the offset is non zero
+	; decrement it
+	dec bc
+	ld (rlh_param_offset_start),bc
+	pop bc
+	pop af
+	ret
+.store_value;
+	pop bc
+	pop af
+	ld (de),a
+	inc de
+    dec ix
+.end
+	ret
 
 decompress_huffman_byte:
 ;BEGIN_UNCOMPRESS_GENERATION
