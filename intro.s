@@ -117,6 +117,7 @@ wheel2_address_down:
 
 show_intro:
     call ay8910_init
+    call music_init
 
     xor a
     call clear_screen ; clear whole screen, but we don't have the color we want for the bottom of the screen
@@ -189,7 +190,7 @@ show_intro:
     call switch_to_mode_graphics_sd_white
 
     call update_animation
-    call ay8910_loop
+    call music_loop
 
     ; Read inputs
     call update_inputs

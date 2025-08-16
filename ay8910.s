@@ -3,9 +3,10 @@
 
     section	code,text
 
-    global ay8910_init, ay8910_init_cars
+    global ay8910_init, ay8910_init_cars, ay8910_init_music
     global ay8910_loop, ay8910_inject_single_chain_in_queue, ay8910_inject_chain_sequence_in_chain_queue
     global ay8910_queue_sequence_wall_collision
+    global ay8910_read_command_sequence
 
 ANIM_COUNTER_INCREMENT equ 32
 
@@ -29,8 +30,18 @@ car_sequence:
     dc.b AY8910_REGISTER_FREQUENCY_B_UPPER, 1
     dc.b AY8910_REGISTER_FREQUENCY_B_LOWER, 0
     dc.b AY8910_REGISTER_ENVELOPPE_DURATION_UPPER, 0
-    dc.b AY8910_REGISTER_ENVELOPPE_DURATION_LOWER, 150
+    dc.b AY8910_REGISTER_ENVELOPPE_DURATION_LOWER, 20
 end_car_sequence:
+
+music_sequence:
+    dc.b AY8910_REGISTER_VOLUME_A, AY8910_FLAG_VOLUME_WITH_ENVELOPPE
+    dc.b AY8910_REGISTER_VOLUME_B, AY8910_FLAG_VOLUME_WITH_ENVELOPPE
+    dc.b AY8910_REGISTER_VOLUME_C, AY8910_FLAG_VOLUME_WITH_ENVELOPPE
+    dc.b AY8910_REGISTER_ENVELOPPE_DURATION_UPPER, 10
+    dc.b AY8910_REGISTER_ENVELOPPE_DURATION_LOWER, 0
+    dc.b AY8910_REGISTER_ENVELOPPE_SHAPE, AY_ENVELOPPE_TYPE_SINGLE_DECAY_THEN_OFF
+    dc.b AY8910_REGISTER_NOISE_PERIOD, 0
+end_music_sequence:
 
 audio_animation_counter:
     dc.w 0
@@ -105,6 +116,29 @@ ay8910_init_cars:
     call ay8910_read_command_sequence
     ret
 
+ay8910_init_music:
+    call ay8910_init
+    ld hl,music_sequence
+    ld b,(end_music_sequence-music_sequence)/2
+    call ay8910_read_command_sequence
+    ret
+
+; Chain number in [a]
+execute_command_chain:
+    add a
+    ld c,a
+    ld b,0
+    ld hl,command_chains
+    add hl,bc
+    ld a,(hl)
+    inc hl
+    ld l,(hl)
+    ld l,a
+    ; hl points to the chain
+    ld b,(hl) ; b points to actions count
+    inc hl
+    jr ay8910_read_command_sequence
+
 ay8910_inject_single_chain_in_queue:
     ld (.tmp_command),a
     ld hl,.tmp_command
@@ -154,22 +188,6 @@ peek_first_chain_in_list:
     ld (de),a
     ex af,af' ; '
     ret
-
-; Chain number in [a]
-execute_command_chain:
-    add a
-    ld c,a
-    ld b,0
-    ld hl,command_chains
-    add hl,bc
-    ld a,(hl)
-    inc hl
-    ld l,(hl)
-    ld l,a
-    ; hl points to the chain
-    ld b,(hl) ; b points to actions count
-    inc hl
-    jr ay8910_read_command_sequence
 
 ; Call this every frame
 ay8910_loop:
