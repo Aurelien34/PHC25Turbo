@@ -31,6 +31,7 @@ block_texts_to_display:
     dc.w 23+104*32+VRAM_ADDRESS, sz_joy_0
     dc.w 23+114*32+VRAM_ADDRESS, sz_joy_1
     dc.w 23+124*32+VRAM_ADDRESS, sz_joy_2
+    dc.w 11+85*32+VRAM_ADDRESS, sz_line_ready
     dc.w $0000
 
 sz_line_0:
@@ -51,12 +52,14 @@ sz_line_7:
     dc.b "> Accel:  S      J",0
 sz_line_8:
     dc.b "PHC25 < Bouz 2025 for RPUFOS",0
+sz_line_ready:
+    dc.b "Ya=ll ready for this?",0
 sz_joy_0:
     dc.b "Joysticks",0
 sz_joy_1:
     dc.b "supported",0
 sz_joy_2:
-    dc.b "soon;",0
+    dc.b "maybe;",0
 
 DIGIT_COUNT equ 3
 DIGIT_IMAGE_SEQUENCE_COUNT equ 3
