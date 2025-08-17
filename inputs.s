@@ -16,7 +16,7 @@ update_inputs:
     if JOYSTICK = 1
     ld a,$0e
     out ($c1),a
-    in a,($c1)
+    in a,($c0)
     bit 4,a
     jp nz,.jp1notfire
     set INPUT_BIT_FIRE,b
@@ -68,7 +68,7 @@ update_inputs:
     if JOYSTICK = 1
     ld a,$0f
     out ($c1),a
-    in a,($c1)
+    in a,($c0)
     bit 4,a
     jp nz,.jp2notfire
     set INPUT_BIT_FIRE,b

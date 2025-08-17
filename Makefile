@@ -1,6 +1,6 @@
 # Debug
-DEBUG = 1
-JOYSTICK = 0
+DEBUG = 0
+JOYSTICK = 1
 
 # Path
 MAME_SAVESTATE_PATH = C:\MameNew\sta\phc25
