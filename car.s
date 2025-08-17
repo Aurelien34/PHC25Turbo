@@ -9,9 +9,20 @@
     global data_car0, data_car1
     global precalc_shifted_cars
     global prepare_draw_car, draw_car, erase_car, update_car_position, update_car_angle_and_throttle, update_car_speed, update_car_engine_sound
+    global compute_engine_enveloppe
 
 THROTTLE_INCREMENT equ 2
 THROTTLE_DECREMENT equ 4
+
+data_engine_enveloppe:
+    dc.b $10
+    dc.b $43
+    dc.b $76
+    dc.b $a9
+    dc.b $dc
+    dc.b $bf
+    dc.b $48
+    dc.b $02
 
 data_car0:
     dc.w $ffff ; x
@@ -22,6 +33,8 @@ data_car0:
     dc.w $ffff ; speed y
     dc.w RAM_MAP_PRECALC_VEHICLE_0; precalc sprites base address
     dc.b AY8910_REGISTER_FREQUENCY_A_LOWER ; AY8910 sound frequency register
+    dc.b AY8910_REGISTER_VOLUME_A ; AY8910 sound frequency register
+    dc.w $ffff ; engine sound enveloppe counter
     dc.w 0 ; sprite VRAM address (precomp)
     dc.w 0 ; shifted sprite data address (precomp) => lower bit says we have to use mirror display
     dc.w 0 ; background VRAM address (precomp)
@@ -38,12 +51,55 @@ data_car1:
     dc.w $ffff ; speed y
     dc.w RAM_MAP_PRECALC_VEHICLE_1; precalc sprites base address
     dc.b AY8910_REGISTER_FREQUENCY_B_LOWER ; AY8910 sound frequency register
+    dc.b AY8910_REGISTER_VOLUME_B ; AY8910 sound frequency register
+    dc.w $ffff ; engine sound enveloppe counter
     dc.w 0 ; sprite VRAM address (precomp)
     dc.w 0 ; shifted sprite data address (precomp)
     dc.w 0 ; background VRAM address (precomp)
     dc.w .background_data ; background backup data address (constant)
 .background_data:
     dc.w 0, 0, 0, 0, 0, 0, 0, 0 ; background backup data
+
+compute_engine_enveloppe:
+    ; load enveloppe counter
+    ld c,(ix+CAR_OFFSET_ENGINE_SOUND_ENVELOPPE_COUNTER)
+    ld b,(ix+CAR_OFFSET_ENGINE_SOUND_ENVELOPPE_COUNTER+1)
+    ; load throttle
+    ld a,(ix+CAR_OFFSET_THROTTLE)
+    or $70 ; ensure throttle is not null
+    ld h,0
+    ld l,a
+    add hl,hl
+    add hl,hl
+    ; add throttle to counter
+    add hl,bc
+    ; save counter value
+    ld (ix+CAR_OFFSET_ENGINE_SOUND_ENVELOPPE_COUNTER),l
+    ld (ix+CAR_OFFSET_ENGINE_SOUND_ENVELOPPE_COUNTER+1),h
+    ; Compute enveloppe index (0-7)
+    ld a,h
+    ld d,a
+    rra
+    and $07
+    ld l,a
+    ld h,0
+    ld bc,data_engine_enveloppe
+    add hl,bc
+    ; prepare audio channel
+    ld a,(ix+CAR_OFFSET_AY8910_SOUND_VOLUME_REGISTER)
+    AY_PUSH_REG
+    ; load corresponding enveloppe level
+    ld a,(hl)
+    bit 0,d
+    jr z,.no_rotation
+    rra    
+    rra    
+    rra    
+    rra    
+.no_rotation:
+    and $0f
+    AY_PUSH_VAL
+    ret
 
 precalc_shifted_cars:
     ; First, decompress the sprite to its target RAM area
