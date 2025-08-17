@@ -2,12 +2,7 @@
     include inc/inputs.inc
     section	code,text
 
-    global start_race, laps_count, set_laps_count
-
-laps_count_car_0:
-    dc.b 0
-laps_count_car_1:
-    dc.b 0
+    global start_race
 
 start_race:
 
@@ -20,6 +15,9 @@ start_race:
     ; load the circuit
     ld hl,rlh_circuitdata
     call load_circuit
+
+    ; draw the HUD
+    call show_hud
 
     ; draw the circuit
     call draw_circuit
@@ -129,21 +127,3 @@ escape:
     ; back to intro!
     ret
 
-; laps count in [a]
-set_laps_count:
-    ld (laps_count_car_0),a
-    ld (laps_count_car_1),a
-    ret
-
-refresh_lap_count:
-    ld a,(laps_count_car_0)
-    ld b,a
-    ld a,(laps_count_car_1)
-    cp b
-    jp nc,.b_geater
-    ld a,b
-.b_geater
-    ; now [A] contains the lowest number
-    ; display it whenever we have a font!
-
-    ret

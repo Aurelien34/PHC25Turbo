@@ -12,6 +12,9 @@ rlh_circuit_tiles_0:
 	global rlh_circuitdata  
 rlh_circuitdata:  
 	incbin "rlh/circuitdata.rlh"  
+	global rlh_hud  
+rlh_hud:  
+	incbin "rlh/hud.rlh"  
 	global rlh_intro_0  
 rlh_intro_0:  
 	incbin "rlh/intro_0.rlh"  

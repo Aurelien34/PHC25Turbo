@@ -6,7 +6,7 @@
 smallfont_res:
     incbin res_raw/smallfont.raw
 
-    global decompress_font, write_character, write_string, write_text_block
+    global write_character, write_string, write_text_block
 
 ; Font generator config: W7 H8 O1 Lucida Console 7
 ; Font contains 0123456789:!/'>?@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz

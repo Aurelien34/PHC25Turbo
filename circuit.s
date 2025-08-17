@@ -27,8 +27,7 @@ load_circuit:
 
     ; Load lap count
     ld a,(RAM_MAP_CIRCUIT_DATA+OFFSSET_CIRCUIT_LAPS_TOTAL)
-    call set_laps_count ; store in race info
-
+    call car_set_lap_count
     ret
 
 copy_car_characteristics
@@ -61,7 +60,7 @@ copy_car_characteristics
     ret
 
 draw_circuit:
-    ld bc,0
+    ld bc,1
 .loopy ; 12 rows
     ld b,0
 .loopx ; 16 columns
