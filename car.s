@@ -23,7 +23,7 @@ data_car0:
     dc.w RAM_MAP_PRECALC_VEHICLE_0; precalc sprites base address
     dc.b AY8910_REGISTER_FREQUENCY_A_LOWER ; AY8910 sound frequency register
     dc.w 0 ; sprite VRAM address (precomp)
-    dc.w 0 ; shifted sprite data address (precomp)
+    dc.w 0 ; shifted sprite data address (precomp) => lower bit says we have to use mirror display
     dc.w 0 ; background VRAM address (precomp)
     dc.w .background_data ; background backup data address (constant)
 .background_data:
@@ -52,10 +52,6 @@ precalc_shifted_cars:
     call decompress_rlh
     ld hl,RAM_MAP_PRECALC_VEHICLE_0
     ld (.ram_precalc_address),hl
-    ld hl,RAM_MAP_PRECALC_VEHICLE_0+127
-    ld (.ram_precalc_address_127),hl
-    ld hl,RAM_MAP_PRECALC_VEHICLE_0+255
-    ld (.ram_precalc_address_255),hl
     call .shiftcompute
 
     ld hl,rlh_car1 ; compressed image in hl
@@ -63,83 +59,96 @@ precalc_shifted_cars:
     call decompress_rlh
     ld hl,RAM_MAP_PRECALC_VEHICLE_1
     ld (.ram_precalc_address),hl
-    ld hl,RAM_MAP_PRECALC_VEHICLE_1+127
-    ld (.ram_precalc_address_127),hl
-    ld hl,RAM_MAP_PRECALC_VEHICLE_1+255
-    ld (.ram_precalc_address_255),hl
     call .shiftcompute
     ret
 
 .ram_precalc_address
     dc.w 0
-.ram_precalc_address_127
-    dc.w 0
-.ram_precalc_address_255
-    dc.w 0
 
 .shiftcompute
-    ; [de] points to precalc area
-    ld de,(.ram_precalc_address_127)
-    inc de
-    ; backup an precompute the addresses
+    ; target memory map is (all addresses are actually offsets based on .ram_precalc_address,
+    ; which is actually RAM_MAP_PRECALC_VEHICLE_0 or RAM_MAP_PRECALC_VEHICLE_1)
+    ; I will thank myself later for writing down this map
+    ; + $0000 : sprite 0 with angle 12, no shifting, 2 bytes per row => 16 bytes total
+    ; + $0010 : sprite 0 with angle 12, 1 shift
+    ; + $0020 : sprite 0 with angle 12, 2 shifts
+    ; ...
+    ; + $0070 : sprite 0 with angle 12, 7 shifts
+    ; + $0080 : sprite 1 with angle 11, no shifting
+    ; + $0090 : sprite 1 with angle 11, 1 shift
+    ; ....
+    ; + $00f0 : sprite 1 with angle 11, 7 shifts
+    ; ...
+    ; + $047f : sprite 8 with angle 4, 7 shifts
+    ; + $0480 : nohing more here
+    ; sprites are all decompressed in the working area
+    ; we need to first split them and send them to their own area
 
-    ; Now, compute all right shifts
-    ld ixh,1 ; current shift count
-    ; [de] should now point 128 bytes farther
-    ld hl,128
-    ex de,hl
-    add hl,de
-    ex de,hl
-
-.precalcloop
+    ; First, let's spread sprites data to their location and make 16 bits data from 8 bits.
+    ; this will be shift 0 data
+    ; we need to insert a white byte ($ff) between each byte to make each row 2 bytes wide
+    ; we have to start at sprite 8 and go backward, to avoid overwriting the initial decompressed piece of data
+    ; Compute target address => de
     ld hl,(.ram_precalc_address)
-    ld iyh,128 ; rows to process
-.rowloop:
-    ld ixl,ixh ; shift counter
-    ld b,(hl)
-    ld a,$ff
-.shiftloop:
-    srl a
-    srl b
-    jr nc,.nocarry
-    set 7,a
-.nocarry:
-    set 7,b
-    dec ixl
-    jr nz,.shiftloop
+    ld bc,128*9-16 ;(16 sprite bytes times 8 shifts times 9 sprites, beginning of last sprite data (unshifted))
+    add hl,bc
+    ex de,hl
+    ; Compute source address => hl
+    ld hl,(.ram_precalc_address)
+    ld bc,8*9-1 ;(8 bytes times 9 sprites, end of last sprite data)
+    add hl,bc
+    ld iyh,9 ; 9 sprites
+.loop_spread_sprites
+    ld iyl,8 ; 8 shifts
+.loop_spread_1_sprite
+        ld a,(hl)
+        dec hl
+        ld (de),a
+        inc de        
+        ld a,$ff
+        ld (de),a
 
-    ld c,a
-    ld a,b
-    ld (de),a
-    inc de
-    ld a,c
-    ld (de),a
-    inc de
-    inc hl
-
+        ; compute next value of de => move to previous sprite unshifted data
+        ex de,hl
+        ld bc,$ffef ; -17
+        ;ld bc,$000f ; todo
+        add hl,bc
+        ex de,hl
+        dec iyl
+        jr nz,.loop_spread_1_sprite
+    ; recompute next value for de
     dec iyh
-    jr nz,.rowloop
-
-    inc ixh
-    ld a,ixh
-    cp 8
-    jr nz,.precalcloop
-
-    ; Double byte size for no shift (1 byte => 2 bytes)
-    ld hl,(.ram_precalc_address_127)
-    ld de,(.ram_precalc_address_255)
-    ld b,128
-.noshiftloop
-    ld a,$ff
-    ld (de),a
-    dec de
-    ld a,(hl)
-    ld (de),a
-    dec hl
-    dec de
-    dec b
-    jr nz,.noshiftloop
-
+    jr nz,.loop_spread_sprites
+    
+    ; now compute 7 remaining shifts for all sprites
+    ld hl,(.ram_precalc_address)
+    ld de,(.ram_precalc_address)
+    inc de
+    inc de
+    ld ixh,9*8 ; 9 sprites times 8 rows
+.loop_shift_sprites:
+    ld ixl,7 ; 7 shifts
+.loop_shift_1_sprite:
+        ld a,(hl)
+        inc hl ; move to next source byte
+        scf ; set carry flag, as we want white to appear on the left
+        rra ; rotate right. The carry will get the lost bit 0
+        ld (de),a
+        inc de ; move to next target byte, does not change carry state as it is a 16 bit register
+        ld a,(hl) ; still don't touch the carry state
+        inc hl ; move to next source byte, still don't touch the carry state
+        rra ; inject the carry on the left
+        ld (de),a
+        inc de
+        dec ixl
+        jr nz,.loop_shift_1_sprite
+    ; skip unshifted sprite, get ready for the next one!
+    inc hl
+    inc hl
+    inc de
+    inc de
+    dec ixh
+    jr nz,.loop_shift_sprites
     ret
 
 prepare_draw_car:
@@ -169,23 +178,50 @@ prepare_draw_car:
     ; And final result with base address
     ld bc,VRAM_ADDRESS ; base address
     add hl,bc
+    ; de will hold the miroring offset and activation bit
+    ld de,0 ; no mirroring for now
     ; Store new sprite VRAM address
     ld (ix+CAR_OFFSET_SPRITE_VRAM_ADDRESS),l
     ld (ix+CAR_OFFSET_SPRITE_VRAM_ADDRESS+1),h
+    ld a,(ix+CAR_OFFSET_ANGLE)
+    and a,$f0
+    ; determine sprite index and potential mirroring
+    cp $d0
+    jr nc,.no_mirroring
+    cp $50
+    jr c,.no_mirroring
+    ; between 5 and 12, need mirroring
+    ld b,a
+    ld a,$c0
+    sub b
+    ; need to display the image backwards and set the lower bit
+    ld de,128-16+1 ; end of shifted sprite data + 1 byte as a marker
+    jr .index_computed
+.no_mirroring
+    add $40
+.index_computed
+    ld h,0
+    ld l,a
+    add hl,hl
+    add hl,hl
+    add hl,hl
+    ld c,(ix+CAR_OFFSET_PRECALC_SPRITES_BASE_ADDRESS)
+    ld b,(ix+CAR_OFFSET_PRECALC_SPRITES_BASE_ADDRESS+1)
+    add hl,bc
 
     ; Determine the sprite shifting to be done
     ld a,(ix+CAR_OFFSET_X+1)
-    ld b,7
-    and b
-    ld b,(ix+CAR_OFFSET_PRECALC_SPRITES_BASE_ADDRESS+1)
-    add a,b ; Update high byte to point to the expected strip!
-    ld (ix+CAR_OFFSET_SHIFTED_SPRITES_DATA_ADDRESS+1),a
-    ld a,(ix+CAR_OFFSET_ANGLE)
-    and a,$f0
-    ld b,(ix+CAR_OFFSET_PRECALC_SPRITES_BASE_ADDRESS)
-    add a,b ; update the low byte to point to the correct angle
-    ld (ix+CAR_OFFSET_SHIFTED_SPRITES_DATA_ADDRESS),a
+    and 7
+    add a
+    ld b,0
+    ld c,a
+    add hl,bc
 
+    ; Add potential mirroring offset
+    add hl,de
+
+    ld (ix+CAR_OFFSET_SHIFTED_SPRITES_DATA_ADDRESS),l
+    ld (ix+CAR_OFFSET_SHIFTED_SPRITES_DATA_ADDRESS+1),h
     ret
 
 erase_car:
@@ -216,6 +252,20 @@ draw_car:
     ; de = target screen address
     ; hl = source sprite data
     ; bc = target background backup
+    ; bc' will hold the next line offset, depending on the potential sprite miroring
+    bit 0,(ix+CAR_OFFSET_SHIFTED_SPRITES_DATA_ADDRESS)
+    jp z,.no_mirroring
+    ld bc,$ffef; -17
+    jp .ok_mirroring
+.no_mirroring:
+    ld bc,15
+.ok_mirroring:
+    res 0,(ix+CAR_OFFSET_SHIFTED_SPRITES_DATA_ADDRESS)
+    push bc
+    exx
+    pop bc
+    exx
+
     ld l,(ix+CAR_OFFSET_SHIFTED_SPRITES_DATA_ADDRESS)
     ld h,(ix+CAR_OFFSET_SHIFTED_SPRITES_DATA_ADDRESS+1)
     ld e,(ix+CAR_OFFSET_SPRITE_VRAM_ADDRESS)
@@ -243,7 +293,18 @@ draw_car:
     ld (de),a
     ; Move 1 byte right
     inc bc
-    inc hl
+    
+    ; todo: optimize that sequence!
+    push bc
+    ; Get bc' using the stack
+    exx
+    push bc
+    exx
+    pop bc
+    ;ld bc,$ffef ; ffef ; 15
+    add hl,bc
+    pop bc
+
     ; Move screen pointer on the next line (31 byte to the right)
     push hl
     ld hl,31
