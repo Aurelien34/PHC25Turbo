@@ -4,7 +4,7 @@
 
     global music_init, music_loop
 
-ANIM_COUNTER_INCREMENT equ 30 ; 125 BPM, yeah! (almost)
+ANIM_COUNTER_INCREMENT equ 37 ; 125 BPM, yeah! (almost)
 
 music_animation_first_run:
     dc.b 0

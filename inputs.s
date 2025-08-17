@@ -13,6 +13,7 @@ update_inputs:
     ld b,0 ; b <- 0
 
     ;  Joystick
+    if JOYSTICK = 1
     ld a,$0e
     out ($c1),a
     in a,($c1)
@@ -28,6 +29,7 @@ update_inputs:
     jp nz,.jp1notright
     set INPUT_BIT_RIGHT,b
 .jp1notright
+    endif
 
     ; Keyboard
     in a,($80)
@@ -63,6 +65,7 @@ update_inputs:
     ld b,0 ; b <- 0
 
     ;  Joystick
+    if JOYSTICK = 1
     ld a,$0f
     out ($c1),a
     in a,($c1)
@@ -78,6 +81,7 @@ update_inputs:
     jp nz,.jp2notright
     set INPUT_BIT_RIGHT,b
 .jp2notright
+    endif
 
     in a,($86)
     bit 2,a
