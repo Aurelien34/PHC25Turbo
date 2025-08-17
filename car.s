@@ -111,7 +111,6 @@ precalc_shifted_cars:
         ; compute next value of de => move to previous sprite unshifted data
         ex de,hl
         ld bc,$ffef ; -17
-        ;ld bc,$000f ; todo
         add hl,bc
         ex de,hl
         dec iyl
@@ -294,14 +293,12 @@ draw_car:
     ; Move 1 byte right
     inc bc
     
-    ; todo: optimize that sequence!
     push bc
     ; Get bc' using the stack
     exx
     push bc
     exx
     pop bc
-    ;ld bc,$ffef ; ffef ; 15
     add hl,bc
     pop bc
 

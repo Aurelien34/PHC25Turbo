@@ -14,7 +14,7 @@ players_count:
 start:
     di ; Disable interrupts
     
-    ld sp,RAM_MAP_STACK_END
+    ld sp,RAM_MAP_STACK
 
     call ay8910_init
 
