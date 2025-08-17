@@ -93,10 +93,6 @@ start_race:
     ld a,%10110110
     out ($40),a
 
-    if DEBUG = 1
-    call emulator_security_idle;
-    endif
-
     ; Erase the car sprites
     ld ix,data_car1 ; ; current car is number 1
     call erase_car
@@ -108,6 +104,10 @@ start_race:
     call draw_car
     ld ix,data_car1 ; current car is number 1
     call draw_car
+
+    if DEBUG = 1
+    call emulator_security_idle;
+    endif
 
     ; Black on white
     ld a,%11110110
