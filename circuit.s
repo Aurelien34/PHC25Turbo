@@ -16,9 +16,6 @@ load_circuit:
     ; hl points to compressed circuit data
     ld de,RAM_MAP_CIRCUIT_DATA
     call decompress_rlh
-    ld hl,rlh_circuit_tiles_0
-    ld de,RAM_MAP_PRECALC_AREA
-    call decompress_rlh
 
     ; now load car positions in circuit
     ld hl,RAM_MAP_CIRCUIT_DATA+OFFSET_CAR_0_DATA
@@ -66,10 +63,22 @@ copy_car_characteristics
 draw_circuit:
     ld bc,0
 .loopy ; 12 rows
-    call wait_for_vbl
     ld b,0
 .loopx ; 16 columns
+    bit 0,c
+    jr z,.odd
+    ld a,12
+    sub c
+    ld c,a
+.odd:
     call draw_circuit_tile
+
+    bit 0,c
+    jr z,.odd2
+    ld a,12
+    sub c
+    ld c,a
+.odd2:
     inc b
     bit 4,b
     jp z,.loopx
@@ -84,6 +93,14 @@ draw_circuit_tile:
     push hl
     push bc
 
+    ; determine if we are drawing tile (0,0)
+    ld a,b
+    or c
+    jr nz,.not_first_draw
+    ld a,$ff
+    ld (.last_tile_drawn),a
+
+.not_first_draw:
     call compute_tile_address ; get tile address in [de]
     ; load tile number
     ld a,(de)
@@ -92,14 +109,30 @@ draw_circuit_tile:
     or a
     jr z,.enddraw
     sub 8; decrement tile number, as we skip blank tile (#0)
+
+    ld hl,.last_tile_drawn
+    cp (hl)
+    jr z,.tile_decompressed
+    ld (.last_tile_drawn),a
+
     ; compute circuit bitmap address
     ld l,a
     ld h,0
     add hl,hl
     add hl,hl
-    ld de,RAM_MAP_PRECALC_AREA
-    add hl,de ; we now have tile bitmap address in [hl]
+    ; we need the address of the tile
+    ld (rlh_param_offset_start),hl
+    ld hl,32
+    ld (rlh_param_extract_length),hl
+    ld hl,rlh_circuit_tiles_0
+    ld de,RAM_MAP_PRECALC_VEHICLE_0
+    push bc
+    call decompress_rlh_advanced
+    pop bc
+    
+.tile_decompressed:
 
+    ld hl,RAM_MAP_PRECALC_VEHICLE_0
     call compute_screen_address ; get screen address in [de]
 
     ld b,16
@@ -125,6 +158,8 @@ draw_circuit_tile:
     pop bc
     pop hl
     ret
+.last_tile_drawn
+    dc.b 0
 
 ; b = x
 ; c = y

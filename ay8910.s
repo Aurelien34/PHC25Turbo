@@ -3,7 +3,7 @@
 
     section	code,text
 
-    global ay8910_init, ay8910_init_cars, ay8910_init_music
+    global ay8910_mute, ay8910_init, ay8910_init_cars, ay8910_init_music
     global ay8910_loop, ay8910_inject_single_chain_in_queue, ay8910_inject_chain_sequence_in_chain_queue
     global ay8910_queue_sequence_wall_collision
     global ay8910_read_command_sequence
@@ -102,6 +102,7 @@ ay8910_read_command_sequence:
     ret
 
 ay8910_init:
+ay8910_mute:
     ld hl,init_sequence
     ld b,(end_init_sequence-init_sequence)/2
     call ay8910_read_command_sequence

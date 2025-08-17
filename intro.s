@@ -6,7 +6,7 @@
 
     global show_intro
 
-INTRO_RAM_MAP_IMAGE_0_A equ RAM_MAP_PRECALC_AREA
+INTRO_RAM_MAP_IMAGE_0_A equ RAM_MAP_PRECALC_VEHICLE_1
 INTRO_RAM_MAP_IMAGE_0_B equ INTRO_RAM_MAP_IMAGE_0_A+81
 INTRO_RAM_MAP_IMAGE_0_C equ INTRO_RAM_MAP_IMAGE_0_B+81
 INTRO_RAM_MAP_IMAGE_HELMET_A equ INTRO_RAM_MAP_IMAGE_0_C+81
@@ -110,8 +110,7 @@ wheel2_address_down:
     dc.w 96/4+66*32+VRAM_ADDRESS
 
 show_intro:
-    call ay8910_init
-    call music_init
+    call ay8910_mute
 
     xor a
     call clear_screen ; clear whole screen, but we don't have the color we want for the bottom of the screen
@@ -167,6 +166,9 @@ show_intro:
     ld h,a
     ld de,INTRO_RAM_MAP_IMAGE_HELMET_B
     call decompress_rlh
+
+    call ay8910_init
+    call music_init
 
 .intro_loop:
 

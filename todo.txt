@@ -1,6 +1,4 @@
 - fix joystick handling
-- sound FX
-- music
 - remaining laps display
 - lap detection
 - new chained circuits
@@ -9,7 +7,7 @@
 - drift factor depending on speed?
 - grey scale ingame pictures
 - car collisions
-- moving car on intro screen?
-- progressive / selective decompression (for potentially large fonts)
 - add greetings!
-- divide ny 2 the size of car sprites using horitontal mirror effect!
+- understand why I can't use by 32 bytes buffer to decompress circuit tiles without crashing the game!
+- forest stage
+- decompress circuit tiles directly in the circuit (breaking the cache?)

@@ -1,5 +1,5 @@
 # Debug
-DEBUG = 0
+DEBUG = 1
 JOYSTICK = 0
 
 # Path

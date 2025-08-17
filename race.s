@@ -11,11 +11,11 @@ laps_count_car_1:
 
 start_race:
 
+    call ay8910_mute
+
     ld a,$ff
     call clear_screen
     call switch_to_mode_graphics_hd;
-
-    call ay8910_init_cars
 
     ; load the circuit
     ld hl,rlh_circuitdata
@@ -26,6 +26,8 @@ start_race:
 
     ; precompute car positions
     call precalc_shifted_cars
+
+    call ay8910_init_cars
 
     ld ix,data_car0 ; current car is number 0
     call prepare_draw_car
