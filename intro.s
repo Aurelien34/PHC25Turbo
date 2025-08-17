@@ -125,13 +125,7 @@ show_intro:
     ld de,VRAM_ADDRESS
     call decompress_rlh
 
-    ; Decompress font
-    ld hl,rlh_smallfont
-    ld de,INTRO_RAM_MAP_FONT
-    call decompress_rlh
-
     ; Write text
-    ld hl,INTRO_RAM_MAP_FONT
     ld ix,block_texts_to_display
     call write_text_block
 

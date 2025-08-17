@@ -3,29 +3,23 @@
 
     section	code,text
 
+smallfont_res:
+    incbin res_raw/smallfont.raw
+
     global decompress_font, write_character, write_string, write_text_block
 
 ; Font generator config: W7 H8 O1 Lucida Console 7
 ; Font contains 0123456789:!/'>?@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 
-decompress_font:
-    ld hl,rlh_smallfont
-    ld de,RAM_MAP_PRECALC_AREA
-    call decompress_rlh
-    ret
-
 ; Screen address in [de]
-; Font address in [hl]
 ; Character in [a]
 write_character:
     push de
-    push hl
     push bc
     
     cp a,' '
     jp z,.end
     sub $30
-    push hl
     ld h,0
     ld l,a
     add hl,hl
@@ -33,7 +27,7 @@ write_character:
     add hl,hl
     ld b,h
     ld c,l
-    pop hl
+    ld hl,smallfont_res
     add hl,bc
     ld bc,32
     ld iyl,8
@@ -47,12 +41,10 @@ write_character:
     jp nz,.copy_loop
 .end
     pop bc
-    pop hl
     pop de
     ret
 
 ; Screen address in [de]
-; Font address in [hl]
 ; String address in [bc]
 write_string:
     ld a,(bc)
@@ -69,7 +61,6 @@ write_string:
 .end
     ret
 
-; Font address in [hl]
 ; Message block in ix
 write_text_block:
     call wait_for_vbl

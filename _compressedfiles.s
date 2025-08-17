@@ -27,6 +27,3 @@ rlh_intro_helmet_c:
 	global rlh_introscreen  
 rlh_introscreen:  
 	incbin "rlh/introscreen.rlh"  
-	global rlh_smallfont  
-rlh_smallfont:  
-	incbin "rlh/smallfont.rlh"  

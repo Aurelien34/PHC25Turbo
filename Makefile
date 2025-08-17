@@ -5,9 +5,11 @@ JOYSTICK = 1
 # Path
 MAME_SAVESTATE_PATH = C:\MameNew\sta\phc25
 TO_COMPRESS_PATH = res_to_compress
+TO_EXTRACT = bmp_to_extract
 TO_EXTRACT_AND_COMPRESS_PATH = bmp_to_extract_and_compress
 TO_EXTRACT_AND_COMPRESS_COLOR_PATH = color_bmp_to_extract_and_compress
 BMP_TO_EXTRACT_PATH = bmp_to_extract
+RESOURCES_RAW = res_raw
 OUTPUT_PATH = .
 PRECOMP_PATH = precomp
 COMPRESSION_PATH = rlh
@@ -45,6 +47,8 @@ TO_COMPRESS_ALL = $(wildcard $(TO_COMPRESS_PATH)/*)
 TO_COMPRESS_BMP = $(wildcard $(TO_COMPRESS_PATH)/*.bmp)
 TO_COMPRESS_OTHER = $(filter-out %.bmp,$(TO_COMPRESS_ALL))
 GENERATED_RESOURCE_CODE_FILE = $(COMPRESSED_FILES_INCLUDER)
+TO_EXTRACT_BMP = $(wildcard $(BMP_TO_EXTRACT_PATH)/*.bmp)
+EXTRACTED_BMP = $(patsubst $(BMP_TO_EXTRACT_PATH)/%.bmp,$(RESOURCES_RAW)/%.raw,$(TO_EXTRACT_BMP))
 TO_EXTRACT_AND_COMPRESS_BMP = $(wildcard $(TO_EXTRACT_AND_COMPRESS_PATH)/*.bmp)
 EXTRACTED_TO_COMPRESS = $(patsubst $(TO_EXTRACT_AND_COMPRESS_PATH)/%.bmp,$(TO_COMPRESS_PATH)/%.raw,$(TO_EXTRACT_AND_COMPRESS_BMP))
 COLOR_IMAGES_BMP = $(wildcard $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/*.bmp)
@@ -77,7 +81,12 @@ rebuild:
 $(TO_COMPRESS_PATH)/circuitdata.bin: circuitdata.data
 	$(AS) circuitdata.data -Fbin -o $(TO_COMPRESS_PATH)/circuitdata.bin -quiet
 
+$(OBJ_PATH)/textwrite.o: res_raw/smallfont.raw
+
 $(TO_COMPRESS_PATH)/%.raw: $(TO_EXTRACT_AND_COMPRESS_PATH)/%.bmp
+	$(EXTRACT_RAW_IMAGE_DATA) $< $@
+
+$(RESOURCES_RAW)/%.raw: $(BMP_TO_EXTRACT_PATH)/%.bmp $(RESOURCES_RAW)
 	$(EXTRACT_RAW_IMAGE_DATA) $< $@
 
 $(foreach file,$(notdir $(basename $(COLOR_IMAGES_RAW))),$(eval $(call COLOR_IMAGES_RAW_EXTRACTION_TEMPLATE,$(file))))
@@ -117,6 +126,8 @@ $(PRECOMP_PATH):
 $(TO_COMPRESS_PATH):
 	mkdir $(TO_COMPRESS_PATH)
 
+$(RESOURCES_RAW):
+	mkdir $(RESOURCES_RAW)
 
 clean:
 ifneq ($(wildcard $(COMPRESSION_PATH)),)
@@ -140,3 +151,4 @@ endif
 	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(EXTRACTED_TO_COMPRESS),del $(notdir $(FILE)) &)
 	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(COLOR_IMAGES_RAW),del $(notdir $(FILE)) &)
 	cd $(TO_COMPRESS_PATH) & del circuitdata.bin
+	cd $(RESOURCES_RAW) & del smallfont.raw
