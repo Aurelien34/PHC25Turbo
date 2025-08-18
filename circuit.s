@@ -143,12 +143,6 @@ draw_circuit_tile:
     ld hl,rlh_circuit_tiles_0
     ld de,RAM_MAP_PRECALC_VEHICLE_0
     push bc
-
-    jp .breakpoint
-    dc.b "                  BREAKPOINT!!!                     "
-.breakpoint
-
-
     call decompress_rlh_advanced
     pop bc
 .tile_decompressed:

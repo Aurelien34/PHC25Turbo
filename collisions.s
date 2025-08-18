@@ -203,7 +203,6 @@ compute_collisions_xy:
 
 tile00:
 tile01:
-tile12:
     xor a ; clear carry
     ret
 tile02:
@@ -365,6 +364,56 @@ tile11:
     call invert_y
     scf ; set carry
     ret
+
+    dc.b "                           breakpoint                                 "
+tile12: ; checkered flag
+    ; x=d ; y=e
+    ; load remaining laps and flags stored with them
+    ld b,(ix+CAR_OFFSET_REMAINING_LAPS)
+    ld a,e
+    cp 25
+    jp nc,.not_top_flag
+    ; top of the flag
+    ld a,b
+    and %11000000
+    cp %11000000
+    jr nz,.end
+    ; top of the flag coming from the bottom
+    ld a,(ix+CAR_OFFSET_REMAINING_LAPS)
+    and %00111111
+    dec a
+    ld (ix+CAR_OFFSET_REMAINING_LAPS),a
+    call refresh_lap_count ; todo: totalement temporaire
+    jp .end
+.not_top_flag
+    ld a,e
+    cp 27
+    jr nc,.not_center_flag
+    ; center flag
+    ld a,b
+    and %11000000
+    cp 1<<CAR_FINISH_LINE_STATUS_BIT_ENTERED_BOTTOM
+    jr nz,.end ; have to come from the bottom
+    ; really joining the center of the flag from the bottom
+    set CAR_FINISH_LINE_STATUS_BIT_ENTERED_CENTER,(ix+CAR_OFFSET_REMAINING_LAPS)
+    jr .end
+.not_center_flag
+    ld a,e
+    cp 29
+    jr nc,.not_entering_flag
+    ; entering flag
+    ld a,b
+    and %11000000
+    jr nz,.end ; both bits should be empty
+    ; really entering flag from the bottom
+    set CAR_FINISH_LINE_STATUS_BIT_ENTERED_BOTTOM,(ix+CAR_OFFSET_REMAINING_LAPS)
+    jr .end
+.not_entering_flag
+.end
+    xor a ; clear carry
+    ret
+
+
 
 invert_x:
     ld l,(ix+CAR_OFFSET_SPEED_X)

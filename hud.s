@@ -3,7 +3,7 @@
     include inc/screen.inc
     section	code,text
 
-    global show_hud
+    global show_hud, refresh_lap_count
 
 
 
@@ -57,11 +57,14 @@ show_hud:
 
 refresh_lap_count:
     ld ix,data_car0
-    ld b,(ix+CAR_OFFSET_REMAINING_LAPS)
+    ld a,(ix+CAR_OFFSET_REMAINING_LAPS)
+    and %00111111 ; remove flag tile status bits
+    ld b,a
     ld ix,data_car1
     ld a,(ix+CAR_OFFSET_REMAINING_LAPS)
+    and %00111111 ; remove flag tile status bits
     cp b
-    jp nc,.b_geater
+    jp c,.b_geater
     ld a,b
 .b_geater
     ; now [A] contains the lowest number

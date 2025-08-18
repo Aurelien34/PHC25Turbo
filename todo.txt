@@ -13,3 +13,4 @@
 - seaside stage?
 - rolling start stage?
 - superpose images to the circuits
+- collision sound could sound better

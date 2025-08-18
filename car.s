@@ -41,7 +41,7 @@ data_car0:
     dc.b AY8910_REGISTER_FREQUENCY_A_LOWER ; AY8910 sound frequency register
     dc.b AY8910_REGISTER_VOLUME_A ; AY8910 sound frequency register
     dc.w $ffff ; engine sound enveloppe counter
-    dc.b 1 ; remaining laps
+    dc.b 1 ; remaining laps + finish line status
     dc.w 0 ; sprite VRAM address (precomp)
     dc.w 0 ; shifted sprite data address (precomp) => lower bit says we have to use mirror display
     dc.w 0 ; background VRAM address (precomp)
@@ -60,7 +60,7 @@ data_car1:
     dc.b AY8910_REGISTER_FREQUENCY_B_LOWER ; AY8910 sound frequency register
     dc.b AY8910_REGISTER_VOLUME_B ; AY8910 sound frequency register
     dc.w $ffff ; engine sound enveloppe counter
-    dc.b 1 ; remaining laps
+    dc.b 1 ; remaining laps + finish line status
     dc.w 0 ; sprite VRAM address (precomp)
     dc.w 0 ; shifted sprite data address (precomp)
     dc.w 0 ; background VRAM address (precomp)
