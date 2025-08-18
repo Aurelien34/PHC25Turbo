@@ -53,7 +53,7 @@ show_hud:
     jr .players_names_done
 .players_names_done
     call refresh_lap_count
-ret
+    ret
 
 refresh_lap_count:
     ld ix,data_car0
