@@ -9,5 +9,7 @@
 - car collisions
 - add greetings!
 - understand why I can't use by 32 bytes buffer to decompress circuit tiles without crashing the game!
-- forest stage
-- decompress circuit tiles directly in the circuit (breaking the cache?)
+- forest stage?
+- seaside stage?
+- rolling start stage?
+- superpose images to the circuits
