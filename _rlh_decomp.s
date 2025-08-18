@@ -25,9 +25,11 @@ rlh_param_extract_length:
 ; de => target buffer pointer
 decompress_rlh:
 	; Indicate we want to extract the whole data
+	push bc
 	ld bc,0
 	ld (rlh_param_extract_length),bc
 	ld (rlh_param_offset_start),bc
+	pop bc
 	jr decompress_rlh_advanced
 	
 
@@ -47,6 +49,9 @@ decompress_rlh:
 ; iyl => RLE compression key
 
 decompress_rlh_advanced:
+	push bc
+	push ix
+	push iy
     ; initialization
 	; see if we have a user defined size limit
 	; rlh_param_extract_length should not be null
@@ -74,12 +79,16 @@ decompress_rlh_advanced:
     inc hl
 	; decode RLE compression flag
 	bit FLAG_COMPRESSION_RLE,a
-	jr nz,decomp_rle
-
+	jr z,.no_decomp_rle
+	call decomp_rle
+	jr .end
+.no_decomp_rle:
 	; decode compression flag
 	bit FLAG_COMPRESSION_HUFFMAN,a
-	jr nz,decomp_huffman
-
+	jr z,.no_decomp_huffman
+	call decomp_huffman
+	jr .end
+.no_decomp_huffman:
 	; data is not compressed
 	; compute starting address in hl
 	ld bc,(rlh_param_offset_start)
@@ -89,7 +98,12 @@ decompress_rlh_advanced:
 	pop bc
 	; copy uncompressed data
 	ldir
+.end
+	pop iy
+	pop ix
+	pop bc
 	ret
+
 decomp_rle:
 	; data is RLE compressed
 	ld b,a ; backup a

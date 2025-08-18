@@ -3,7 +3,7 @@
 
     section	code,text
 
-    global load_circuit, draw_circuit, compute_tile_address
+    global load_circuit, draw_circuit
 
 TILE_DATA_SIZE equ 16*12
 CAR_DATA_SIZE equ 3
@@ -55,29 +55,33 @@ copy_car_characteristics
     inc de
     dec b
     jr nz,.loopclear
+    ret
 
-    ret
-    ret
+last_tile_drawn:
+    dc.b 0
 
 draw_circuit:
-    ld bc,1
+
+    ; tile number for the previous tile in the cache => set it to an invalid number in order to force the cache
+    ld a,$ff
+    ld (last_tile_drawn),a
+
+    ; iterate through possible tiles
+    call get_max_tile_index;
+    ld ixl,a ; loop on tile number => max number
+.loop_tile
+    ld hl,RAM_MAP_CIRCUIT_DATA+16 ; skip the first row
+    ld c,1 ; ignore the first raw, as we will display the HUD
 .loopy ; 12 rows
     ld b,0
 .loopx ; 16 columns
-    bit 0,c
-    jr z,.odd
-    ld a,12
-    sub c
-    ld c,a
-.odd:
-    call draw_circuit_tile
-
-    bit 0,c
-    jr z,.odd2
-    ld a,12
-    sub c
-    ld c,a
-.odd2:
+    ld a,(hl) ; load current tile in the circuit map
+    inc hl  ; move the pointer to the next one
+    and a,%11111000 ; remove the autodrive markers
+    cp ixl ; compare the circuit tile with the current one
+    jp nz,.tile_done ; if not the same, then it will be drawnduring another cycle
+    call draw_circuit_tile ; tile number is in register [a]
+.tile_done:
     inc b
     bit 4,b
     jp z,.loopx
@@ -86,33 +90,46 @@ draw_circuit:
     cp 12
     jr nz,.loopy
 
+    ld a,ixl
+    sub 8 ; tile number is shifted 3 time to fit the autopilot instructions
+    ld ixl,a
+    jr nz,.loop_tile ; nz, as we don't draw tile #0 anyway
+    ret
+
+; return the highest tile value in [a] for the current circuit
+get_max_tile_index:
+    ld hl,RAM_MAP_CIRCUIT_DATA
+    ld b,16*12 ; iterate on all tiles
+    ld c,0 ; keeps the currently highest value
+.loop
+    ld a,(hl)
+    inc hl
+    and %11111000 ; mask autodrive bits
+    cp c
+    jr c,.lower
+    ld c,a
+.lower:
+    dec b
+    jr nz,.loop
+    ld a,c ; transfer result to [a] register
+    ret
+
 ; b = x
 ; c = y
 draw_circuit_tile:
     push hl
     push bc
+    push de
 
-    ; determine if we are drawing tile (0,0)
-    ld a,b
-    or c
-    jr nz,.not_first_draw
-    ld a,$ff
-    ld (.last_tile_drawn),a
-
-.not_first_draw:
-    call compute_tile_address ; get tile address in [de]
-    ; load tile number
-    ld a,(de)
-    and %11111000
     ; check if the tile should be drawn
     or a
     jr z,.enddraw
     sub 8; decrement tile number, as we skip blank tile (#0)
 
-    ld hl,.last_tile_drawn
+    ld hl,last_tile_drawn
     cp (hl)
     jr z,.tile_decompressed
-    ld (.last_tile_drawn),a
+    ld (last_tile_drawn),a
 
     ; compute circuit bitmap address
     ld l,a
@@ -126,14 +143,17 @@ draw_circuit_tile:
     ld hl,rlh_circuit_tiles_0
     ld de,RAM_MAP_PRECALC_VEHICLE_0
     push bc
+
+    jp .breakpoint
+    dc.b "                  BREAKPOINT!!!                     "
+.breakpoint
+
+
     call decompress_rlh_advanced
     pop bc
-    
 .tile_decompressed:
-
     ld hl,RAM_MAP_PRECALC_VEHICLE_0
     call compute_screen_address ; get screen address in [de]
-
     ld b,16
 .loop ; 16 lines
     ld a,(hl)
@@ -154,37 +174,7 @@ draw_circuit_tile:
     jr nz,.loop
 
 .enddraw:
-    pop bc
-    pop hl
-    ret
-.last_tile_drawn
-    dc.b 0
-
-; b = x
-; c = y
-; returns tile address in [de]
-compute_tile_address:
-    push hl
-    push bc
-
-    ; compute circuit tile address
-    ; y offset (in c) x 16
-    ld h,0
-    ld l,c
-    add hl,hl
-    add hl,hl
-    add hl,hl
-    add hl,hl
-    ; x offset (in b)
-    ld c,b
-    ld b,0
-    ; sum x/y offsets
-    add hl,bc
-    ; add circuit base address
-    ld de,RAM_MAP_CIRCUIT_DATA
-    add hl,de
-    ex de,hl ; de now points to the tile address
-
+    pop de
     pop bc
     pop hl
     ret
