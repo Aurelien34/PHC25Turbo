@@ -1,6 +1,4 @@
 - fix joystick handling
-- remaining laps display
-- lap detection
 - new chained circuits
 - car profiles (rotation speed, acceleration profiles, drifting profiles)
 - oil puddles
@@ -8,9 +6,7 @@
 - grey scale ingame pictures
 - car collisions
 - add greetings!
-- understand why I can't use by 32 bytes buffer to decompress circuit tiles without crashing the game!
 - forest stage?
 - seaside stage?
 - rolling start stage?
 - superpose images to the circuits
-- collision sound could sound better

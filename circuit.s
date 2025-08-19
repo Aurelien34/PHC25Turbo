@@ -143,12 +143,12 @@ draw_circuit_tile:
     ld hl,32
     ld (rlh_param_extract_length),hl
     ld hl,rlh_circuit_tiles_0
-    ld de,RAM_MAP_PRECALC_VEHICLE_0
+    ld de,RAM_MAP_DECOMPRESSION_BUFFER_32
     push bc
     call decompress_rlh_advanced
     pop bc
 .tile_decompressed:
-    ld hl,RAM_MAP_PRECALC_VEHICLE_0
+    ld hl,RAM_MAP_DECOMPRESSION_BUFFER_32
     call compute_screen_address ; get screen address in [de]
     ld b,16
 .loop ; 16 lines
