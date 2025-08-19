@@ -38,7 +38,7 @@ sz_line_1:
 sz_line_2:
     dc.b "> 2 players start: 2",0
 sz_line_3:
-    dc.b "> Back to menu: Q",0
+    dc.b "> Back to menu: X",0
 sz_line_4:
     dc.b "P1     P2",0
 sz_line_5:
