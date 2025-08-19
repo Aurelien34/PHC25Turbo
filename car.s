@@ -72,6 +72,11 @@ compute_engine_enveloppe:
     ; load enveloppe counter
     ld c,(ix+CAR_OFFSET_ENGINE_SOUND_ENVELOPPE_COUNTER)
     ld b,(ix+CAR_OFFSET_ENGINE_SOUND_ENVELOPPE_COUNTER+1)
+    ; add some variations to avoir resonance
+    ld a,r
+    add a
+    add c
+    ld c,a
     ; load throttle
     ld a,(ix+CAR_OFFSET_THROTTLE)
     or $70 ; ensure throttle is not null
@@ -86,7 +91,7 @@ compute_engine_enveloppe:
     ld (ix+CAR_OFFSET_ENGINE_SOUND_ENVELOPPE_COUNTER+1),h
     ; Compute enveloppe index (0-7)
     ld a,h
-    ld d,a
+    ld d,a ; backup the "index"
     rra
     and $07
     ld l,a

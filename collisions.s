@@ -128,6 +128,7 @@ compute_circuit_interactions:
     srl a
     ld (ix+CAR_OFFSET_THROTTLE),a
     ; Send call collision sound
+    call ay8910_randomize_crash_sound
     call ay8910_queue_sequence_wall_collision
     ret
 

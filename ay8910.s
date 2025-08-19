@@ -7,6 +7,7 @@
     global ay8910_loop, ay8910_inject_single_chain_in_queue, ay8910_inject_chain_sequence_in_chain_queue
     global ay8910_queue_sequence_wall_collision
     global ay8910_read_command_sequence
+    global ay8910_randomize_crash_sound
 
 ANIM_COUNTER_INCREMENT equ 32
 
@@ -22,8 +23,11 @@ init_sequence:
 end_init_sequence:
 
 car_sequence:
-    dc.b AY8910_REGISTER_VOLUME_A, 9
-    dc.b AY8910_REGISTER_VOLUME_B, 9
+    dc.b AY8910_REGISTER_VOLUME_A, 8
+    dc.b AY8910_REGISTER_VOLUME_B, 8
+    dc.b AY8910_REGISTER_VOLUME_C, 0
+
+    dc.b AY8910_REGISTER_MIXER, AY8910_MASK_MIXER_TONE_A&AY8910_MASK_MIXER_TONE_B&AY8910_MASK_MIXER_NOISE_C&AY8910_MASK_MIXER_PORT_A_IN&AY8910_MASK_MIXER_PORT_B_IN
     dc.b AY8910_REGISTER_FREQUENCY_A_UPPER, 1
     dc.b AY8910_REGISTER_FREQUENCY_A_LOWER, 0 
     dc.b AY8910_REGISTER_FREQUENCY_B_UPPER, 1
@@ -82,10 +86,18 @@ ay8910_command_chain_play_tone_end:
 
 ay8910_command_chain_play_crash_p1:
     dc.b (ay8910_command_chain_play_crash_p1_end-ay8910_command_chain_play_crash_p1-1)/2
-    dc.b AY8910_REGISTER_FREQUENCY_C_LOWER,50
-    dc.b AY8910_REGISTER_FREQUENCY_C_UPPER,2
     dc.b AY8910_REGISTER_VOLUME_C, 15
+    dc.b AY8910_REGISTER_NOISE_PERIOD
+noise_period:
+    dc.b 0
+    dc.b AY8910_REGISTER_NOISE_PERIOD, 31
 ay8910_command_chain_play_crash_p1_end:
+
+ay8910_randomize_crash_sound:
+    ld a,r
+    and $1f
+    ld (noise_period),a
+    ret
 
 
 ay8910_read_command_sequence:
