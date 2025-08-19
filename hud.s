@@ -3,7 +3,7 @@
     include inc/screen.inc
     section	code,text
 
-    global show_hud, refresh_lap_count
+    global show_hud, hud_refresh_lap_count
 
 
 
@@ -52,24 +52,23 @@ show_hud:
     call write_string
     jr .players_names_done
 .players_names_done
-    call refresh_lap_count
+    call get_lap_count
+    dec a ; show 1 less, as the cars will have to cross the line for the real countdown to stard
+    call hud_refresh_lap_count
     ret
 
-refresh_lap_count:
-    ld ix,data_car0
-    ld a,(ix+CAR_OFFSET_REMAINING_LAPS)
-    and %00111111 ; remove flag tile status bits
-    ld b,a
-    ld ix,data_car1
-    ld a,(ix+CAR_OFFSET_REMAINING_LAPS)
-    and %00111111 ; remove flag tile status bits
-    cp b
-    jp c,.b_geater
-    ld a,b
-.b_geater
+; Lap count in [a]
+hud_refresh_lap_count:
+    push hl
+    push bc
+    push de
+    push ix
     ; now [A] contains the lowest number
     add '0'
     ld de,32-1-1+4*32+VRAM_ADDRESS
     call write_character
- 
+    pop ix
+    pop de
+    pop bc
+    pop hl
     ret

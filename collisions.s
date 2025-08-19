@@ -365,51 +365,72 @@ tile11:
     scf ; set carry
     ret
 
-    dc.b "                           breakpoint                                 "
+
+CHECKERED_FLAG_ZONE_WHITE_TOP equ 20
+CHECKERED_FLAG_ZONE_TOP equ 23
+CHECKERED_FLAG_ZONE_BOTTOM equ 26
+CHECKERED_FLAG_ZONE_WHITE_BOTTOM equ 28
+
 tile12: ; checkered flag
     ; x=d ; y=e
     ; load remaining laps and flags stored with them
     ld b,(ix+CAR_OFFSET_REMAINING_LAPS)
     ld a,e
-    cp 25
-    jp nc,.not_top_flag
-    ; top of the flag
+    cp CHECKERED_FLAG_ZONE_WHITE_TOP
+    jp c,.in_white_zone
+    cp CHECKERED_FLAG_ZONE_WHITE_BOTTOM
+    jp nc,.in_white_zone
+    jp .check_position_in_flag
+.in_white_zone:
+    ; clear flags
     ld a,b
-    and %11000000
-    cp %11000000
-    jr nz,.end
-    ; top of the flag coming from the bottom
-    ld a,(ix+CAR_OFFSET_REMAINING_LAPS)
+    and %00111111
+    ld b,a
+    jp .end
+.check_position_in_flag
+    ; on the bottom of the flag?
+    ld a,e
+    cp CHECKERED_FLAG_ZONE_BOTTOM
+    jp c,.not_bottom
+    set CAR_FINISH_LINE_STATUS_BIT_BOTTOM,b
+    ld a,b
+    ; bottom of the flag
+    and 1<<CAR_FINISH_LINE_STATUS_BIT_TOP
+    jr z,.entering_from_bottom
+    ; Coming from the top
+    ; clear flag, increment lap count and set both flags
+    ld a,b
+    and %00111111
+    inc a
+    or %10000000
+    ld b,a
+    jp .end
+.entering_from_bottom:
+    ; really entering flag from the bottom
+    jp .end
+.not_bottom:
+    ; on the top of the flag?
+    ld a,e
+    cp CHECKERED_FLAG_ZONE_TOP
+    jr nc,.not_top
+    ; top of the flag
+    set CAR_FINISH_LINE_STATUS_BIT_TOP,b
+    ld a,b
+    and 1<<CAR_FINISH_LINE_STATUS_BIT_BOTTOM
+    jr z,.entering_top
+    ; Coming from the bottom
+    ; clear flags, decrement lap count and set flags
+    ld a,b
     and %00111111
     dec a
-    ld (ix+CAR_OFFSET_REMAINING_LAPS),a
-    call refresh_lap_count ; todo: totalement temporaire
-    jp .end
-.not_top_flag
-    ld a,e
-    cp 27
-    jr nc,.not_center_flag
-    ; center flag
-    ld a,b
-    and %11000000
-    cp 1<<CAR_FINISH_LINE_STATUS_BIT_ENTERED_BOTTOM
-    jr nz,.end ; have to come from the bottom
-    ; really joining the center of the flag from the bottom
-    set CAR_FINISH_LINE_STATUS_BIT_ENTERED_CENTER,(ix+CAR_OFFSET_REMAINING_LAPS)
-    jr .end
-.not_center_flag
-    ld a,e
-    cp 29
-    jr nc,.not_entering_flag
-    ; entering flag
-    ld a,b
-    and %11000000
-    jr nz,.end ; both bits should be empty
-    ; really entering flag from the bottom
-    set CAR_FINISH_LINE_STATUS_BIT_ENTERED_BOTTOM,(ix+CAR_OFFSET_REMAINING_LAPS)
-    jr .end
-.not_entering_flag
-.end
+    or %01000000
+    ld b,a
+.entering_top:
+    ; entering flag from the top
+.not_top:
+    ; neither top nor bottom => center of the flag
+.end:
+    ld (ix+CAR_OFFSET_REMAINING_LAPS),b
     xor a ; clear carry
     ret
 

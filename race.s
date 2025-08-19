@@ -1,8 +1,13 @@
     include inc/rammap.inc
     include inc/inputs.inc
+    include inc/car.inc
     section	code,text
 
-    global start_race
+    global start_race, get_lap_count
+    global current_laps_to_go
+
+current_laps_to_go:
+    dc.b 0
 
 start_race:
 
@@ -111,6 +116,9 @@ start_race:
     ld ix,data_car1 ; current car is number 1
     call draw_car
 
+    ; Update laps to go (if needed)
+    call update_laps_to_go
+
     if DEBUG = 1
     call emulator_security_idle;
     endif
@@ -127,3 +135,29 @@ escape:
     ; back to intro!
     ret
 
+; result in [a]
+get_lap_count:
+    push bc
+    ld a,(data_car0+CAR_OFFSET_REMAINING_LAPS)
+    and %00111111 ; remove flag tile status bits
+    ld b,a
+    ld a,(data_car1+CAR_OFFSET_REMAINING_LAPS)
+    and %00111111 ; remove flag tile status bits
+    cp b
+    jp c,.b_geater
+    ld a,b
+.b_geater
+    ; now [A] contains the lowest number
+    pop bc
+    ret
+
+update_laps_to_go:
+    ld a,(current_laps_to_go)
+    ld b,a
+    call get_lap_count
+    cp b
+	dc.b $c8 ; "ret z" not assembled correctly by VASM!
+    ; lap count has changed
+    ld (current_laps_to_go),a
+    call hud_refresh_lap_count
+    ret

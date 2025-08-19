@@ -27,6 +27,8 @@ load_circuit:
 
     ; Load lap count
     ld a,(RAM_MAP_CIRCUIT_DATA+OFFSSET_CIRCUIT_LAPS_TOTAL)
+    inc a ; increment count, as it will be decremented when the cars will cross the line the first time
+    ld (current_laps_to_go),a
     call car_set_lap_count
     ret
 
