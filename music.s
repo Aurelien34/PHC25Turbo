@@ -31,7 +31,7 @@ music_instructions:
     dc.w play_chord_BM3
     dc.w 0
     dc.w play_chord_BM3
-    dc.w play_percussion
+    dc.w 0
     dc.w play_chord_EM4
     dc.w play_percussion
     dc.w play_bass
@@ -47,7 +47,7 @@ music_instructions:
     dc.w play_chord_AM4
     dc.w 0
     dc.w play_chord_AM4
-    dc.w play_percussion
+    dc.w 0
     dc.w play_chord_EM4
     dc.w play_percussion
     dc.w play_bass
@@ -63,7 +63,7 @@ music_instructions:
     dc.w play_chord_BM3
     dc.w 0
     dc.w play_chord_BM3
-    dc.w play_percussion
+    dc.w 0
     dc.w play_chord_EM4
     dc.w play_percussion
     dc.w play_bass
@@ -79,7 +79,7 @@ music_instructions:
     dc.w play_chord_AM4
     dc.w 0
     dc.w play_chord_BM4
-    dc.w play_percussion
+    dc.w 0
 music_instructions_end:
 
 music_init:
