@@ -4,10 +4,19 @@
     section	code,text
 
     global start_race, get_lap_count
-    global current_laps_to_go
+    global current_laps_to_go, race_winner_id
+
+; duration in VBL count ffor the race to end after a player crosses the line
+END_OF_RACE_EXIT_DURATION equ 60*4
 
 current_laps_to_go:
     dc.b 0
+
+race_winner_id:
+    dc.b 0
+
+race_exit_counter;
+    dc.w 0
 
 start_race:
 
@@ -16,6 +25,12 @@ start_race:
     ld a,$ff
     call clear_screen
     call switch_to_mode_graphics_hd;
+
+    ; No winner, yet
+    xor a
+    ld (race_winner_id),a
+    ld bc,END_OF_RACE_EXIT_DURATION
+    ld (race_exit_counter),bc
 
     ; load the circuit
     ld hl,rlh_circuitdata
@@ -42,15 +57,29 @@ start_race:
 
 .loop
 
+    call check_for_end_of_race
+    jr c,.not_finished
+    ; Back to parent screen
+    ret
+
+.not_finished:
     call update_inputs;
     call ay8910_loop
 
     ; Compute car speed vector
     ld ix,data_car0 ; current car is number 0
+    ld a,(race_winner_id)
+    cp 1
+    jp nz,.player_1_did_not_win_yet
+    call autodrive_current_car
+    jp .common_player1
+.player_1_did_not_win_yet
     ld a,(RAM_MAP_CONTROLLERS_VALUES)
+.common_player1
     call update_car_angle_and_throttle
     call update_car_speed
     call update_car_engine_sound
+
     ld ix,data_car1 ; current car is number 1
     ld a,(players_count)
     cp 2
@@ -58,6 +87,12 @@ start_race:
     call autodrive_current_car
     jp .common_player2
 .realplayer2:
+    ld a,(race_winner_id)
+    cp 2
+    jp nz,.player_2_did_not_win_yet
+    call autodrive_current_car
+    jp .common_player2
+.player_2_did_not_win_yet
     ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
 .common_player2
     call update_car_angle_and_throttle
@@ -160,4 +195,38 @@ update_laps_to_go:
     ; lap count has changed
     ld (current_laps_to_go),a
     call hud_refresh_lap_count
+    ret
+
+check_for_end_of_race:
+    ; check if we have already detected a winner
+    ld a,(race_winner_id)
+    or a
+    jp z,.check_laps
+    ; we already have a winner
+    ; Check race exit counter
+    ld bc,(race_exit_counter)
+    dec bc
+    ld (race_exit_counter),bc
+    ld a,b
+    or c
+    jp nz,.continue
+    ; we have to stop
+    xor a ; clear carry
+    ret
+.check_laps
+    ; still some laps to go?
+    ld a,(current_laps_to_go)
+    or a
+    jp nz,.still_some_laps
+    ; No more laps, we have a winner
+    ld a,(data_car0+CAR_OFFSET_REMAINING_LAPS)
+    and %00111111 ; remove flag tile status bits
+    ld a,1
+    jr z,.winner_id_in_reg_a
+    ld a,2
+.winner_id_in_reg_a:
+    ld (race_winner_id),a
+.still_some_laps:
+.continue:
+    scf ; set carry
     ret
