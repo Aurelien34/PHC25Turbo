@@ -5,7 +5,7 @@
 
     global ay8910_mute, ay8910_init, ay8910_init_cars, ay8910_init_music
     global ay8910_loop, ay8910_inject_single_chain_in_queue, ay8910_inject_chain_sequence_in_chain_queue
-    global ay8910_queue_sequence_wall_collision
+    global ay8910_queue_sequence_wall_collision, ay8910_queue_sequence_start_beep
     global ay8910_read_command_sequence
     global ay8910_randomize_crash_sound
 
@@ -62,15 +62,21 @@ chain_sequence_wall_collision:
     dc.b AY_SOUND_CHAIN_NUMBER_PLAY_CRASH, AY_SOUND_CHAIN_NUMBER_SILENCE
 chain_sequence_wall_collision_end:
 
+chain_sequence_start_beep:
+    dc.b AY_SOUND_CHAIN_START_BEEP, AY_SOUND_CHAIN_NUMBER_SILENCE
+chain_sequence_start_beep_end:
+
 AY_SOUND_CHAIN_NUMBER_SILENCE equ 1
 AY_SOUND_CHAIN_NUMBER_PLAY_TONE equ 2
 AY_SOUND_CHAIN_NUMBER_PLAY_CRASH equ 3
+AY_SOUND_CHAIN_START_BEEP equ 4
 
 command_chains:
     dc.w $ffff ; todo put the animation counter here! (maybe)
     dc.w ay8910_command_chain_silence
     dc.w ay8910_command_chain_play_tone
     dc.w ay8910_command_chain_play_crash_p1
+    dc.w ay8910_command_chain_play_start_beep
 
 ay8910_command_chain_silence:
     dc.b (ay8910_command_chain_silence_end-ay8910_command_chain_silence-1)/2
@@ -86,6 +92,7 @@ ay8910_command_chain_play_tone_end:
 
 ay8910_command_chain_play_crash_p1:
     dc.b (ay8910_command_chain_play_crash_p1_end-ay8910_command_chain_play_crash_p1-1)/2
+    dc.b AY8910_REGISTER_MIXER, AY8910_MASK_MIXER_TONE_A&AY8910_MASK_MIXER_TONE_B&AY8910_MASK_MIXER_NOISE_C&AY8910_MASK_MIXER_PORT_A_IN&AY8910_MASK_MIXER_PORT_B_IN
     dc.b AY8910_REGISTER_VOLUME_C, 15
     dc.b AY8910_REGISTER_NOISE_PERIOD
 noise_period:
@@ -98,6 +105,14 @@ ay8910_randomize_crash_sound:
     and $1f
     ld (noise_period),a
     ret
+
+ay8910_command_chain_play_start_beep:
+    dc.b (ay8910_command_chain_play_start_beep_end-ay8910_command_chain_play_start_beep-1)/2
+    dc.b AY8910_REGISTER_MIXER, AY8910_MASK_MIXER_TONE_A&AY8910_MASK_MIXER_TONE_B&AY8910_MASK_MIXER_TONE_C&AY8910_MASK_MIXER_PORT_A_IN&AY8910_MASK_MIXER_PORT_B_IN
+    dc.b AY8910_REGISTER_FREQUENCY_C_LOWER,150
+    dc.b AY8910_REGISTER_FREQUENCY_C_UPPER,0
+    dc.b AY8910_REGISTER_VOLUME_C, 15
+ay8910_command_chain_play_start_beep_end:
 
 
 ay8910_read_command_sequence:
@@ -231,4 +246,9 @@ ay8910_queue_sequence_keyboard_beep:
 ay8910_queue_sequence_wall_collision:
     ld bc,chain_sequence_wall_collision_end-chain_sequence_wall_collision
     ld hl,chain_sequence_wall_collision
+    jr ay8910_inject_chain_sequence_in_chain_queue
+
+ay8910_queue_sequence_start_beep:
+    ld bc,chain_sequence_start_beep_end-chain_sequence_start_beep
+    ld hl,chain_sequence_start_beep
     jr ay8910_inject_chain_sequence_in_chain_queue

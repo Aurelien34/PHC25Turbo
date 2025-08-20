@@ -161,7 +161,6 @@ show_intro:
     ld de,INTRO_RAM_MAP_IMAGE_HELMET_B
     call decompress_rlh
 
-    call ay8910_init
     call music_init
 
 .intro_loop:

@@ -10,3 +10,6 @@
 - seaside stage?
 - rolling start stage?
 - superpose images to the circuits
+- race winner music => one for each player
+- start beep sequence + visual count down
+- store mixer mask instead of rebuilding it completely for every sound

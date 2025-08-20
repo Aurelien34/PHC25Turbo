@@ -55,6 +55,8 @@ start_race:
     call prepare_draw_car
     call draw_car
 
+    call ay8910_queue_sequence_start_beep
+
 .loop
 
     call check_for_end_of_race
@@ -63,8 +65,17 @@ start_race:
     ret
 
 .not_finished:
-    call update_inputs;
+    ; Should be play music or SFX?
+    ld a,(race_winner_id)
+    or a
+    jp z,.play_sfx
+    call music_loop
+    jr .done_sound
+.play_sfx:
     call ay8910_loop
+.done_sound:
+
+    call update_inputs;
 
     ; Compute car speed vector
     ld ix,data_car0 ; current car is number 0
@@ -219,6 +230,8 @@ check_for_end_of_race:
     or a
     jp nz,.still_some_laps
     ; No more laps, we have a winner
+    ; init music engine as we want to play winner's music
+    call music_init
     ld a,(data_car0+CAR_OFFSET_REMAINING_LAPS)
     and %00111111 ; remove flag tile status bits
     ld a,1
