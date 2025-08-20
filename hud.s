@@ -3,7 +3,7 @@
     include inc/screen.inc
     section	code,text
 
-    global show_hud, hud_refresh_lap_count
+    global show_hud, hud_refresh_lap_count, hud_show_countdown_digit
 
 
 
@@ -23,6 +23,8 @@ txt_2_players:
     dc.b "P1 vs P2",0
 txt_laps_to_go:
     dc.b "LAPS TO GO:",0
+txt_countdown_go:
+    dc.b "GO;",0
 
 
 show_hud:
@@ -33,11 +35,11 @@ show_hud:
 
     ; Write laps to go text
     ld bc,txt_laps_to_go
-    ld de,32-12-1+4*32+VRAM_ADDRESS
+    ld de,32-12-1+3*32+VRAM_ADDRESS
     call write_string
 
     ; Display config related text
-    ld de,1+4*32+VRAM_ADDRESS
+    ld de,1+3*32+VRAM_ADDRESS
     ld a,(players_count)
     cp 2
     jr nz,.single_player
@@ -47,7 +49,7 @@ show_hud:
 .single_player
     ld bc,txt_1_player
     call write_string
-    ld de,1+7+4*32+VRAM_ADDRESS
+    ld de,1+7+3*32+VRAM_ADDRESS
     call get_opponent_name
     call write_string
     jr .players_names_done
@@ -65,10 +67,24 @@ hud_refresh_lap_count:
     push ix
     ; now [A] contains the lowest number
     add '0'
-    ld de,32-1-1+4*32+VRAM_ADDRESS
+    ld de,32-1-1+3*32+VRAM_ADDRESS
     call write_character
     pop ix
     pop de
     pop bc
     pop hl
+    ret
+
+hud_show_countdown_digit:
+    ld a,(startup_count_down_counter+1)
+    or a
+    jp z,.go
+    add '0'
+    ld de,15+3*32+VRAM_ADDRESS
+    call write_character
+    ret
+.go
+    ld bc,txt_countdown_go
+    ld de,14+3*32+VRAM_ADDRESS
+    call write_string
     ret

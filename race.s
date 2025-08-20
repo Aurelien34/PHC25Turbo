@@ -4,10 +4,11 @@
     section	code,text
 
     global start_race, get_lap_count
-    global current_laps_to_go, race_winner_id
+    global current_laps_to_go, race_winner_id, startup_count_down_counter
 
-; duration in VBL count ffor the race to end after a player crosses the line
+; duration in VBL count for the race to end after a player crosses the line
 END_OF_RACE_EXIT_DURATION equ 60*4
+STARTUP_COUNT_DOWN_SPEED equ 2
 
 current_laps_to_go:
     dc.b 0
@@ -18,13 +19,22 @@ race_winner_id:
 race_exit_counter;
     dc.w 0
 
+startup_count_down_counter:
+    dc.w 0
+
 start_race:
 
+    ; shut the audio chip
     call ay8910_mute
 
+    ; clear the screen
     ld a,$ff
     call clear_screen
     call switch_to_mode_graphics_hd;
+
+    ; init the startup countdown
+    ld hl,$43c ; 3 seconds and 60 1/60 seconds
+    ld (startup_count_down_counter),hl
 
     ; No winner, yet
     xor a
@@ -50,12 +60,12 @@ start_race:
     ld ix,data_car0 ; current car is number 0
     call prepare_draw_car
     call draw_car
+    call update_car_speed
 
     ld ix,data_car1 ; current car is number 1
     call prepare_draw_car
     call draw_car
-
-    call ay8910_queue_sequence_start_beep
+    call update_car_speed
 
 .loop
 
@@ -88,7 +98,11 @@ start_race:
     ld a,(RAM_MAP_CONTROLLERS_VALUES)
 .common_player1
     call update_car_angle_and_throttle
+    ld a,(startup_count_down_counter)
+    or a
+    jp nz,.coutdown_running_skip_p1_move
     call update_car_speed
+.coutdown_running_skip_p1_move:
     call update_car_engine_sound
 
     ld ix,data_car1 ; current car is number 1
@@ -107,7 +121,11 @@ start_race:
     ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
 .common_player2
     call update_car_angle_and_throttle
+    ld a,(startup_count_down_counter)
+    or a
+    jp nz,.coutdown_running_skip_p2_move
     call update_car_speed
+.coutdown_running_skip_p2_move:
     call update_car_engine_sound
     
     ; Compute circuit tiles interactions
@@ -165,6 +183,9 @@ start_race:
     ; Update laps to go (if needed)
     call update_laps_to_go
 
+    ; Update countdown (if needed)
+    call update_startup_countdown
+
     if DEBUG = 1
     call emulator_security_idle;
     endif
@@ -179,6 +200,36 @@ start_race:
 
 escape:
     ; back to intro!
+    ret
+
+update_startup_countdown:
+    ; Decrement counter
+    ld hl,(startup_count_down_counter)
+    ld a,l
+    cp 0
+	dc.b $c8 ; "ret z" not assembled correctly by VASM!
+    dec l
+    jp nz,.no_carry
+    ld l,60
+    dec h
+.no_carry:
+    ld (startup_count_down_counter),hl
+    jp z,.end_reached
+
+    ; Test lower byte
+    ld a,l
+    cp 60
+    ; return if not a round count
+    dc.b $c0 ; "ret nz" is not assembled correctly by VASM
+    ; the lower byte is 60
+    call ay8910_queue_sequence_start_beep_1
+    call hud_show_countdown_digit
+    ret
+.end_reached:
+    xor a
+    ld (startup_count_down_counter),a
+    call ay8910_queue_sequence_start_beep_2
+    call hud_show_countdown_digit
     ret
 
 ; result in [a]
