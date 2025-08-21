@@ -49,7 +49,9 @@ decompress_rlh:
 ; iyl => RLE compression key
 
 decompress_rlh_advanced:
+	push hl
 	push bc
+	push de
 	push ix
 	push iy
     ; initialization
@@ -101,7 +103,9 @@ decompress_rlh_advanced:
 .end
 	pop iy
 	pop ix
+	pop de
 	pop bc
+	pop hl
 	ret
 
 decomp_rle:
@@ -155,6 +159,13 @@ decomp_rle:
 	ld a,c
 .loop_multi_instances
 	call store_reg_a_to_output_stream_or_not
+	ex af,af' ;'
+	ld a,ixh
+	or ixl
+	jp nz,.not_over_yet
+	ld b,1
+.not_over_yet:
+	ex af,af' ;'
 	; shadow
 	dec b
 	jr nz,.loop_multi_instances
