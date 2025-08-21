@@ -1,5 +1,6 @@
     include inc/rammap.inc
     include inc/inputs.inc
+    include inc/screen.inc
     include inc/car.inc
     section	code,text
 
@@ -22,6 +23,15 @@ race_exit_counter;
 startup_count_down_counter:
     dc.w 0
 
+image_winner_screen_address:
+    dc.w 0
+
+image_looser_screen_address:
+    dc.w 0
+
+winner_looser_loading_counter:
+    dc.b 0
+
 start_race:
 
     ; shut the audio chip
@@ -36,9 +46,13 @@ start_race:
     ld hl,$43c ; 3 seconds and 60 1/60 seconds
     ld (startup_count_down_counter),hl
 
-    ; No winner, yet
+    ; No winner, yet => set image addresses to 0
     xor a
     ld (race_winner_id),a
+    ld b,a
+    ld c,a
+    ld (image_winner_screen_address),bc
+    ld (image_looser_screen_address),bc
     ld bc,END_OF_RACE_EXIT_DURATION
     ld (race_exit_counter),bc
 
@@ -157,6 +171,9 @@ start_race:
     bit INPUT_BIT_ESC,a
     jp nz,escape
 
+    ; Prepare winner / user image
+    call prepare_winner_looser_image
+
     ; Black on white
     ;ld a,%11110110
     ;out ($40),a
@@ -173,6 +190,9 @@ start_race:
     call erase_car
     ld ix,data_car0 ; current car is number 0
     call erase_car
+
+    ; Draw winner / user image
+    call draw_winner_looser_image
 
     ; Draw the cars
     ld ix,data_car0 ; current car is number 0
@@ -200,6 +220,94 @@ start_race:
 
 escape:
     ; back to intro!
+    ret
+
+draw_winner_looser_image:
+    ld a,(race_winner_id)
+    or a
+	dc.b $c8 ; "ret z" not assembled correctly by VASM!
+
+    ld a,(winner_looser_loading_counter)
+    cp 32
+    jp nc,.nothing_to_do
+    cp 16 ; displaying the winner image?
+    jr nc,.looser_image
+    ld de,(image_winner_screen_address)
+    jp .continue
+.looser_image:
+    ld de,(image_looser_screen_address)
+.continue:
+    and $f
+    ld h,0
+    add a
+    add a
+    add a
+    add a
+    ld l,a
+    add hl,hl
+    add hl,de
+    ex de,hl
+    ld hl,RAM_MAP_DECOMPRESSION_BUFFER_32
+    ld bc,8
+    ldir
+    ; increment loading counter
+    ld hl,winner_looser_loading_counter
+    inc (hl)
+.nothing_to_do:
+    ret
+
+prepare_winner_looser_image:
+    ld a,(race_winner_id)
+    or a
+	dc.b $c8 ; "ret z" not assembled correctly by VASM!
+    ; Check if we have already computed the addresses
+    ld hl,(image_winner_screen_address)
+    ld a,h
+    or l
+    jp nz,.initial_address_already_computed
+    ; now compute the initial addresses
+    xor a
+    ld (winner_looser_loading_counter),a
+    ld bc,5+80*32+VRAM_ADDRESS
+    ld hl,19+80*32+VRAM_ADDRESS
+    ld a,(race_winner_id)
+    cp 2
+    jp z,.player_2_won
+    ; player 1 won
+    ld (image_winner_screen_address),bc
+    ld (image_looser_screen_address),hl
+    jp .initial_address_already_computed
+.player_2_won:
+    ld (image_looser_screen_address),bc
+    ld (image_winner_screen_address),hl
+.initial_address_already_computed
+    ; load the loading counter and prepare images display depending on its value
+    ld a,(winner_looser_loading_counter)
+    cp 32 ; already displayed both images?
+    jr z,.end
+    ; We need to decompress one row an an image
+    ld bc,8
+	ld (rlh_param_extract_length),bc
+    and $0f ; line in current image => ignore image1/image2 counter bit
+    add a
+    add a
+    add a
+    ld b,0
+    ld c,a
+	ld (rlh_param_offset_start),bc
+    ld de,RAM_MAP_DECOMPRESSION_BUFFER_32
+    ; now determine what image we want to decompress
+    ld a,(winner_looser_loading_counter)
+    cp 16 ; displaying the winner image?
+    jr nc,.looser_image
+    ld hl,rlh_you_win
+    jp .load_image_line
+.looser_image:
+    ld hl,rlh_you_loose
+.load_image_line:
+	call decompress_rlh_advanced
+.done:
+.end:
     ret
 
 update_startup_countdown:

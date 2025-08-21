@@ -30,3 +30,9 @@ rlh_intro_helmet_c:
 	global rlh_introscreen  
 rlh_introscreen:  
 	incbin "rlh/introscreen.rlh"  
+	global rlh_you_loose  
+rlh_you_loose:  
+	incbin "rlh/you_loose.rlh"  
+	global rlh_you_win  
+rlh_you_win:  
+	incbin "rlh/you_win.rlh"  
