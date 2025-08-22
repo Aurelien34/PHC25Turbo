@@ -84,7 +84,15 @@ hud_show_countdown_digit:
     call write_character
     ret
 .go
-    ld bc,txt_countdown_go
     ld de,14+3*32+VRAM_ADDRESS
-    call write_string
+    ld a,'G'
+    call write_character
+    call wait_for_vbl
+    ld de,15+3*32+VRAM_ADDRESS
+    ld a,'O'
+    call write_character
+    call wait_for_vbl
+    ld de,16+3*32+VRAM_ADDRESS
+    ld a,';'
+    call write_character
     ret

@@ -81,6 +81,7 @@ rebuild:
 $(TO_COMPRESS_PATH)/circuitdata.bin: circuitdata.data
 	$(AS) circuitdata.data -Fbin -o $(TO_COMPRESS_PATH)/circuitdata.bin -quiet
 
+$(OBJ_PATH)/race.o: res_raw/guy_win_1.raw res_raw/guy_win_2.raw res_raw/guy_loose_1.raw res_raw/guy_loose_2.raw
 $(OBJ_PATH)/textwrite.o: res_raw/smallfont.raw
 
 $(TO_COMPRESS_PATH)/%.raw: $(TO_EXTRACT_AND_COMPRESS_PATH)/%.bmp

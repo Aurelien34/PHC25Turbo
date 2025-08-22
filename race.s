@@ -2,13 +2,25 @@
     include inc/inputs.inc
     include inc/screen.inc
     include inc/car.inc
+    
     section	code,text
+
+RES_GUYS_IMAGE_HEIGHT equ 13
+res_guys:
+res_guy_win_1:
+    incbin res_raw/guy_win_1.raw
+res_guy_win_2:
+    incbin res_raw/guy_win_2.raw
+res_guy_loose_1:
+    incbin res_raw/guy_loose_1.raw
+res_guy_loose_2:
+    incbin res_raw/guy_loose_2.raw
 
     global start_race, get_lap_count
     global current_laps_to_go, race_winner_id, startup_count_down_counter
 
 ; duration in VBL count for the race to end after a player crosses the line
-END_OF_RACE_EXIT_DURATION equ 60*10 ; 60*n seconds
+END_OF_RACE_EXIT_DURATION equ 60*7+30 ; 60*n seconds
 STARTUP_COUNT_DOWN_SPEED equ 2
 
 
@@ -16,10 +28,12 @@ RACE_STATE_STARTUP_COUNTDOWN        equ 1
 RACE_STATE_RACE_STARTED             equ 2
 RACE_STATE_RACE_OVER                equ 3
 RACE_STATE_LOADING_WINNER_LOOSER    equ 4
-RACE_STATE_LOAD_GUYS_ANIMATIONS     equ 5
-RACE_STATE_ANIMATE_GUYS             equ 6
+RACE_STATE_ANIMATE_GUYS             equ 5
 
 race_state:
+    dc.b 0
+
+frame_count:
     dc.b 0
 
 current_laps_to_go:
@@ -71,6 +85,10 @@ start_race:
     ld bc,END_OF_RACE_EXIT_DURATION
     ld (race_exit_counter),bc
 
+    ; first frame
+    xor a;
+    ld (frame_count),a
+
     ; load the circuit
     ld hl,rlh_circuitdata
     call load_circuit
@@ -97,6 +115,9 @@ start_race:
     call update_car_speed
 
 .loop
+    ld a,(frame_count)
+    inc a
+    ld (frame_count),a
 
     ld a,(race_state)
     and a,1<<RACE_STATE_RACE_OVER
@@ -162,8 +183,10 @@ start_race:
     ; Compute circuit tiles interactions
     ld ix,data_car0 ; current car is number 0
     call compute_circuit_interactions
+    call handle_collision_noises
     ld ix,data_car1 ; current car is number 1
     call compute_circuit_interactions
+    call handle_collision_noises
 
     ; Update car position
     ld ix,data_car0 ; current car is number 0
@@ -194,6 +217,13 @@ start_race:
     jr z,.no_winner_looser_image
     call prepare_winner_looser_image
 .no_winner_looser_image:
+
+    ; Load guys animations
+    ld a,(race_state)
+    and a,1<<RACE_STATE_ANIMATE_GUYS
+    jp z,.no_animate_guys
+    call animate_guys
+.no_animate_guys:
 
     ; Black on white
     ;ld a,%11110110
@@ -282,7 +312,7 @@ draw_winner_looser_image:
 .nothing_to_do:
     ld a,(race_state)
     and ~(1<<RACE_STATE_LOADING_WINNER_LOOSER)
-    or 1<<RACE_STATE_LOAD_GUYS_ANIMATIONS
+    or 1<<RACE_STATE_ANIMATE_GUYS
     ld (race_state),a
     ret
 
@@ -358,12 +388,20 @@ update_startup_countdown:
     dc.b $c0 ; "ret nz" is not assembled correctly by VASM
     ; the lower byte is 60
     call ay8910_queue_sequence_start_beep_1
+    ; Black on green
+    ld a,%10110110
+    out ($40),a
     call hud_show_countdown_digit
+    ld c,2
+    call wait_for_vbl_count
     ret
 .end_reached:
     xor a
     ld (startup_count_down_counter),a
     call ay8910_queue_sequence_start_beep_2
+    ; Black on green
+    ld a,%10110110
+    out ($40),a
     call hud_show_countdown_digit
     ld a,(race_state)
     and a,~(1<<RACE_STATE_STARTUP_COUNTDOWN)
@@ -433,8 +471,59 @@ check_for_end_of_race:
     ld a,(race_state)
     and a,~(1<<RACE_STATE_RACE_STARTED)
     or a,1<<RACE_STATE_RACE_OVER
+    or a,1<<RACE_STATE_LOADING_WINNER_LOOSER
     ld (race_state),a
 .still_some_laps:
 .continue:
     scf ; set carry
+    ret
+
+handle_collision_noises:
+    dc.b $d0 ; "ret nc" not assembled correctly by VASM!
+    ; Send call collision sound
+    ld a,(race_state)
+    and a,1<<RACE_STATE_RACE_OVER
+    dc.b $c0 ; "ret nz" not assembled correctly by VASM!
+    call ay8910_randomize_crash_sound
+    call ay8910_queue_sequence_wall_collision
+    ret
+
+
+animate_guys:
+    ld a,(frame_count)
+    ld b,a
+    and 7 ; animate every x frames only
+    dc.b $c0 ; "ret nz" is not assembled correctly by VASM
+    ld a,b
+    ld bc,6+32*2
+    srl a
+    srl a
+    srl a
+    bit 0,a
+    jp z,.show_guy_loose
+    ld de,res_guys
+    ld hl,(image_winner_screen_address)
+    jp .show_guy
+.show_guy_loose
+    ld de,res_guys+RES_GUYS_IMAGE_HEIGHT*2
+    ld hl,(image_looser_screen_address)
+.show_guy
+    add hl,bc
+    bit 1,a
+    jp nz,.anim2
+    ld bc,RES_GUYS_IMAGE_HEIGHT
+    ex de,hl
+    add hl,bc
+    ex de,hl
+.anim2:
+    ld bc,32
+    ld iyl,RES_GUYS_IMAGE_HEIGHT
+.loop:
+    ld a,(de)
+    ld (hl),a
+    inc de
+    add hl,bc
+    dec iyl
+    jp nz,.loop
+
     ret

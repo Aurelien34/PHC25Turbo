@@ -120,6 +120,7 @@ compute_circuit_interactions:
     jp c,.collision_occurred
 .only_one_column2:
 .only_one_row:
+    xor a ; clear carry
     ret
 
 .collision_occurred:
@@ -127,9 +128,7 @@ compute_circuit_interactions:
     ld a,(ix+CAR_OFFSET_THROTTLE)
     srl a
     ld (ix+CAR_OFFSET_THROTTLE),a
-    ; Send call collision sound
-    call ay8910_randomize_crash_sound
-    call ay8910_queue_sequence_wall_collision
+    scf ; set carry
     ret
 
 .status:
