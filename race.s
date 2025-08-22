@@ -8,8 +8,19 @@
     global current_laps_to_go, race_winner_id, startup_count_down_counter
 
 ; duration in VBL count for the race to end after a player crosses the line
-END_OF_RACE_EXIT_DURATION equ 60*4
+END_OF_RACE_EXIT_DURATION equ 60*10 ; 60*n seconds
 STARTUP_COUNT_DOWN_SPEED equ 2
+
+
+RACE_STATE_STARTUP_COUNTDOWN        equ 1
+RACE_STATE_RACE_STARTED             equ 2
+RACE_STATE_RACE_OVER                equ 3
+RACE_STATE_LOADING_WINNER_LOOSER    equ 4
+RACE_STATE_LOAD_GUYS_ANIMATIONS     equ 5
+RACE_STATE_ANIMATE_GUYS             equ 6
+
+race_state:
+    dc.b 0
 
 current_laps_to_go:
     dc.b 0
@@ -45,6 +56,10 @@ start_race:
     ; init the startup countdown
     ld hl,$43c ; 3 seconds and 60 1/60 seconds
     ld (startup_count_down_counter),hl
+
+    ; initial state is count down
+    ld a,1<<RACE_STATE_STARTUP_COUNTDOWN
+    ld (race_state),a
 
     ; No winner, yet => set image addresses to 0
     xor a
@@ -83,37 +98,37 @@ start_race:
 
 .loop
 
-    call check_for_end_of_race
-    jr c,.not_finished
-    ; Back to parent screen
-    ret
-
-.not_finished:
-    ; Should be play music or SFX?
-    ld a,(race_winner_id)
-    or a
-    jp z,.play_sfx
+    ld a,(race_state)
+    and a,1<<RACE_STATE_RACE_OVER
+    jp z,.not_finished
+    ; Play victory music loop
     call music_loop
-    jr .done_sound
-.play_sfx:
+.not_finished:
+    ; play engine sounds
     call ay8910_loop
-.done_sound:
+.continue_state_tests:
+
+    call check_for_end_of_race
+    dc.b $d0 ; "ret nc" not assembled correctly by VASM!
+    ; Back to parent screen
 
     call update_inputs;
 
     ; Compute car speed vector
     ld ix,data_car0 ; current car is number 0
-    ld a,(race_winner_id)
-    cp 1
-    jp nz,.player_1_did_not_win_yet
+
+    ld a,(race_state)
+    and a,1<<RACE_STATE_RACE_OVER
+    jr z,.player_1_did_not_win_yet
     call autodrive_current_car
     jp .common_player1
 .player_1_did_not_win_yet
     ld a,(RAM_MAP_CONTROLLERS_VALUES)
 .common_player1
     call update_car_angle_and_throttle
-    ld a,(startup_count_down_counter)
-    or a
+
+    ld a,(race_state)
+    and a,1<<RACE_STATE_STARTUP_COUNTDOWN
     jp nz,.coutdown_running_skip_p1_move
     call update_car_speed
 .coutdown_running_skip_p1_move:
@@ -126,17 +141,19 @@ start_race:
     call autodrive_current_car
     jp .common_player2
 .realplayer2:
-    ld a,(race_winner_id)
-    cp 2
-    jp nz,.player_2_did_not_win_yet
+
+    ld a,(race_state)
+    and a,1<<RACE_STATE_RACE_OVER
+    jr z,.player_2_did_not_win_yet
     call autodrive_current_car
     jp .common_player2
 .player_2_did_not_win_yet
     ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
 .common_player2
     call update_car_angle_and_throttle
-    ld a,(startup_count_down_counter)
-    or a
+
+    ld a,(race_state)
+    and a,1<<RACE_STATE_STARTUP_COUNTDOWN
     jp nz,.coutdown_running_skip_p2_move
     call update_car_speed
 .coutdown_running_skip_p2_move:
@@ -172,7 +189,11 @@ start_race:
     jp nz,escape
 
     ; Prepare winner / user image
+    ld a,(race_state)
+    and a,1<<RACE_STATE_LOADING_WINNER_LOOSER
+    jr z,.no_winner_looser_image
     call prepare_winner_looser_image
+.no_winner_looser_image:
 
     ; Black on white
     ;ld a,%11110110
@@ -192,7 +213,11 @@ start_race:
     call erase_car
 
     ; Draw winner / user image
+    ld a,(race_state)
+    and a,1<<RACE_STATE_LOADING_WINNER_LOOSER
+    jr z,.no_winner_looser_image_draw
     call draw_winner_looser_image
+.no_winner_looser_image_draw:
 
     ; Draw the cars
     ld ix,data_car0 ; current car is number 0
@@ -204,7 +229,11 @@ start_race:
     call update_laps_to_go
 
     ; Update countdown (if needed)
+    ld a,(race_state)
+    and a,1<<RACE_STATE_STARTUP_COUNTDOWN
+    jp z,.no_countdown
     call update_startup_countdown
+.no_countdown:
 
     if DEBUG = 1
     call emulator_security_idle;
@@ -223,10 +252,6 @@ escape:
     ret
 
 draw_winner_looser_image:
-    ld a,(race_winner_id)
-    or a
-	dc.b $c8 ; "ret z" not assembled correctly by VASM!
-
     ld a,(winner_looser_loading_counter)
     cp 32
     jp nc,.nothing_to_do
@@ -253,13 +278,15 @@ draw_winner_looser_image:
     ; increment loading counter
     ld hl,winner_looser_loading_counter
     inc (hl)
+    ret
 .nothing_to_do:
+    ld a,(race_state)
+    and ~(1<<RACE_STATE_LOADING_WINNER_LOOSER)
+    or 1<<RACE_STATE_LOAD_GUYS_ANIMATIONS
+    ld (race_state),a
     ret
 
 prepare_winner_looser_image:
-    ld a,(race_winner_id)
-    or a
-	dc.b $c8 ; "ret z" not assembled correctly by VASM!
     ; Check if we have already computed the addresses
     ld hl,(image_winner_screen_address)
     ld a,h
@@ -338,6 +365,10 @@ update_startup_countdown:
     ld (startup_count_down_counter),a
     call ay8910_queue_sequence_start_beep_2
     call hud_show_countdown_digit
+    ld a,(race_state)
+    and a,~(1<<RACE_STATE_STARTUP_COUNTDOWN)
+    or a,1<<RACE_STATE_RACE_STARTED
+    ld (race_state),a
     ret
 
 ; result in [a]
@@ -398,6 +429,11 @@ check_for_end_of_race:
     ld a,2
 .winner_id_in_reg_a:
     ld (race_winner_id),a
+    ; race is over
+    ld a,(race_state)
+    and a,~(1<<RACE_STATE_RACE_STARTED)
+    or a,1<<RACE_STATE_RACE_OVER
+    ld (race_state),a
 .still_some_laps:
 .continue:
     scf ; set carry
