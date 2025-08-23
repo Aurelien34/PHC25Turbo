@@ -13,3 +13,10 @@
 - race winner music => one for each player
 - start beep sequence + visual count down
 - store mixer mask instead of rebuilding it completely for every sound
+
+
+
+
+PHC becomes the loader
+Turbo besomes the bin file
+Make the loader work on japanese machines by decting BIOS differences?
