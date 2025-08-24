@@ -201,10 +201,14 @@ start_race:
     call prepare_draw_car
 
     ; Compute engine sound enveloppe
+    ld a,(race_state)
+    and a,1<<RACE_STATE_RACE_OVER
+    jr nz,.no_engine_enveloppe
     ld ix,data_car0 ; current car is number 0
     call compute_engine_enveloppe
     ld ix,data_car1 ; current car is number 1
     call compute_engine_enveloppe
+.no_engine_enveloppe:
 
     ; check [back to menu] key    
     ld a,(RAM_MAP_CONTROLLERS_VALUES)
