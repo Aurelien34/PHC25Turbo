@@ -4,10 +4,11 @@
     section	code,text
 
     global music_init, music_loop
+    global current_music_data_base_address, current_music_instructions_count, music_animation_not_first_run
 
 ANIM_COUNTER_INCREMENT equ 37 ; 125 BPM, yeah! (almost)
 
-music_animation_first_run:
+music_animation_not_first_run:
     dc.b 0
 
 music_animation_counter:
@@ -22,95 +23,27 @@ current_music_data_base_address:
 current_music_instructions_count:
     dc.b $ff
 
-music_instructions_intro:
-    dc.w play_chord_EM4
-    dc.w play_percussion
-    dc.w play_bass
-    dc.w play_chord_EM4
-    dc.w play_percussion
-    dc.w play_bass
-    dc.w play_chord_EM4
-    dc.w play_bass
-    dc.w play_chord_AM3
-    dc.w play_bass
-    dc.w play_chord_AM3
-    dc.w play_bass
-    dc.w play_chord_BM3
-    dc.w 0
-    dc.w play_chord_BM3
-    dc.w 0
-    dc.w play_chord_EM4
-    dc.w play_percussion
-    dc.w play_bass
-    dc.w play_chord_EM4
-    dc.w play_percussion
-    dc.w play_bass
-    dc.w play_chord_EM4
-    dc.w play_bass
-    dc.w play_chord_GM4
-    dc.w play_bass
-    dc.w play_chord_GM4
-    dc.w play_bass
-    dc.w play_chord_AM4
-    dc.w 0
-    dc.w play_chord_AM4
-    dc.w 0
-    dc.w play_chord_EM4
-    dc.w play_percussion
-    dc.w play_bass
-    dc.w play_chord_EM4
-    dc.w play_percussion
-    dc.w play_bass
-    dc.w play_chord_EM4
-    dc.w play_bass
-    dc.w play_chord_AM3
-    dc.w play_bass
-    dc.w play_chord_AM3
-    dc.w play_bass
-    dc.w play_chord_BM3
-    dc.w 0
-    dc.w play_chord_BM3
-    dc.w 0
-    dc.w play_chord_EM4
-    dc.w play_percussion
-    dc.w play_bass
-    dc.w play_chord_EM4
-    dc.w play_percussion
-    dc.w play_bass
-    dc.w play_chord_EM4
-    dc.w play_bass
-    dc.w play_chord_GM4
-    dc.w play_bass
-    dc.w play_chord_GM4
-    dc.w play_bass
-    dc.w play_chord_AM4
-    dc.w 0
-    dc.w play_chord_BM4
-    dc.w 0
-music_instructions_intro_end:
+music_commands: ; These should follow constants MUSIC_COMMAND_XXX in inc/music.inc
+    dc.w 0 ; Do nothing
+    dc.w music_play_chord_EM4 ; 1
+    dc.w music_play_chord_AM3 ; 2
+    dc.w music_play_chord_BM3 ; 3
+    dc.w music_play_chord_GM4 ; 4
+    dc.w music_play_chord_AM4 ; 5
+    dc.w music_play_chord_BM4 ; 6
+    dc.w music_play_percussion ; 7
+    dc.w music_play_bass ; 8
 
 ; Music number in register [a]
 music_init:
     cp MUSIC_NUMBER_INTRO
     jp nz,.not_music_intro
-    ; Intro
-    ld hl,music_instructions_intro
-    ld (current_music_data_base_address),hl
-    ld a,(music_instructions_intro_end-music_instructions_intro)/2
-    ld (current_music_instructions_count),a
-    xor a
-    ld (music_animation_first_run),a ; not the first run anymore
+    call music_init_intro
     jp .common
 .not_music_intro:
     cp MUSIC_NUMBER_END_OF_RACE
     jp nz,.not_music_end_of_race
-    ; End of race
-    ld hl,music_instructions_intro
-    ld (current_music_data_base_address),hl
-    ld a,(music_instructions_intro_end-music_instructions_intro)/2
-    ld (current_music_instructions_count),a
-    ld a,0
-    ld (music_animation_first_run),a
+    ;call music_init_end_of_race
     jp .common
 .not_music_end_of_race:
 
@@ -129,22 +62,22 @@ music_loop:
     jr nc,.update_counter
     ; overflow here, reset counter
     ld a,0 ; don't optimize this, as we don't want to loose the carry flag
+
+    jp .update_counter
+    dc.b "                            BREAKPOINT                       "
+
 .update_counter:
     ld (music_animation_counter),a
     ; return if nothing to be done
     dc.b $d0 ; "ret nc" not assembled correctly by VASM!
     ; Play current pointer position
     ld a,(music_pointer)
-    add a
     ld b,0
     ld c,a
     ld hl,(current_music_data_base_address)
     add hl,bc
     ld a,(hl)
-    inc hl
-    ld h,(hl)
-    ld l,a
-    or h
+    or a
     jr z,.skip_instructions
     call .exec_instructions ; need an intermediate function call in order to have a return address in the stack
 .skip_instructions
@@ -156,12 +89,22 @@ music_loop:
     cp b
     jr nz,.update_pointer
     ld a,1
-    ld (music_animation_first_run),a ; not the first run anymore
+    ld (music_animation_not_first_run),a ; not the first run anymore
     ld a,0  ; don't optimize this, as we don't want to loose the carry flag
 .update_pointer    
     ld (music_pointer),a
     ret
 .exec_instructions
+    ; [a] contains instruction number
+    ld b,0
+    ld c,a
+    ld hl,music_commands
+    add hl,bc
+    add hl,bc
+    ld a,(hl)
+    inc hl
+    ld h,(hl)
+    ld l,a
     jp (hl)
 
 ; [hl] points to the notes, expecting 3 notes
@@ -190,7 +133,7 @@ set_lower_frequency_registers_3_voices_and_play:
 
 prepare_registers_for_notes_3_voices:
     ld hl,.commands_begin
-    ld a,(music_animation_first_run)
+    ld a,(music_animation_not_first_run)
     or a
     jr nz,.first_run
     ld b,(.commands_end-.commands_begin)/2
@@ -198,7 +141,7 @@ prepare_registers_for_notes_3_voices:
 .first_run
     ld b,(.commands_end-.commands_begin)/2-1 ; don't play the last command
     jp ay8910_read_command_sequence
-    ; music_animation_first_run
+    ; music_animation_not_first_run
 .commands_begin:
     dc.b AY8910_REGISTER_MIXER, AY8910_MASK_MIXER_TONE_A&AY8910_MASK_MIXER_TONE_B&AY8910_MASK_MIXER_TONE_C&AY8910_MASK_MIXER_PORT_A_IN&AY8910_MASK_MIXER_PORT_B_IN
     dc.b AY8910_REGISTER_FREQUENCY_A_UPPER, $00
@@ -208,7 +151,7 @@ prepare_registers_for_notes_3_voices:
     dc.b AY8910_REGISTER_MIXER, AY8910_MASK_MIXER_TONE_C&AY8910_MASK_MIXER_PORT_A_IN&AY8910_MASK_MIXER_PORT_B_IN
 .commands_end:
 
-play_chord_EM4: ; E4 G4# B4
+music_play_chord_EM4: ; E4 G4# B4
     call prepare_registers_for_notes_3_voices
     ld hl,.notes
     jp set_lower_frequency_registers_3_voices_and_play
@@ -216,7 +159,7 @@ play_chord_EM4: ; E4 G4# B4
     dc.b $be, $96, $7f
 
 
-play_chord_AM3: ; A3 C4# E4
+music_play_chord_AM3: ; A3 C4# E4
     call prepare_registers_for_notes_3_voices
     AYOUT AY8910_REGISTER_FREQUENCY_A_UPPER,$01
     ld hl,.notes
@@ -224,42 +167,42 @@ play_chord_AM3: ; A3 C4# E4
 .notes:
     dc.b $1c, $e1, $be
 
-play_chord_BM3: ; B3 D4# F4#
+music_play_chord_BM3: ; B3 D4# F4#
     call prepare_registers_for_notes_3_voices
     ld hl,.notes
     jp set_lower_frequency_registers_3_voices_and_play
 .notes:
     dc.b $fd, $c9, $a9
 
-play_chord_GM4: ; G4 B4 D5
+music_play_chord_GM4: ; G4 B4 D5
     call prepare_registers_for_notes_3_voices
     ld hl,.notes
     jp set_lower_frequency_registers_3_voices_and_play
 .notes:
     dc.b $9f, $7f, $6a
 
-play_chord_AM4: ; A4 C5# E5
+music_play_chord_AM4: ; A4 C5# E5
     call prepare_registers_for_notes_3_voices
     ld hl,.notes
     jp set_lower_frequency_registers_3_voices_and_play
 .notes:
     dc.b $8e, $71, $5f
 
-play_chord_BM4: ; B4 D5# F5#
+music_play_chord_BM4: ; B4 D5# F5#
     call prepare_registers_for_notes_3_voices
     ld hl,.notes
     jp set_lower_frequency_registers_3_voices_and_play
 .notes:
     dc.b $7f, $64, $54
 
-play_percussion:
-    ld a,(music_animation_first_run)
+music_play_percussion:
+    ld a,(music_animation_not_first_run)
     or a
     dc.b $c8 ; "ret z" not assembled correctly by VASM!
     AYOUT AY8910_REGISTER_MIXER, AY8910_MASK_MIXER_NOISE_A&AY8910_MASK_MIXER_TONE_B&AY8910_MASK_MIXER_TONE_C&AY8910_MASK_MIXER_PORT_A_IN&AY8910_MASK_MIXER_PORT_B_IN 
     ret
 
-play_bass:
+music_play_bass:
     ld hl,.settings
     ld b,(.settings_end-.settings)/2
     jp ay8910_read_command_sequence
