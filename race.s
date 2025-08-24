@@ -116,15 +116,16 @@ start_race:
     call update_car_speed
 
 .loop
-    ld a,(frame_count)
-    inc a
-    ld (frame_count),a
+    ; increment frame counter
+    ld hl,frame_count
+    inc (hl)
 
     ld a,(race_state)
     and a,1<<RACE_STATE_RACE_OVER
     jp z,.not_finished
     ; Play victory music loop
     call music_loop
+    jp .continue_state_tests
 .not_finished:
     ; play engine sounds
     call ay8910_loop
@@ -154,7 +155,11 @@ start_race:
     jp nz,.coutdown_running_skip_p1_move
     call update_car_speed
 .coutdown_running_skip_p1_move:
+    ld a,(race_state)
+    and a,1<<RACE_STATE_RACE_OVER
+    jp nz,.skip_engine_count_p1
     call update_car_engine_sound
+.skip_engine_count_p1:
 
     ld ix,data_car1 ; current car is number 1
     ld a,(players_count)
@@ -179,7 +184,11 @@ start_race:
     jp nz,.coutdown_running_skip_p2_move
     call update_car_speed
 .coutdown_running_skip_p2_move:
+    ld a,(race_state)
+    and a,1<<RACE_STATE_RACE_OVER
+    jp nz,.skip_engine_count_p2
     call update_car_engine_sound
+.skip_engine_count_p2:
     
     ; Compute circuit tiles interactions
     ld ix,data_car0 ; current car is number 0

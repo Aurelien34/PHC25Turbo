@@ -33,6 +33,12 @@ music_commands: ; These should follow constants MUSIC_COMMAND_XXX in inc/music.i
     dc.w music_play_chord_BM4 ; 6
     dc.w music_play_percussion ; 7
     dc.w music_play_bass ; 8
+    dc.w music_play_tone_G4S ; 9
+    dc.w music_play_tone_C5S ; 10
+    dc.w music_play_tone_C5 ; 11
+    dc.w music_play_tone_A4S ; 12
+    dc.w music_play_tone_F4 ; 13
+    dc.w music_play_tone_F5 ; 14
 
 ; Music number in register [a]
 music_init:
@@ -43,7 +49,7 @@ music_init:
 .not_music_intro:
     cp MUSIC_NUMBER_END_OF_RACE
     jp nz,.not_music_end_of_race
-    ;call music_init_end_of_race
+    call music_init_end_of_race
     jp .common
 .not_music_end_of_race:
 
@@ -107,6 +113,21 @@ music_loop:
     ld l,a
     jp (hl)
 
+; [a] contains the note frequency (lower byte)
+set_lower_frequency_registers_1_voice_and_play
+    ld c,a
+    ld a,AY8910_REGISTER_FREQUENCY_A_LOWER
+    AY_PUSH_REG
+    ld a,c
+    AY_PUSH_VAL
+    ld hl,.settings
+    ld b,(.settings_end-.settings)/2
+    jp ay8910_read_command_sequence
+.settings
+    dc.b AY8910_REGISTER_VOLUME_A, AY8910_FLAG_VOLUME_WITH_ENVELOPPE
+    dc.b AY8910_REGISTER_ENVELOPPE_SHAPE, AY_ENVELOPPE_TYPE_SINGLE_DECAY_THEN_OFF
+.settings_end    
+
 ; [hl] points to the notes, expecting 3 notes
 set_lower_frequency_registers_3_voices_and_play:
     ld a,AY8910_REGISTER_FREQUENCY_A_LOWER
@@ -130,6 +151,15 @@ set_lower_frequency_registers_3_voices_and_play:
     inc hl
     AY_PUSH_VAL
     ret
+
+prepare_registers_for_notes_1_voice:
+    ld hl,.commands_begin
+    ld b,(.commands_end-.commands_begin)/2
+    jp ay8910_read_command_sequence
+.commands_begin:
+    dc.b AY8910_REGISTER_MIXER, AY8910_MASK_MIXER_TONE_A&AY8910_MASK_MIXER_PORT_A_IN&AY8910_MASK_MIXER_PORT_B_IN
+    dc.b AY8910_REGISTER_FREQUENCY_A_UPPER, $00
+.commands_end:
 
 prepare_registers_for_notes_3_voices:
     ld hl,.commands_begin
@@ -212,3 +242,36 @@ music_play_bass:
     dc.b AY8910_REGISTER_VOLUME_B, 12
 .settings_end    
     ret
+
+music_play_tone_G4S: ; G4#
+    call prepare_registers_for_notes_1_voice
+    ld a,$96
+    jp set_lower_frequency_registers_1_voice_and_play
+
+music_play_tone_C5S: ; C5#
+    call prepare_registers_for_notes_1_voice
+    ld a,$71
+    jp set_lower_frequency_registers_1_voice_and_play
+
+music_play_tone_C5: ; C5
+    call prepare_registers_for_notes_1_voice
+    ld a,$77
+    jp set_lower_frequency_registers_1_voice_and_play
+
+music_play_tone_A4S: ; A4#
+    call prepare_registers_for_notes_1_voice
+    ld a,$86
+    jp set_lower_frequency_registers_1_voice_and_play
+
+music_play_tone_F4: ; F4
+    call prepare_registers_for_notes_1_voice
+    ld a,$B3
+    jp set_lower_frequency_registers_1_voice_and_play
+
+music_play_tone_F5: ; F5
+    call prepare_registers_for_notes_1_voice
+    ld a,$59
+    jp set_lower_frequency_registers_1_voice_and_play
+
+;MUSIC_COMMAND_PLAY_TONE_F4 equ 13
+;MUSIC_COMMAND_PLAY_TONE_F5 equ 14
