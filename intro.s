@@ -1,6 +1,7 @@
     include inc/rammap.inc
     include inc/screen.inc
     include inc/inputs.inc
+    include inc/music.inc
     
     section	code,text
 
@@ -161,6 +162,7 @@ show_intro:
     ld de,INTRO_RAM_MAP_IMAGE_HELMET_B
     call decompress_rlh
 
+    ld a,MUSIC_NUMBER_INTRO
     call music_init
 
 .intro_loop:

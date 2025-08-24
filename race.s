@@ -2,6 +2,7 @@
     include inc/inputs.inc
     include inc/screen.inc
     include inc/car.inc
+    include inc/music.inc
     
     section	code,text
 
@@ -463,6 +464,7 @@ check_for_end_of_race:
     jp nz,.still_some_laps
     ; No more laps, we have a winner
     ; init music engine as we want to play winner's music
+    ld a,MUSIC_NUMBER_END_OF_RACE
     call music_init
     ld a,(data_car0+CAR_OFFSET_REMAINING_LAPS)
     and %00111111 ; remove flag tile status bits

@@ -6,7 +6,7 @@
 - grey scale ingame pictures
 - car collisions
 - add greetings!
-- forest stage?
+- forest stage? (run, forest!)
 - seaside stage?
 - rolling start stage?
 - superpose images to the circuits

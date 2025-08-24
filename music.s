@@ -1,4 +1,5 @@
     include inc/ay8910.inc
+    include inc/music.inc
 
     section	code,text
 
@@ -15,7 +16,13 @@ music_animation_counter:
 music_pointer:
     dc.b 0
 
-music_instructions:
+current_music_data_base_address:
+    dc.w $ffff
+
+current_music_instructions_count:
+    dc.b $ff
+
+music_instructions_intro:
     dc.w play_chord_EM4
     dc.w play_percussion
     dc.w play_bass
@@ -80,15 +87,39 @@ music_instructions:
     dc.w 0
     dc.w play_chord_BM4
     dc.w 0
-music_instructions_end:
+music_instructions_intro_end:
 
+; Music number in register [a]
 music_init:
+    cp MUSIC_NUMBER_INTRO
+    jp nz,.not_music_intro
+    ; Intro
+    ld hl,music_instructions_intro
+    ld (current_music_data_base_address),hl
+    ld a,(music_instructions_intro_end-music_instructions_intro)/2
+    ld (current_music_instructions_count),a
+    xor a
+    ld (music_animation_first_run),a ; not the first run anymore
+    jp .common
+.not_music_intro:
+    cp MUSIC_NUMBER_END_OF_RACE
+    jp nz,.not_music_end_of_race
+    ; End of race
+    ld hl,music_instructions_intro
+    ld (current_music_data_base_address),hl
+    ld a,(music_instructions_intro_end-music_instructions_intro)/2
+    ld (current_music_instructions_count),a
+    ld a,0
+    ld (music_animation_first_run),a
+    jp .common
+.not_music_end_of_race:
+
+.common
     call ay8910_init_music
     ld a,$ff ; ensure we trigger the carry flag on next round
     ld (music_animation_counter),a
     xor a
     ld (music_pointer),a
-    ld (music_animation_first_run),a
     ret
 
 music_loop:
@@ -107,7 +138,7 @@ music_loop:
     add a
     ld b,0
     ld c,a
-    ld hl,music_instructions
+    ld hl,(current_music_data_base_address)
     add hl,bc
     ld a,(hl)
     inc hl
@@ -118,9 +149,11 @@ music_loop:
     call .exec_instructions ; need an intermediate function call in order to have a return address in the stack
 .skip_instructions
     ; Update pointer position
+    ld a,(current_music_instructions_count)
+    ld b,a
     ld a,(music_pointer)
     inc a
-    cp (music_instructions_end-music_instructions)/2
+    cp b
     jr nz,.update_pointer
     ld a,1
     ld (music_animation_first_run),a ; not the first run anymore
