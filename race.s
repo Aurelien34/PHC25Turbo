@@ -218,13 +218,6 @@ start_race:
     call prepare_winner_looser_image
 .no_winner_looser_image:
 
-    ; Load guys animations
-    ld a,(race_state)
-    and a,1<<RACE_STATE_ANIMATE_GUYS
-    jp z,.no_animate_guys
-    call animate_guys
-.no_animate_guys:
-
     ; Black on white
     ;ld a,%11110110
     ;out ($40),a
@@ -254,6 +247,13 @@ start_race:
     call draw_car
     ld ix,data_car1 ; current car is number 1
     call draw_car
+
+    ; Load guys animations
+    ld a,(race_state)
+    and a,1<<RACE_STATE_ANIMATE_GUYS
+    jp z,.no_animate_guys
+    call animate_guys
+.no_animate_guys:
 
     ; Update laps to go (if needed)
     call update_laps_to_go
