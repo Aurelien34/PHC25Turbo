@@ -9,6 +9,9 @@ rlh_car1:
 	global rlh_circuit_tiles_0  
 rlh_circuit_tiles_0:  
 	incbin "rlh/circuit_tiles_0.rlh"  
+	global rlh_circuit_tiles_1  
+rlh_circuit_tiles_1:  
+	incbin "rlh/circuit_tiles_1.rlh"  
 	global rlh_circuitdata  
 rlh_circuitdata:  
 	incbin "rlh/circuitdata.rlh"  
