@@ -7,15 +7,33 @@
 
 TILE_DATA_SIZE equ 16*12
 CAR_DATA_SIZE equ 3
-OFFSET_CAR_0_DATA equ TILE_DATA_SIZE
+OFFSET_DATA_TILESET equ TILE_DATA_SIZE
+OFFSET_CAR_0_DATA equ OFFSET_DATA_TILESET+1
 OFFSET_CAR_1_DATA equ OFFSET_CAR_0_DATA+CAR_DATA_SIZE
 OFFSSET_CIRCUIT_LAPS_TOTAL equ OFFSET_CAR_1_DATA+CAR_DATA_SIZE
 
+tilesets_list:
+    dc.w rlh_circuit_tiles_0
+    dc.w rlh_circuit_tiles_1
+
+circuit_tileset_address:
+    dc.w 0
 
 load_circuit:
     ; hl points to compressed circuit data
     ld de,RAM_MAP_CIRCUIT_DATA
     call decompress_rlh
+
+    ld b,0
+    ld a,(RAM_MAP_CIRCUIT_DATA+OFFSET_DATA_TILESET)
+    add a
+    ld c,a
+    ld hl,tilesets_list
+    add hl,bc
+    ld c,(hl)
+    inc hl
+    ld b,(hl)
+    ld (circuit_tileset_address),bc
 
     ; now load car positions in circuit
     ld hl,RAM_MAP_CIRCUIT_DATA+OFFSET_CAR_0_DATA
@@ -142,7 +160,7 @@ draw_circuit_tile:
     ld (rlh_param_offset_start),hl
     ld hl,32
     ld (rlh_param_extract_length),hl
-    ld hl,(circuit_picker_circuit_tileset_address)
+    ld hl,(circuit_tileset_address)
     ld de,RAM_MAP_DECOMPRESSION_BUFFER_32
     push bc
     call decompress_rlh_advanced

@@ -74,9 +74,16 @@ start:
 .loop
 
     call show_intro
+
+    call circuit_picker_show
+    ; Ensure a circuit has been selected
+    ld a,(circuit_picker_circuit_index)
+    cp $ff
+    jr z,.loop
+
     call start_race
 
-    jp .loop
+    jr .loop
 
     ret
 
