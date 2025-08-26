@@ -6,15 +6,18 @@ rlh_car0:
 	global rlh_car1  
 rlh_car1:  
 	incbin "rlh/car1.rlh"  
+	global rlh_circuit_daytono  
+rlh_circuit_daytono:  
+	incbin "rlh/circuit_daytono.rlh"  
+	global rlh_circuit_monaco  
+rlh_circuit_monaco:  
+	incbin "rlh/circuit_monaco.rlh"  
 	global rlh_circuit_tiles_0  
 rlh_circuit_tiles_0:  
 	incbin "rlh/circuit_tiles_0.rlh"  
 	global rlh_circuit_tiles_1  
 rlh_circuit_tiles_1:  
 	incbin "rlh/circuit_tiles_1.rlh"  
-	global rlh_circuitdata  
-rlh_circuitdata:  
-	incbin "rlh/circuitdata.rlh"  
 	global rlh_hud  
 rlh_hud:  
 	incbin "rlh/hud.rlh"  

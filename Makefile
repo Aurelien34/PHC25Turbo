@@ -10,6 +10,7 @@ TO_EXTRACT_AND_COMPRESS_PATH = bmp_to_extract_and_compress
 TO_EXTRACT_AND_COMPRESS_COLOR_PATH = color_bmp_to_extract_and_compress
 BMP_TO_EXTRACT_PATH = bmp_to_extract
 RESOURCES_RAW = res_raw
+CIRCUITS_PATH = circuits
 OUTPUT_PATH = .
 PRECOMP_PATH = precomp
 COMPRESSION_PATH = rlh
@@ -53,6 +54,9 @@ TO_EXTRACT_AND_COMPRESS_BMP = $(wildcard $(TO_EXTRACT_AND_COMPRESS_PATH)/*.bmp)
 EXTRACTED_TO_COMPRESS = $(patsubst $(TO_EXTRACT_AND_COMPRESS_PATH)/%.bmp,$(TO_COMPRESS_PATH)/%.raw,$(TO_EXTRACT_AND_COMPRESS_BMP))
 COLOR_IMAGES_BMP = $(wildcard $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/*.bmp)
 COLOR_IMAGES_RAW = $(patsubst $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/%.bmp,$(TO_COMPRESS_PATH)/%.raw,$(COLOR_IMAGES_BMP))
+CIRCUITS_DATA = $(wildcard $(CIRCUITS_PATH)/*)
+CIRCUITS_BIN = $(patsubst $(CIRCUITS_PATH)/%.data,$(TO_COMPRESS_PATH)/%.bin,$(CIRCUITS_DATA))
+
 
 define RESOURCE_FILE_TEMPLATE
 echo 	global rlh_$(basename $(FILE)) >> $(GENERATED_RESOURCE_CODE_FILE) &
@@ -78,8 +82,8 @@ rebuild:
 	make clean
 	make all
 
-$(TO_COMPRESS_PATH)/circuitdata.bin: circuitdata.data
-	$(AS) circuitdata.data -Fbin -o $(TO_COMPRESS_PATH)/circuitdata.bin -quiet
+$(TO_COMPRESS_PATH)/%.bin: $(CIRCUITS_PATH)/%.data $(TO_COMPRESS_PATH)
+	$(AS) $< -Fbin -o $@ -quiet
 
 $(OBJ_PATH)/race.o: res_raw/guy_win_1.raw res_raw/guy_win_2.raw res_raw/guy_loose_1.raw res_raw/guy_loose_2.raw
 $(OBJ_PATH)/textwrite.o: res_raw/smallfont.raw
@@ -100,7 +104,7 @@ $(OUTPUT_PATH)/$(TARGET): $(OUTPUT_PATH) $(OBJ_PATH) $(OBJ) main.ld
 	$(LD) $(LDFLAGS) -o $(OUTPUT_PATH)/$(TARGET) $(OBJ) -M > $(SECTION_MAP_FILE)
 	$(APPLY_PHC_MASK) $(OUTPUT_PATH)/$(TARGET) $(OUTPUT_PATH)/$(SECTION_MAP_FILE)
 
-$(COMPRESSED_FILES_INCLUDER): $(EXTRACTED_TO_COMPRESS) $(TO_COMPRESS_PATH)/circuitdata.bin $(COLOR_IMAGES_BMP) $(COLOR_IMAGES_RAW)
+$(COMPRESSED_FILES_INCLUDER): $(EXTRACTED_TO_COMPRESS) $(CIRCUITS_BIN) $(COLOR_IMAGES_BMP) $(COLOR_IMAGES_RAW)
 
 $(OBJ_PATH)/%.o: %.s $(INC) $(PRECOMP_PATH)
 	$(AS) $(ASFLAGS) -L $(PRECOMP_PATH)/$<.txt -o $@ $< -DDEBUG=$(DEBUG) -DJOYSTICK=$(JOYSTICK)
@@ -151,5 +155,5 @@ ifneq ($(wildcard $(SAVESTATE)),)
 endif
 	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(EXTRACTED_TO_COMPRESS),del $(notdir $(FILE)) &)
 	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(COLOR_IMAGES_RAW),del $(notdir $(FILE)) &)
-	cd $(TO_COMPRESS_PATH) & del circuitdata.bin
+	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(CIRCUITS_BIN),del $(notdir $(FILE)) &)
 	cd $(RESOURCES_RAW) & del smallfont.raw

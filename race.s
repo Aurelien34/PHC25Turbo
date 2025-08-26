@@ -91,7 +91,7 @@ start_race:
     ld (frame_count),a
 
     ; load the circuit
-    ld hl,rlh_circuitdata
+    ld hl,(circuit_picker_circuit_data_address)
     call load_circuit
 
     ; draw the HUD
