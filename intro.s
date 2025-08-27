@@ -200,7 +200,6 @@ show_intro:
     ret
 .notstart2:
     jr .intro_loop
-    ret
 
 animate_wheels:
     ld hl,wheels_animation_counter+1
