@@ -12,9 +12,6 @@ rlh_circuit_daytono:
 	global rlh_circuit_monaco  
 rlh_circuit_monaco:  
 	incbin "rlh/circuit_monaco.rlh"  
-	global rlh_circuit_picker  
-rlh_circuit_picker:  
-	incbin "rlh/circuit_picker.rlh"  
 	global rlh_circuit_tiles_0  
 rlh_circuit_tiles_0:  
 	incbin "rlh/circuit_tiles_0.rlh"  
@@ -39,6 +36,9 @@ rlh_intro_helmet_c:
 	global rlh_introscreen  
 rlh_introscreen:  
 	incbin "rlh/introscreen.rlh"  
+	global rlh_round_borders  
+rlh_round_borders:  
+	incbin "rlh/round_borders.rlh"  
 	global rlh_you_loose  
 rlh_you_loose:  
 	incbin "rlh/you_loose.rlh"  

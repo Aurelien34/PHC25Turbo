@@ -56,9 +56,23 @@ circuit_picker_show:
     call clear_screen
     call switch_to_mode_graphics_hd
 
-    ld hl,rlh_circuit_picker
-    ld de,VRAM_ADDRESS
+    ; decompress round borders
+    ld hl,rlh_round_borders
+    ld de,RAM_MAP_DECOMPRESSION_BUFFER_32
     call decompress_rlh
+
+    ; draw rectangles
+    ld hl,0+1*32+VRAM_ADDRESS
+    ld ix,16+53<<8
+    call draw_black_rectangle
+    
+    ld hl,18+11*32+VRAM_ADDRESS
+    ld ix,11+54<<8
+    call draw_black_rectangle
+
+    ld hl,4+71*32+VRAM_ADDRESS
+    ld ix,27+118<<8
+    call draw_black_rectangle
 
     ; load "cursor"
     ld hl,rlh_car1
@@ -182,10 +196,20 @@ erase_cursor:
     ret
 
 show_cursor:
-    ;CURSOR_VRAM_ADDRESS
     ld a,(circuit_picker_circuit_index)
     call compute_cursor_address
-    ld de,RAM_MAP_PRECALC_VEHICLE_0
+    ld de,RAM_MAP_PRECALC_VEHICLE_0+64
+    call copy_8x8_image
+    ret
+
+; source in [de]
+; target in [hl]
+copy_8x8_image:
+    push hl
+    push de
+    push bc
+    push ix
+
     ld bc,32
     ld ixl,8
 .loop
@@ -195,4 +219,62 @@ show_cursor:
     add hl,bc
     dec ixl
     jr nz,.loop
+
+    pop ix
+    pop bc
+    pop de
+    pop hl
+    ret
+
+; start offset in [hl]
+; expected width in [ixl]
+; expected height in [ixh]
+draw_black_rectangle:
+    xor a
+    dec ixl
+    push hl
+    push hl
+.yloop:
+    ld (hl),a
+    ld d,h
+    ld e,l
+    inc de
+    ld b,0
+    ld c,ixl
+    ldir
+
+    pop hl
+    ld bc,32
+    add hl,bc
+    push hl
+
+    dec ixh
+    jr nz,.yloop
+    pop hl
+
+    ; bottom left
+    ld bc,$ff00 ; (-32*8)
+    add hl,bc
+    ld de,RAM_MAP_DECOMPRESSION_BUFFER_32+16
+    call copy_8x8_image
+
+    ; bottom right
+    ld b,0
+    ld c,ixl
+    add hl,bc
+    ld de,RAM_MAP_DECOMPRESSION_BUFFER_32+24
+    call copy_8x8_image
+
+    ; top left
+    pop hl
+    ld de,RAM_MAP_DECOMPRESSION_BUFFER_32
+    call copy_8x8_image
+
+    ; top right
+    ld b,0
+    ld c,ixl
+    add hl,bc
+    ld de,RAM_MAP_DECOMPRESSION_BUFFER_32+8
+    call copy_8x8_image
+
     ret
