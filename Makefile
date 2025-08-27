@@ -5,7 +5,6 @@ JOYSTICK = 0
 # Path
 MAME_SAVESTATE_PATH = C:\MameNew\sta\phc25
 TO_COMPRESS_PATH = res_to_compress
-TO_EXTRACT = bmp_to_extract
 TO_EXTRACT_AND_COMPRESS_PATH = bmp_to_extract_and_compress
 TO_EXTRACT_AND_COMPRESS_COLOR_PATH = color_bmp_to_extract_and_compress
 BMP_TO_EXTRACT_PATH = bmp_to_extract
@@ -156,4 +155,4 @@ endif
 	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(EXTRACTED_TO_COMPRESS),del $(notdir $(FILE)) &)
 	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(COLOR_IMAGES_RAW),del $(notdir $(FILE)) &)
 	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(CIRCUITS_BIN),del $(notdir $(FILE)) &)
-	cd $(RESOURCES_RAW) & del smallfont.raw
+	cd $(RESOURCES_RAW) & $(foreach FILE,$(EXTRACTED_BMP),del $(notdir $(FILE)) &)
