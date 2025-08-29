@@ -249,17 +249,17 @@ store_reg_a_to_output_stream_or_not:
 
 decompress_huffman_byte:
 ;BEGIN_UNCOMPRESS_GENERATION
-;Decompression algorithm takes 818 bytes
+;Decompression algorithm takes 824 bytes
 
 .n:
 	call get_next_bit
-	jp c,.n1 ; Jump size: 440
+	jp c,.n1 ; Jump size: 471
 .n0:
 	call get_next_bit
-	jp c,.n01 ; Jump size: 204
+	jp c,.n01 ; Jump size: 236
 .n00:
 	call get_next_bit
-	jp c,.n001 ; Jump size: 187
+	jp c,.n001 ; Jump size: 219
 .n000:
 	call get_next_bit
 	jr c,.n0001 ; Jump size: 43
@@ -276,19 +276,19 @@ decompress_huffman_byte:
 	call get_next_bit
 	jr c,.n00000001 ; Jump size: 3
 .n00000000:
-	ld a,$52
+	ld a,$12
 	ret
 .n00000001:
-	ld a,$a3
+	ld a,$d1
 	ret
 .n0000001:
 	call get_next_bit
 	jr c,.n00000011 ; Jump size: 3
 .n00000010:
-	ld a,$12
+	ld a,$96
 	ret
 .n00000011:
-	ld a,$d1
+	ld a,$a6
 	ret
 .n000001:
 	ld a,$c0
@@ -304,49 +304,55 @@ decompress_huffman_byte:
 	ret
 .n00011:
 	call get_next_bit
-	jr c,.n000111 ; Jump size: 51
+	jr c,.n000111 ; Jump size: 59
 .n000110:
 	call get_next_bit
-	jr c,.n0001101 ; Jump size: 11
+	jr c,.n0001101 ; Jump size: 27
 .n0001100:
 	call get_next_bit
-	jr c,.n00011001 ; Jump size: 3
+	jr c,.n00011001 ; Jump size: 11
 .n00011000:
-	ld a,$96
+	call get_next_bit
+	jr c,.n000110001 ; Jump size: 3
+.n000110000:
+	ld a,$17
+	ret
+.n000110001:
+	ld a,$20
 	ret
 .n00011001:
-	ld a,$a6
+	call get_next_bit
+	jr c,.n000110011 ; Jump size: 3
+.n000110010:
+	ld a,$e0
+	ret
+.n000110011:
+	ld a,$1c
 	ret
 .n0001101:
 	call get_next_bit
-	jr c,.n00011011 ; Jump size: 19
+	jr c,.n00011011 ; Jump size: 11
 .n00011010:
 	call get_next_bit
-	jr c,.n000110101 ; Jump size: 11
+	jr c,.n000110101 ; Jump size: 3
 .n000110100:
-	call get_next_bit
-	jr c,.n0001101001 ; Jump size: 3
-.n0001101000:
-	ld a,$51
-	ret
-.n0001101001:
-	ld a,$1e
+	ld a,$bf
 	ret
 .n000110101:
-	ld a,$1c
+	ld a,$42
 	ret
 .n00011011:
 	call get_next_bit
 	jr c,.n000110111 ; Jump size: 3
 .n000110110:
-	ld a,$bf
+	ld a,$34
 	ret
 .n000110111:
-	ld a,$42
+	ld a,$d2
 	ret
 .n000111:
 	call get_next_bit
-	jr c,.n0001111 ; Jump size: 27
+	jr c,.n0001111 ; Jump size: 35
 .n0001110:
 	call get_next_bit
 	jr c,.n00011101 ; Jump size: 11
@@ -354,31 +360,49 @@ decompress_huffman_byte:
 	call get_next_bit
 	jr c,.n000111001 ; Jump size: 3
 .n000111000:
-	ld a,$34
+	ld a,$b3
 	ret
 .n000111001:
-	ld a,$d2
+	ld a,$09
 	ret
 .n00011101:
 	call get_next_bit
 	jr c,.n000111011 ; Jump size: 3
 .n000111010:
-	ld a,$b3
+	ld a,$10
 	ret
 .n000111011:
-	ld a,$09
+	call get_next_bit
+	jr c,.n0001110111 ; Jump size: 3
+.n0001110110:
+	ld a,$fe
+	ret
+.n0001110111:
+	ld a,$fd
 	ret
 .n0001111:
 	call get_next_bit
-	jr c,.n00011111 ; Jump size: 11
+	jr c,.n00011111 ; Jump size: 27
 .n00011110:
 	call get_next_bit
-	jr c,.n000111101 ; Jump size: 3
+	jr c,.n000111101 ; Jump size: 11
 .n000111100:
-	ld a,$10
+	call get_next_bit
+	jr c,.n0001111001 ; Jump size: 3
+.n0001111000:
+	ld a,$bc
+	ret
+.n0001111001:
+	ld a,$2c
 	ret
 .n000111101:
-	ld a,$fa
+	call get_next_bit
+	jr c,.n0001111011 ; Jump size: 3
+.n0001111010:
+	ld a,$62
+	ret
+.n0001111011:
+	ld a,$56
 	ret
 .n00011111:
 	call get_next_bit
@@ -387,19 +411,19 @@ decompress_huffman_byte:
 	call get_next_bit
 	jr c,.n0001111101 ; Jump size: 3
 .n0001111100:
-	ld a,$fe
+	ld a,$cd
 	ret
 .n0001111101:
-	ld a,$20
+	ld a,$3d
 	ret
 .n000111111:
 	call get_next_bit
 	jr c,.n0001111111 ; Jump size: 3
 .n0001111110:
-	ld a,$fd
+	ld a,$ab
 	ret
 .n0001111111:
-	ld a,$bc
+	ld a,$16
 	ret
 .n001:
 	call get_next_bit
@@ -412,10 +436,10 @@ decompress_huffman_byte:
 	ret
 .n01:
 	call get_next_bit
-	jp c,.n011 ; Jump size: 197
+	jp c,.n011 ; Jump size: 196
 .n010:
 	call get_next_bit
-	jp c,.n0101 ; Jump size: 180
+	jp c,.n0101 ; Jump size: 179
 .n0100:
 	call get_next_bit
 	jr c,.n01001 ; Jump size: 3
@@ -424,10 +448,10 @@ decompress_huffman_byte:
 	ret
 .n01001:
 	call get_next_bit
-	jp c,.n010011 ; Jump size: 155
+	jr c,.n010011 ; Jump size: 91
 .n010010:
 	call get_next_bit
-	jr c,.n0100101 ; Jump size: 59
+	jr c,.n0100101 ; Jump size: 83
 .n0100100:
 	call get_next_bit
 	jr c,.n01001001 ; Jump size: 27
@@ -438,115 +462,115 @@ decompress_huffman_byte:
 	call get_next_bit
 	jr c,.n0100100001 ; Jump size: 3
 .n0100100000:
-	ld a,$2c
+	ld a,$c4
 	ret
 .n0100100001:
-	ld a,$62
+	ld a,$13
 	ret
 .n010010001:
 	call get_next_bit
 	jr c,.n0100100011 ; Jump size: 3
 .n0100100010:
-	ld a,$56
+	ld a,$53
 	ret
 .n0100100011:
-	ld a,$cd
+	ld a,$57
 	ret
 .n01001001:
 	call get_next_bit
-	jr c,.n010010011 ; Jump size: 11
+	jr c,.n010010011 ; Jump size: 19
 .n010010010:
 	call get_next_bit
 	jr c,.n0100100101 ; Jump size: 3
 .n0100100100:
-	ld a,$3d
+	ld a,$47
 	ret
 .n0100100101:
-	ld a,$ab
+	call get_next_bit
+	jr c,.n01001001011 ; Jump size: 3
+.n01001001010:
+	ld a,$66
+	ret
+.n01001001011:
+	ld a,$da
 	ret
 .n010010011:
 	call get_next_bit
-	jr c,.n0100100111 ; Jump size: 3
+	jr c,.n0100100111 ; Jump size: 11
 .n0100100110:
-	ld a,$16
-	ret
-.n0100100111:
-	ld a,$c4
-	ret
-.n0100101:
 	call get_next_bit
-	jr c,.n01001011 ; Jump size: 27
-.n01001010:
-	call get_next_bit
-	jr c,.n010010101 ; Jump size: 11
-.n010010100:
-	call get_next_bit
-	jr c,.n0100101001 ; Jump size: 3
-.n0100101000:
-	ld a,$13
-	ret
-.n0100101001:
-	ld a,$53
-	ret
-.n010010101:
-	call get_next_bit
-	jr c,.n0100101011 ; Jump size: 3
-.n0100101010:
-	ld a,$57
-	ret
-.n0100101011:
-	ld a,$47
-	ret
-.n01001011:
-	call get_next_bit
-	jr c,.n010010111 ; Jump size: 27
-.n010010110:
-	call get_next_bit
-	jr c,.n0100101101 ; Jump size: 11
-.n0100101100:
-	call get_next_bit
-	jr c,.n01001011001 ; Jump size: 3
-.n01001011000:
-	ld a,$da
-	ret
-.n01001011001:
+	jr c,.n01001001101 ; Jump size: 3
+.n01001001100:
 	ld a,$bd
 	ret
-.n0100101101:
-	call get_next_bit
-	jr c,.n01001011011 ; Jump size: 3
-.n01001011010:
+.n01001001101:
 	ld a,$22
 	ret
-.n01001011011:
+.n0100100111:
+	call get_next_bit
+	jr c,.n01001001111 ; Jump size: 3
+.n01001001110:
 	ld a,$4a
 	ret
-.n010010111:
-	call get_next_bit
-	jr c,.n0100101111 ; Jump size: 11
-.n0100101110:
-	call get_next_bit
-	jr c,.n01001011101 ; Jump size: 3
-.n01001011100:
+.n01001001111:
 	ld a,$6a
 	ret
-.n01001011101:
-	ld a,$d6
-	ret
-.n0100101111:
-	call get_next_bit
-	jr c,.n01001011111 ; Jump size: 3
-.n01001011110:
-	ld a,$0b
-	ret
-.n01001011111:
-	ld a,$28
+.n0100101:
+	ld a,$08
 	ret
 .n010011:
 	call get_next_bit
-	jr c,.n0100111 ; Jump size: 3
+	jr c,.n0100111 ; Jump size: 67
 .n0100110:
-	ld a,$08
+	call get_next_bit
+	jr c,.n01001101 ; Jump size: 59
+.n01001100:
+	call get_next_bit
+	jr c,.n010011001 ; Jump size: 27
+.n010011000:
+	call get_next_bit
+	jr c,.n0100110001 ; Jump size: 11
+.n0100110000:
+	call get_next_bit
+	jr c,.n01001100001 ; Jump size: 3
+.n01001100000:
+	ld a,$d6
+	ret
+.n01001100001:
+	ld a,$0b
+	ret
+.n0100110001:
+	call get_next_bit
+	jr c,.n01001100011 ; Jump size: 3
+.n01001100010:
+	ld a,$28
+	ret
+.n01001100011:
+	ld a,$45
+	ret
+.n010011001:
+	call get_next_bit
+	jr c,.n0100110011 ; Jump size: 11
+.n0100110010:
+	call get_next_bit
+	jr c,.n01001100101 ; Jump size: 3
+.n01001100100:
+	ld a,$b0
+	ret
+.n01001100101:
+	ld a,$84
+	ret
+.n0100110011:
+	call get_next_bit
+	jr c,.n01001100111 ; Jump size: 3
+.n01001100110:
+	ld a,$81
+	ret
+.n01001100111:
+	ld a,$51
+	ret
+.n01001101:
+	ld a,$46
 	ret
 .n0100111:
 	ld a,$82
@@ -567,148 +591,136 @@ decompress_huffman_byte:
 	call get_next_bit
 	jr c,.n01101 ; Jump size: 3
 .n01100:
-	ld a,$02
+	ld a,$05
 	ret
 .n01101:
-	ld a,$05
+	ld a,$55
 	ret
 .n0111:
 	call get_next_bit
 	jr c,.n01111 ; Jump size: 3
 .n01110:
-	ld a,$55
+	ld a,$fc
 	ret
 .n01111:
-	ld a,$fc
+	ld a,$a0
 	ret
 .n1:
 	call get_next_bit
-	jp c,.n11 ; Jump size: 180
+	jp c,.n11 ; Jump size: 163
 .n10:
 	call get_next_bit
-	jp c,.n101 ; Jump size: 155
+	jr c,.n101 ; Jump size: 83
 .n100:
 	call get_next_bit
-	jr c,.n1001 ; Jump size: 91
+	jr c,.n1001 ; Jump size: 75
 .n1000:
 	call get_next_bit
 	jr c,.n10001 ; Jump size: 3
 .n10000:
-	ld a,$a0
+	ld a,$02
 	ret
 .n10001:
 	call get_next_bit
-	jr c,.n100011 ; Jump size: 51
+	jr c,.n100011 ; Jump size: 11
 .n100010:
 	call get_next_bit
-	jr c,.n1000101 ; Jump size: 43
+	jr c,.n1000101 ; Jump size: 3
 .n1000100:
-	call get_next_bit
-	jr c,.n10001001 ; Jump size: 3
-.n10001000:
-	ld a,$46
-	ret
-.n10001001:
-	call get_next_bit
-	jr c,.n100010011 ; Jump size: 27
-.n100010010:
-	call get_next_bit
-	jr c,.n1000100101 ; Jump size: 11
-.n1000100100:
-	call get_next_bit
-	jr c,.n10001001001 ; Jump size: 3
-.n10001001000:
-	ld a,$45
-	ret
-.n10001001001:
-	ld a,$b0
-	ret
-.n1000100101:
-	call get_next_bit
-	jr c,.n10001001011 ; Jump size: 3
-.n10001001010:
-	ld a,$84
-	ret
-.n10001001011:
-	ld a,$81
-	ret
-.n100010011:
-	ld a,$0c
+	ld a,$07
 	ret
 .n1000101:
-	ld a,$07
+	ld a,$41
 	ret
 .n100011:
 	call get_next_bit
-	jr c,.n1000111 ; Jump size: 3
+	jr c,.n1000111 ; Jump size: 19
 .n1000110:
-	ld a,$41
+	call get_next_bit
+	jr c,.n10001101 ; Jump size: 3
+.n10001100:
+	ld a,$c3
+	ret
+.n10001101:
+	call get_next_bit
+	jr c,.n100011011 ; Jump size: 3
+.n100011010:
+	ld a,$fa
+	ret
+.n100011011:
+	ld a,$1e
 	ret
 .n1000111:
 	call get_next_bit
-	jr c,.n10001111 ; Jump size: 3
+	jr c,.n10001111 ; Jump size: 11
 .n10001110:
-	ld a,$c3
+	call get_next_bit
+	jr c,.n100011101 ; Jump size: 3
+.n100011100:
+	ld a,$0c
+	ret
+.n100011101:
+	ld a,$0e
 	ret
 .n10001111:
 	call get_next_bit
 	jr c,.n100011111 ; Jump size: 3
 .n100011110:
-	ld a,$0e
-	ret
-.n100011111:
 	ld a,$2f
 	ret
-.n1001:
-	call get_next_bit
-	jr c,.n10011 ; Jump size: 51
-.n10010:
-	call get_next_bit
-	jr c,.n100101 ; Jump size: 3
-.n100100:
-	ld a,$0f
-	ret
-.n100101:
-	call get_next_bit
-	jr c,.n1001011 ; Jump size: 27
-.n1001010:
-	call get_next_bit
-	jr c,.n10010101 ; Jump size: 11
-.n10010100:
-	call get_next_bit
-	jr c,.n100101001 ; Jump size: 3
-.n100101000:
+.n100011111:
 	ld a,$c5
 	ret
-.n100101001:
-	ld a,$33
-	ret
-.n10010101:
-	call get_next_bit
-	jr c,.n100101011 ; Jump size: 3
-.n100101010:
-	ld a,$23
-	ret
-.n100101011:
-	ld a,$8c
-	ret
-.n1001011:
-	call get_next_bit
-	jr c,.n10010111 ; Jump size: 3
-.n10010110:
-	ld a,$c1
-	ret
-.n10010111:
-	ld a,$11
-	ret
-.n10011:
-	ld a,$15
+.n1001:
+	ld a,$aa
 	ret
 .n101:
 	call get_next_bit
-	jr c,.n1011 ; Jump size: 3
+	jr c,.n1011 ; Jump size: 59
 .n1010:
-	ld a,$aa
+	call get_next_bit
+	jr c,.n10101 ; Jump size: 3
+.n10100:
+	ld a,$15
+	ret
+.n10101:
+	call get_next_bit
+	jr c,.n101011 ; Jump size: 3
+.n101010:
+	ld a,$0f
+	ret
+.n101011:
+	call get_next_bit
+	jr c,.n1010111 ; Jump size: 19
+.n1010110:
+	call get_next_bit
+	jr c,.n10101101 ; Jump size: 11
+.n10101100:
+	call get_next_bit
+	jr c,.n101011001 ; Jump size: 3
+.n101011000:
+	ld a,$33
+	ret
+.n101011001:
+	ld a,$23
+	ret
+.n10101101:
+	ld a,$c1
+	ret
+.n1010111:
+	call get_next_bit
+	jr c,.n10101111 ; Jump size: 3
+.n10101110:
+	ld a,$11
+	ret
+.n10101111:
+	call get_next_bit
+	jr c,.n101011111 ; Jump size: 3
+.n101011110:
+	ld a,$8c
+	ret
+.n101011111:
+	ld a,$d4
 	ret
 .n1011:
 	call get_next_bit
@@ -753,10 +765,10 @@ decompress_huffman_byte:
 	call get_next_bit
 	jr c,.n111001111 ; Jump size: 3
 .n111001110:
-	ld a,$d4
+	ld a,$35
 	ret
 .n111001111:
-	ld a,$35
+	ld a,$5c
 	ret
 .n11101:
 	ld a,$54
@@ -769,27 +781,33 @@ decompress_huffman_byte:
 	ret
 .n11111:
 	call get_next_bit
-	jr c,.n111111 ; Jump size: 115
+	jr c,.n111111 ; Jump size: 107
 .n111110:
 	call get_next_bit
-	jr c,.n1111101 ; Jump size: 51
+	jr c,.n1111101 ; Jump size: 59
 .n1111100:
 	call get_next_bit
-	jr c,.n11111001 ; Jump size: 19
+	jr c,.n11111001 ; Jump size: 27
 .n11111000:
 	call get_next_bit
-	jr c,.n111110001 ; Jump size: 3
+	jr c,.n111110001 ; Jump size: 11
 .n111110000:
-	ld a,$5c
+	call get_next_bit
+	jr c,.n1111100001 ; Jump size: 3
+.n1111100000:
+	ld a,$0d
+	ret
+.n1111100001:
+	ld a,$18
 	ret
 .n111110001:
 	call get_next_bit
 	jr c,.n1111100011 ; Jump size: 3
 .n1111100010:
-	ld a,$e0
+	ld a,$31
 	ret
 .n1111100011:
-	ld a,$0d
+	ld a,$44
 	ret
 .n11111001:
 	call get_next_bit
@@ -798,19 +816,19 @@ decompress_huffman_byte:
 	call get_next_bit
 	jr c,.n1111100101 ; Jump size: 3
 .n1111100100:
-	ld a,$18
+	ld a,$ac
 	ret
 .n1111100101:
-	ld a,$31
+	ld a,$af
 	ret
 .n111110011:
 	call get_next_bit
 	jr c,.n1111100111 ; Jump size: 3
 .n1111100110:
-	ld a,$44
+	ld a,$8b
 	ret
 .n1111100111:
-	ld a,$ac
+	ld a,$83
 	ret
 .n1111101:
 	call get_next_bit
@@ -822,40 +840,28 @@ decompress_huffman_byte:
 	call get_next_bit
 	jr c,.n1111101001 ; Jump size: 3
 .n1111101000:
-	ld a,$af
+	ld a,$1a
 	ret
 .n1111101001:
-	ld a,$8b
+	ld a,$95
 	ret
 .n111110101:
 	call get_next_bit
 	jr c,.n1111101011 ; Jump size: 3
 .n1111101010:
-	ld a,$83
+	ld a,$5a
 	ret
 .n1111101011:
-	ld a,$1a
+	ld a,$d5
 	ret
 .n11111011:
 	call get_next_bit
-	jr c,.n111110111 ; Jump size: 11
+	jr c,.n111110111 ; Jump size: 3
 .n111110110:
-	call get_next_bit
-	jr c,.n1111101101 ; Jump size: 3
-.n1111101100:
-	ld a,$95
-	ret
-.n1111101101:
-	ld a,$5a
+	ld a,$52
 	ret
 .n111110111:
-	call get_next_bit
-	jr c,.n1111101111 ; Jump size: 3
-.n1111101110:
-	ld a,$d5
-	ret
-.n1111101111:
-	ld a,$17
+	ld a,$a3
 	ret
 .n111111:
 	ld a,$40

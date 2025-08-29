@@ -92,7 +92,7 @@ draw_circuit:
 .loop_tile
     ld hl,RAM_MAP_CIRCUIT_DATA+16 ; skip the first row
     ld c,1 ; ignore the first raw, as we will display the HUD
-.loopy ; 12 rows
+.loopy ; 11 rows
     ld b,0
 .loopx ; 16 columns
     ld a,(hl) ; load current tile in the circuit map
@@ -107,7 +107,7 @@ draw_circuit:
     jp z,.loopx
     inc c
     ld a,c
-    cp 12
+    cp 11 ; skip the last row, as it will be ocupied by the hdd
     jr nz,.loopy
 
     ld a,ixl

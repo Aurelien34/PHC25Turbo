@@ -97,6 +97,9 @@ start_race:
     ; draw the HUD
     call show_hud
 
+    ; draw the HDD
+    call show_hdd
+
     ; draw the circuit
     call draw_circuit
 
@@ -540,5 +543,27 @@ animate_guys:
     add hl,bc
     dec iyl
     jp nz,.loop
+
+    ret
+
+show_hdd:
+    ; Show bottom image
+    ld hl,rlh_hdd
+    ld de,32*(192-16)+VRAM_ADDRESS
+    call decompress_rlh
+
+    ; Display circuit name
+    ld hl,circuit_picker_circuits_names
+    ld a,(circuit_picker_circuit_index)
+    add a,a
+    ld b,0
+    ld c,a
+    add hl,bc
+    ld c,(hl)
+    inc hl
+    ld b,(hl)
+    ld de,3+32*(192-16+4)+VRAM_ADDRESS
+
+    call write_string
 
     ret

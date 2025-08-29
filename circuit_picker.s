@@ -4,7 +4,7 @@
 
     section	code,text
 
-    global circuit_picker_circuit_index, circuit_picker_circuit_data_address
+    global circuit_picker_circuit_index, circuit_picker_circuit_data_address, circuit_picker_circuits_names
     global circuit_picker_show
 
 CURSOR_VRAM_ADDRESS equ 1+80*32+VRAM_ADDRESS
@@ -14,7 +14,7 @@ circuits_list:
     dc.w rlh_circuit_daytono
 circuits_list_end:
 
-circuits_names:
+circuit_picker_circuits_names:
     dc.w text_name_monaco
     dc.w text_name_daytono
 
