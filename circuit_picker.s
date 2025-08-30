@@ -8,6 +8,9 @@
     global circuit_picker_show
 
 CURSOR_VRAM_ADDRESS equ 1+80*32+VRAM_ADDRESS
+IMAGE_VRAM_ADDRESS equ 19+20*32+VRAM_ADDRESS
+IMAGE_BYTE_WIDTH equ 8
+IMAGE_HEIGHT equ 28
 
 circuits_list:
     dc.w rlh_circuit_monaco
@@ -17,7 +20,6 @@ circuits_list_end:
 circuit_picker_circuits_names:
     dc.w text_name_monaco
     dc.w text_name_daytono
-
 
 block_texts_to_display:
     ; x is in 8 pixels increments, 32 increments for one row
@@ -51,6 +53,9 @@ circuit_picker_circuit_index:
 previous_input_value:
     dc.b 0
 
+image_counter:
+    dc.b 0
+
 circuit_picker_show:
     ld a,$ff
     call clear_screen
@@ -61,15 +66,23 @@ circuit_picker_show:
     ld de,RAM_MAP_DECOMPRESSION_BUFFER_32
     call decompress_rlh
 
+    ; decompress grayscale image
+    ld hl,rlh_gs_car
+    ld de,RAM_MAP_PRECALC_VEHICLE_1
+    call decompress_rlh
+
     ; draw rectangles
+    ; top left
     ld hl,0+1*32+VRAM_ADDRESS
     ld ix,16+53<<8
     call draw_black_rectangle
     
+    ; top right
     ld hl,18+11*32+VRAM_ADDRESS
-    ld ix,11+54<<8
+    ld ix,10+54<<8
     call draw_black_rectangle
 
+    ; bottom
     ld hl,4+71*32+VRAM_ADDRESS
     ld ix,27+118<<8
     call draw_black_rectangle
@@ -95,6 +108,9 @@ circuit_picker_show:
     ; Black on green
     ld a,%10110110
     out ($40),a
+
+    ; Update grayscale image
+    call update_grayscale_image
 
     ; Read inputs
     ld a,(previous_input_value)
@@ -276,5 +292,46 @@ draw_black_rectangle:
     add hl,bc
     ld de,RAM_MAP_DECOMPRESSION_BUFFER_32+8
     call copy_8x8_image
+
+    ret
+
+update_grayscale_image:
+    ; Determine image to be drawn
+    ; increment image counter
+    ld hl,image_counter
+    ld a,(hl)
+    inc a
+    cp 3
+    jr nz,.not_3:
+    xor a
+.not_3
+    ld (hl),a
+    or a
+    jp nz,.image_2
+    ld hl,RAM_MAP_PRECALC_VEHICLE_1+IMAGE_BYTE_WIDTH*IMAGE_HEIGHT
+    ld de,IMAGE_VRAM_ADDRESS
+    call draw_half_gs_image
+    jr .image_done
+.image_2:
+    ld hl,RAM_MAP_PRECALC_VEHICLE_1
+    ld de,IMAGE_VRAM_ADDRESS
+    call draw_half_gs_image
+.image_done
+    ld a,(image_counter)
+    cpl
+    ld (VRAM_ADDRESS+32*192-1),a; Force 60Hz refresh in MAME!
+    ret
+
+draw_half_gs_image:
+    ld ixh,IMAGE_HEIGHT
+.yloop:
+    ld bc,IMAGE_BYTE_WIDTH
+    ldir
+    ld bc,32-IMAGE_BYTE_WIDTH
+    ex de,hl
+    add hl,bc
+    ex de,hl
+    dec ixh
+    jr nz,.yloop
 
     ret
