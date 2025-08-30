@@ -9,20 +9,21 @@
 
 CURSOR_VRAM_ADDRESS equ 1+80*32+VRAM_ADDRESS
 
-CIRCUIT_VRAM_ADDRESS equ 19+20*32+VRAM_ADDRESS
+CIRUCIT_FRAME_VRAM_ADDRESS equ 20+17*32+VRAM_ADDRESS
+CIRCUIT_VRAM_ADDRESS equ 21+22*32+VRAM_ADDRESS
 CIRCUIT_WIDTH equ 16
 CIRCUIT_HEIGHT equ 12
 
 circuits_list:
-    dc.w rlh_circuit_monaco
-    dc.w rlh_circuit_daytono
     dc.w rlh_circuit_take_it_easy
+    dc.w rlh_circuit_daytono
+    dc.w rlh_circuit_monaco
 circuits_list_end:
 
 circuit_picker_circuits_names:
-    dc.w text_name_monaco
-    dc.w text_name_daytono
     dc.w text_name_take_it_easy
+    dc.w text_name_daytono
+    dc.w text_name_monaco
 
 block_texts_to_display:
     ; x is in 8 pixels increments, 32 increments for one row
@@ -31,9 +32,9 @@ block_texts_to_display:
     ; Room for 32x9 characters
     dc.w 2+13*32+VRAM_ADDRESS, text_title_0
     dc.w 2+25*32+VRAM_ADDRESS, text_title_1
-    dc.w 6+80*32+VRAM_ADDRESS, text_name_monaco
+    dc.w 6+80*32+VRAM_ADDRESS, text_name_take_it_easy
     dc.w 6+96*32+VRAM_ADDRESS, text_name_daytono
-    dc.w 6+112*32+VRAM_ADDRESS, text_name_take_it_easy
+    dc.w 6+112*32+VRAM_ADDRESS, text_name_monaco
     dc.w $0000
 
 CIRCUIT_COUNT equ (circuits_list_end-circuits_list)/2
@@ -43,12 +44,12 @@ text_title_0:
 text_title_1:
     dc.b "circuit", 0
 
-text_name_monaco:
-    dc.b "Monaco",0
-text_name_daytono:
-    dc.b "Daytonneaux Speedway",0
 text_name_take_it_easy:
     dc.b "Take it easy",0
+text_name_daytono:
+    dc.b "Daytonneaux Speedway",0
+text_name_monaco:
+    dc.b "Monaco",0
 
 circuit_picker_circuit_data_address:
     dc.w $ffff
@@ -77,8 +78,12 @@ circuit_picker_show:
     
     ; top right
     ld hl,18+11*32+VRAM_ADDRESS
-    ld ix,10+54<<8
+    ld ix,10+45<<8
     call draw_black_rectangle
+
+    ; circuit frame
+    ld de,CIRUCIT_FRAME_VRAM_ADDRESS
+    call draw_circuit_frame
 
     ; bottom
     ld hl,4+71*32+VRAM_ADDRESS
@@ -91,7 +96,6 @@ circuit_picker_show:
     call decompress_rlh
 
     ; Write text
-    call wait_for_vbl
     ld ix,block_texts_to_display
     call write_text_block
 
@@ -295,20 +299,26 @@ draw_black_rectangle:
 
     ret
 
-    dc.b "                    BREAKPOINT1                     "
 draw_circuit_miniature:
-    ; top right rectangle (todo: remove this!)
-    ld hl,18+11*32+VRAM_ADDRESS
-    ld ix,10+54<<8
-    call draw_black_rectangle
+
+    ; Black on white
+    ld a,%11110110
+    out ($40),a
 
     ; load the circuit
     ld hl,(circuit_picker_circuit_data_address)
     call load_circuit
 
-    ; initialize circuit and screen pointers
+    ; clear targer area
+    ld hl,RAM_MAP_PRECALC_VEHICLE_1
+    ld de,RAM_MAP_PRECALC_VEHICLE_1+1
+    ld bc,4*CIRCUIT_HEIGHT*2-1
+    ld (hl),0
+    ldir
+
+    ; initialize circuit and target pointers
     ld hl,RAM_MAP_CIRCUIT_DATA
-    ld de,CIRCUIT_VRAM_ADDRESS
+    ld de,RAM_MAP_PRECALC_VEHICLE_1
 
     ; loop on rows
     ld iyl,CIRCUIT_HEIGHT
@@ -339,13 +349,53 @@ draw_circuit_miniature:
     ld a,ixl
     cp CIRCUIT_WIDTH
     jp nz,.loopx
-    ex de,hl
-    ld b,0
-    ld c,32*2-4
-    add hl,bc
-    ex de,hl
+    inc de
+    inc de
+    inc de
+    inc de
     dec iyl
     jp nz,.loopy
+
+    ; Wait for VBL
+    call wait_for_vbl
+
+    ; Black on green
+    ld a,%10110110
+    out ($40),a
+
+    if DEBUG = 1
+    call emulator_security_idle;
+    endif
+
+    ; now copy the buffer to the screen
+    ld de,RAM_MAP_PRECALC_VEHICLE_1
+    ld hl,CIRCUIT_VRAM_ADDRESS
+    ld bc,32-3
+    ld iyl,CIRCUIT_HEIGHT*2
+.loopyfinal
+    ld a,(de)
+    ld (hl),a
+    inc hl
+    inc de
+    ld a,(de)
+    ld (hl),a
+    inc hl
+    inc de
+    ld a,(de)
+    ld (hl),a
+    inc hl
+    inc de
+    ld a,(de)
+    ld (hl),a
+    inc de
+    add hl,bc
+    dec iyl
+    jr nz,.loopyfinal
+
+    ; Black on white
+    ld a,%11110110
+    out ($40),a
+
     ret
 
 
@@ -353,7 +403,6 @@ draw_circuit_miniature:
 ; [de] = mem destination
 ; [ixl] = x
 ; [iyl] = y
-    dc.b "                    BREAKPOINT2                     "
 draw_tile:
     push hl
     push bc
@@ -370,12 +419,10 @@ draw_tile:
     ld a,c
     call .common_processing
 
-    push bc
-    ex de,hl
-    ld bc,32
-    add hl,bc
-    pop bc
-    ex de,hl
+    inc de
+    inc de
+    inc de
+    inc de
 
     ld a,ixl
     inc a
@@ -423,4 +470,26 @@ minitiles_data:
     dc.b %1010 ; wall right
     dc.b %0011 ; wall bottom
     dc.b %1001 ; flag
-    
+
+; video target in [hl]
+draw_circuit_frame:
+    push de
+    ld hl,rlh_circuit_frame
+    ld de,RAM_MAP_PRECALC_VEHICLE_1
+    call decompress_rlh
+    ld hl,RAM_MAP_PRECALC_VEHICLE_1
+    pop de
+    ld bc,32-6
+    ld iyl,30
+.loopy
+    ld bc,6
+    ldir
+
+    ld bc,32-6
+    ex de,hl
+    add hl,bc
+    ex de,hl
+
+    dec iyl
+    jr nz,.loopy
+    ret

@@ -9,6 +9,9 @@ rlh_car1:
 	global rlh_circuit_daytono  
 rlh_circuit_daytono:  
 	incbin "rlh/circuit_daytono.rlh"  
+	global rlh_circuit_frame  
+rlh_circuit_frame:  
+	incbin "rlh/circuit_frame.rlh"  
 	global rlh_circuit_monaco  
 rlh_circuit_monaco:  
 	incbin "rlh/circuit_monaco.rlh"  
@@ -21,9 +24,6 @@ rlh_circuit_tiles_0:
 	global rlh_circuit_tiles_1  
 rlh_circuit_tiles_1:  
 	incbin "rlh/circuit_tiles_1.rlh"  
-	global rlh_gs_car  
-rlh_gs_car:  
-	incbin "rlh/gs_car.rlh"  
 	global rlh_hdd  
 rlh_hdd:  
 	incbin "rlh/hdd.rlh"  
