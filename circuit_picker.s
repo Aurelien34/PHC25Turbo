@@ -15,11 +15,13 @@ IMAGE_HEIGHT equ 28
 circuits_list:
     dc.w rlh_circuit_monaco
     dc.w rlh_circuit_daytono
+    dc.w rlh_circuit_take_it_easy
 circuits_list_end:
 
 circuit_picker_circuits_names:
     dc.w text_name_monaco
     dc.w text_name_daytono
+    dc.w text_name_take_it_easy
 
 block_texts_to_display:
     ; x is in 8 pixels increments, 32 increments for one row
@@ -30,6 +32,7 @@ block_texts_to_display:
     dc.w 2+25*32+VRAM_ADDRESS, text_title_1
     dc.w 6+80*32+VRAM_ADDRESS, text_name_monaco
     dc.w 6+96*32+VRAM_ADDRESS, text_name_daytono
+    dc.w 6+112*32+VRAM_ADDRESS, text_name_take_it_easy
     dc.w $0000
 
 CIRCUIT_COUNT equ (circuits_list_end-circuits_list)/2
@@ -43,6 +46,8 @@ text_name_monaco:
     dc.b "Monaco",0
 text_name_daytono:
     dc.b "Daytonneaux Speedway",0
+text_name_take_it_easy:
+    dc.b "Take it easy",0
 
 circuit_picker_circuit_data_address:
     dc.w $ffff
