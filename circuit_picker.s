@@ -335,6 +335,12 @@ draw_circuit_miniature:
 .loopy:
     ; loop on groups of columns
     ld ixl,0
+    bit 0,ixl
+    jr z,.loopx
+    exx
+    call picker_wait_for_vbl
+    call picker_end_of_vram_access
+    exx
 .loopx:
     ; load circuit tile info
     ld b,0
