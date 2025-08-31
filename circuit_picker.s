@@ -68,6 +68,11 @@ previous_input_value:
     dc.b 0
 
 circuit_picker_show:
+
+    ; shut the audio chip
+    call ay8910_mute
+
+    ; Clear the screen
     ld a,$ff
     call clear_screen
     call switch_to_mode_graphics_hd
