@@ -96,6 +96,7 @@ $(TO_COMPRESS_PATH)/%.bin: $(CIRCUITS_PATH)/%.data $(TO_COMPRESS_PATH)
 
 $(OBJ_PATH)/race.o: res_raw/guy_win_1.raw res_raw/guy_win_2.raw res_raw/guy_loose_1.raw res_raw/guy_loose_2.raw
 $(OBJ_PATH)/textwrite.o: res_raw/smallfont.raw
+$(OBJ_PATH)/circuit_picker.o : res_raw/trophy.raw
 
 $(TO_COMPRESS_PATH)/%.raw: $(TO_EXTRACT_AND_COMPRESS_PATH)/%.bmp
 	$(EXTRACT_RAW_IMAGE_DATA) $< $@

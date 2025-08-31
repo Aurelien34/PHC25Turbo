@@ -83,6 +83,23 @@ start:
 
     call start_race
 
+    ; Record winner's potential victory
+    ld a,(players_count)
+    cp 1
+    jr nz,.end_victory_detection
+    ld a,(race_winner_id)
+    cp 1
+    jr nz,.end_victory_detection
+    ld hl,victory_list
+    ld b,0
+    ld a,(circuit_picker_circuit_index)
+    ld c,a
+    add hl,bc
+    ld a,1
+    ld (hl),a
+
+.end_victory_detection
+
     jr .loop
 
     ret

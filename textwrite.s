@@ -14,8 +14,10 @@ smallfont_res:
 ; Screen address in [de]
 ; Character in [a]
 write_character:
+    push hl
     push de
     push bc
+    push iy
     
     cp a,' '
     jp z,.end
@@ -40,8 +42,10 @@ write_character:
     dec iyl
     jp nz,.copy_loop
 .end
+    pop iy
     pop bc
     pop de
+    pop hl
     ret
 
 ; Screen address in [de]

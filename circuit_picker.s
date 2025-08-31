@@ -5,7 +5,7 @@
 
     section	code,text
 
-    global circuit_picker_circuit_index, circuit_picker_circuit_data_address, circuit_picker_circuits_names
+    global circuit_picker_circuit_index, circuit_picker_circuit_data_address, circuit_picker_circuits_names, victory_list
     global circuit_picker_show
 
 CURSOR_POSITION_BASE_X equ 10
@@ -15,6 +15,14 @@ CIRCUIT_FRAME_VRAM_ADDRESS equ 25+6*32+VRAM_ADDRESS
 CIRCUIT_VRAM_ADDRESS equ CIRCUIT_FRAME_VRAM_ADDRESS+1+5*32
 CIRCUIT_WIDTH equ 16
 CIRCUIT_HEIGHT equ 12
+
+CIRCUITS_NAMES_INITIAL_POSITION equ 6+(CURSOR_POSITION_BASE_Y)*32+VRAM_ADDRESS
+
+victory_list:
+    dc.b 0, 0, 0, 0
+    dc.b 0, 0, 0, 0
+    dc.b 0, 0, 0, 0
+    dc.b 0, 0, 0, 0
 
 circuits_list:
     dc.w rlh_circuit_take_it_easy
@@ -36,10 +44,6 @@ block_texts_to_display:
     ; Room for 32x9 characters
     dc.w 2+9*32+VRAM_ADDRESS, text_title_0
     dc.w 1+23*32+VRAM_ADDRESS, text_title_1
-    dc.w 6+(CURSOR_POSITION_BASE_Y)*32+VRAM_ADDRESS, text_name_take_it_easy
-    dc.w 6+(CURSOR_POSITION_BASE_Y+16)*32+VRAM_ADDRESS, text_name_you_turn
-    dc.w 6+(CURSOR_POSITION_BASE_Y+32)*32+VRAM_ADDRESS, text_name_daytono
-    dc.w 6+(CURSOR_POSITION_BASE_Y+48)*32+VRAM_ADDRESS, text_name_monaco
     dc.w $0000
 
 CIRCUIT_COUNT equ (circuits_list_end-circuits_list)/2
@@ -108,6 +112,9 @@ circuit_picker_show:
     ; Write text
     ld ix,block_texts_to_display
     call write_text_block
+
+    ; Write circuits names
+    call write_circuits_list
 
     ; Show cursor for current position
     ld ix,data_car0 ; current car is number 0
@@ -503,3 +510,60 @@ draw_circuit_frame:
     dec iyl
     jr nz,.loopy
     ret
+
+write_circuits_list:
+    ld de,CIRCUITS_NAMES_INITIAL_POSITION
+    ld iyl,0
+    ld hl,circuit_picker_circuits_names
+.loop
+    ; load string address in [bc]
+    ld c,(hl)
+    inc hl
+    ld b,(hl)
+    inc hl
+
+    call .insert_trophy_if_needed
+
+    push de
+    call write_string
+    pop de
+
+    ex de,hl
+    ld bc,32*16
+    add hl,bc
+    ex de,hl
+
+    inc iyl
+    ld a,iyl
+    cp CIRCUIT_COUNT
+    jr nz,.loop
+
+    ret
+.insert_trophy_if_needed:
+    push hl
+    push bc
+    push de
+
+    ld b,0
+    ld c,iyl
+    ld hl,victory_list
+    add hl,bc
+    ld a,(hl)
+    or a
+    jr z,.end_insert
+
+    dec de
+    dec de
+    ld hl,trophy_res
+    ex de,hl
+    call copy_8x8_image
+
+.end_insert
+    pop de
+    pop bc
+    pop hl
+
+    ret
+
+trophy_res:
+    incbin res_raw/trophy.raw

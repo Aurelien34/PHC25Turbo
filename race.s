@@ -297,6 +297,8 @@ start_race:
 
 escape:
     ; back to intro!
+    xor a
+    ld (race_winner_id),a
     ret
 
 draw_winner_looser_image:
