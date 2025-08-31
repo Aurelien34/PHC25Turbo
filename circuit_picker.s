@@ -18,12 +18,14 @@ CIRCUIT_HEIGHT equ 12
 
 circuits_list:
     dc.w rlh_circuit_take_it_easy
+    dc.w rlh_circuit_you_turn
     dc.w rlh_circuit_daytono
     dc.w rlh_circuit_monaco
 circuits_list_end:
 
 circuit_picker_circuits_names:
     dc.w text_name_take_it_easy
+    dc.w text_name_you_turn
     dc.w text_name_daytono
     dc.w text_name_monaco
 
@@ -35,8 +37,9 @@ block_texts_to_display:
     dc.w 2+9*32+VRAM_ADDRESS, text_title_0
     dc.w 1+23*32+VRAM_ADDRESS, text_title_1
     dc.w 6+(CURSOR_POSITION_BASE_Y)*32+VRAM_ADDRESS, text_name_take_it_easy
-    dc.w 6+(CURSOR_POSITION_BASE_Y+16)*32+VRAM_ADDRESS, text_name_daytono
-    dc.w 6+(CURSOR_POSITION_BASE_Y+32)*32+VRAM_ADDRESS, text_name_monaco
+    dc.w 6+(CURSOR_POSITION_BASE_Y+16)*32+VRAM_ADDRESS, text_name_you_turn
+    dc.w 6+(CURSOR_POSITION_BASE_Y+32)*32+VRAM_ADDRESS, text_name_daytono
+    dc.w 6+(CURSOR_POSITION_BASE_Y+48)*32+VRAM_ADDRESS, text_name_monaco
     dc.w $0000
 
 CIRCUIT_COUNT equ (circuits_list_end-circuits_list)/2
@@ -48,6 +51,8 @@ text_title_1:
 
 text_name_take_it_easy:
     dc.b "Take it easy",0
+text_name_you_turn:
+    dc.b "You turn",0
 text_name_daytono:
     dc.b "Daytonneaux Speedway",0
 text_name_monaco:

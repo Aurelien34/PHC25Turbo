@@ -10,3 +10,4 @@
 - gain RAM space in order to fit circuits, cars and tiles!
 - Press any key on the title screen, but1P or 2P on the circuit selection screen
 - recompute cos/sin tables
+- music on circuit selection screen
