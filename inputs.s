@@ -19,15 +19,15 @@ update_inputs:
     out ($c1),a
     in a,($c0)
     bit 4,a
-    jp nz,.jp1notfire
+    jr nz,.jp1notfire
     set INPUT_BIT_FIRE,b
 .jp1notfire
     bit 2,a
-    jp nz,.jp1notleft
+    jr nz,.jp1notleft
     set INPUT_BIT_LEFT,b
 .jp1notleft
     bit 3,a
-    jp nz,.jp1notright
+    jr nz,.jp1notright
     set INPUT_BIT_RIGHT,b
 .jp1notright
     endif
@@ -35,27 +35,27 @@ update_inputs:
     ; Keyboard
     in a,($80)
     bit 2,a
-    jp nz,.p1notfire
+    jr nz,.p1notfire
     set INPUT_BIT_FIRE,b
 .p1notfire
     in a,($83)
     bit 2,a
-    jp nz,.p1notleft
+    jr nz,.p1notleft
     set INPUT_BIT_LEFT,b
 .p1notleft
     in a,($82)
     bit 2,a
-    jp nz,.p1notright
+    jr nz,.p1notright
     set INPUT_BIT_RIGHT,b
 .p1notright
     in a,($80)
     bit 0,a
-    jp nz,.p1notstart
+    jr nz,.p1notstart
     set INPUT_BIT_START,b
 .p1notstart
     in a,($80)
     bit 3,a
-    jp nz,.p1notesc
+    jr nz,.p1notesc
     set INPUT_BIT_ESC,b
 .p1notesc
     ld a,b
@@ -71,37 +71,37 @@ update_inputs:
     out ($c1),a
     in a,($c0)
     bit 4,a
-    jp nz,.jp2notfire
+    jr nz,.jp2notfire
     set INPUT_BIT_FIRE,b
 .jp2notfire
     bit 2,a
-    jp nz,.jp2notleft
+    jr nz,.jp2notleft
     set INPUT_BIT_LEFT,b
 .jp2notleft
     bit 3,a
-    jp nz,.jp2notright
+    jr nz,.jp2notright
     set INPUT_BIT_RIGHT,b
 .jp2notright
     endif
 
     in a,($86)
     bit 2,a
-    jp nz,.p2notfire
+    jr nz,.p2notfire
     set INPUT_BIT_FIRE,b
 .p2notfire
     in a,($87)
     bit 2,a
-    jp nz,.p2notleft
+    jr nz,.p2notleft
     set INPUT_BIT_LEFT,b
 .p2notleft
     in a,($87)
     bit 6,a
-    jp nz,.p2notright
+    jr nz,.p2notright
     set INPUT_BIT_RIGHT,b
 .p2notright
     in a,($83)
     bit 0,a
-    jp nz,.p2notstart
+    jr nz,.p2notstart
     set INPUT_BIT_START,b
 .p2notstart
     ld a,b

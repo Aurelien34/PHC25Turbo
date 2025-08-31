@@ -78,7 +78,7 @@ hud_refresh_lap_count:
 hud_show_countdown_digit:
     ld a,(startup_count_down_counter+1)
     or a
-    jp z,.go
+    jr z,.go
     add '0'
     ld de,15+3*32+VRAM_ADDRESS
     call write_character

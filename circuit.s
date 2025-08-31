@@ -101,12 +101,12 @@ draw_circuit:
     inc hl  ; move the pointer to the next one
     and a,%11111000 ; remove the autodrive markers
     cp ixl ; compare the circuit tile with the current one
-    jp nz,.tile_done ; if not the same, then it will be drawnduring another cycle
+    jr nz,.tile_done ; if not the same, then it will be drawnduring another cycle
     call draw_circuit_tile ; tile number is in register [a]
 .tile_done:
     inc b
     bit 4,b
-    jp z,.loopx
+    jr z,.loopx
     inc c
     ld a,c
     cp 11 ; skip the last row, as it will be ocupied by the hdd

@@ -195,14 +195,14 @@ animate_wheels:
     ld a,(hl)
     ld hl,anim_status
     bit 0,a
-    jp z,.clear_swapped
+    jr z,.clear_swapped
     bit WHEELS_SWAPPED_BIT,(hl)
-    jp nz,.introscreenwheels_swap_end
-    jp .go_swap
+    jr nz,.introscreenwheels_swap_end
+    jr .go_swap
 
 .clear_swapped:
     res WHEELS_SWAPPED_BIT,(hl)
-    jp .introscreenwheels_swap_end
+    jr .introscreenwheels_swap_end
     
 .go_swap:
     ; Need to swap wheels
@@ -235,7 +235,7 @@ animate_wheels:
     ld (hl),a
     add hl,de
     dec b
-    jp nz,.copy_loop
+    jr nz,.copy_loop
 
 .introscreenwheels_swap_end:
 
@@ -244,13 +244,13 @@ animate_wheels:
     ld a,(hl)
     ld hl,anim_status
     and %11
-    jp nz,.clear_moved
+    jr nz,.clear_moved
     bit WHEELS_MOVED_BIT,(hl)
-    jp nz,.introscreenwheels_move_end
-    jp .go_move
+    jr nz,.introscreenwheels_move_end
+    jr .go_move
 .clear_moved:
     res WHEELS_MOVED_BIT,(hl)
-    jp .introscreenwheels_move_end
+    jr .introscreenwheels_move_end
 .go_move:
     ; need to move wheels
     ; Update status
@@ -258,12 +258,12 @@ animate_wheels:
     ; Determine the addresses to use for data transfer
     call .load_wheels_positions
     bit WHEELS_UP_BIT,c ; up or down?
-    jp nz,.move_down
+    jr nz,.move_down
     ; move up
     call .do_move_up
     exx 
     call .do_move_up
-    jp .update_position_status
+    jr .update_position_status
 .move_down:
     call .do_move_down    
     exx
@@ -272,9 +272,9 @@ animate_wheels:
     ; Update status
     ld a,(anim_status)
     bit WHEELS_UP_BIT,a
-    jp z,.position_to_1
+    jr z,.position_to_1
     res WHEELS_UP_BIT,a
-    jp .ok_position_bit
+    jr .ok_position_bit
 .position_to_1:
     set WHEELS_UP_BIT,a
 .ok_position_bit:
@@ -292,7 +292,7 @@ animate_wheels:
     ld hl,anim_status
     ld c,(hl) ; status in [c]
      bit WHEELS_UP_BIT,c
-    jp z,.wheels_down
+    jr z,.wheels_down
     ; wheels are up
     ld hl,(wheel1_address_up)
     exx
@@ -332,7 +332,7 @@ animate_wheels:
     add hl,bc
     ex de,hl
     dec ixl
-    jp nz,.do_move_down_loop
+    jr nz,.do_move_down_loop
     xor a
     ld (de),a
     inc de
@@ -361,7 +361,7 @@ animate_wheels:
     add hl,bc
     ex de,hl
     dec ixl
-    jp nz,.do_move_up_loop
+    jr nz,.do_move_up_loop
     xor a
     ld (de),a
     inc de
@@ -392,17 +392,17 @@ animate_digits:
     ld a,(anim_status)
     bit IMAGE_SWAP_BIT,a
     ld a,b
-    jp z,.show_second
+    jr z,.show_second
     ; show first
     srl a
     srl a
 .show_second:
     and %11 ; a now points to the bitmap index to be displayed
     cp 3
-    jp nz,.continue_with_an_image
+    jr nz,.continue_with_an_image
     ; We need to clear the digit on the screen
     call .clear_digit
-    jp .flip_anim_bit
+    jr .flip_anim_bit
 .continue_with_an_image:
     add a
     ld b,0
@@ -419,10 +419,10 @@ animate_digits:
     ; Now flip the animation bit
     ld a,(anim_status)
     bit IMAGE_SWAP_BIT,a
-    jp z,.flipTo1
+    jr z,.flipTo1
     ; flip to 0
     res IMAGE_SWAP_BIT,a
-    jp .end
+    jr .end
 .flipTo1
     set IMAGE_SWAP_BIT,a
 .end
@@ -447,7 +447,7 @@ animate_digits:
     inc de
     add hl,bc
     dec iyl
-    jp nz,.show_0_bloc_loop
+    jr nz,.show_0_bloc_loop
     ret
 
 ; de points to the area to be cleared
@@ -464,7 +464,7 @@ animate_digits:
     ld (hl),a
     add hl,bc
     dec d
-    jp nz,.clear_digit_loop
+    jr nz,.clear_digit_loop
     ret
 
 update_animation:
@@ -479,7 +479,7 @@ update_animation:
     ld c,l
     ld a,b ; the high byte is now in a
     cp DIGIT_IMAGE_SEQUENCE_COUNT ; reached the maximum number of sequences
-    jp nz,.ok_image_sequence
+    jr nz,.ok_image_sequence
     xor a
     ld b,a
     ld c,a
@@ -500,7 +500,7 @@ update_animation:
     ld c,l
     ld a,b ; th high byte is in a
     cp 3 ; reached the maximum number of sequences
-    jp c,.ok_digit
+    jr c,.ok_digit
     xor a
     ld b,a
     ld c,a
@@ -516,9 +516,9 @@ update_animation:
 animate_helmet:
     ld hl,anim_status
     bit IMAGE_SWAP_BIT,(hl)
-    jp z,.image_a
+    jr z,.image_a
     ld de,INTRO_RAM_MAP_IMAGE_HELMET_B
-    jp .go
+    jr .go
 .image_a
     ld de,INTRO_RAM_MAP_IMAGE_HELMET_A
 .go
@@ -535,5 +535,5 @@ animate_helmet:
     inc de
     add hl,bc
     dec iyl
-    jp nz,.row_loop
+    jr nz,.row_loop
     ret

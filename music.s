@@ -85,7 +85,7 @@ music_loop:
     ; overflow here, reset counter
     ld a,0 ; don't optimize this, as we don't want to loose the carry flag
 
-    jp .update_counter
+    jr .update_counter
 
 .update_counter:
     ld (music_animation_counter),a
@@ -143,30 +143,6 @@ set_lower_frequency_registers_1_voice_and_play
     dc.b AY8910_REGISTER_ENVELOPPE_SHAPE, AY_ENVELOPPE_TYPE_SINGLE_DECAY_THEN_OFF
 .settings_end    
 
-; [hl] points to the notes, expecting 3 notes
-set_lower_frequency_registers_3_voices_and_play:
-    ld a,AY8910_REGISTER_FREQUENCY_A_LOWER
-    call .load_and_push
-    ld a,AY8910_REGISTER_FREQUENCY_B_LOWER
-    call .load_and_push
-    ld a,AY8910_REGISTER_FREQUENCY_C_LOWER
-    call .load_and_push
-    ld hl,.settings
-    ld b,(.settings_end-.settings)/2
-    jp ay8910_read_command_sequence
-.settings
-    dc.b AY8910_REGISTER_VOLUME_A, AY8910_FLAG_VOLUME_WITH_ENVELOPPE
-    dc.b AY8910_REGISTER_VOLUME_B, AY8910_FLAG_VOLUME_WITH_ENVELOPPE
-    dc.b AY8910_REGISTER_VOLUME_C, AY8910_FLAG_VOLUME_WITH_ENVELOPPE
-    dc.b AY8910_REGISTER_ENVELOPPE_SHAPE, AY_ENVELOPPE_TYPE_SINGLE_DECAY_THEN_OFF
-.settings_end    
-.load_and_push
-    AY_PUSH_REG 
-    ld a,(hl)
-    inc hl
-    AY_PUSH_VAL
-    ret
-
 prepare_registers_for_notes_1_voice:
     ld hl,.commands_begin
     ld b,(.commands_end-.commands_begin)/2
@@ -196,47 +172,70 @@ prepare_registers_for_notes_3_voices:
     dc.b AY8910_REGISTER_MIXER, AY8910_MASK_MIXER_TONE_C&AY8910_MASK_MIXER_PORT_A_IN&AY8910_MASK_MIXER_PORT_B_IN
 .commands_end:
 
+; [hl] points to the notes, expecting 3 notes
+set_lower_frequency_registers_3_voices_and_play:
+    ld a,AY8910_REGISTER_FREQUENCY_A_LOWER
+    call .load_and_push
+    ld a,AY8910_REGISTER_FREQUENCY_B_LOWER
+    call .load_and_push
+    ld a,AY8910_REGISTER_FREQUENCY_C_LOWER
+    call .load_and_push
+    ld hl,.settings
+    ld b,(.settings_end-.settings)/2
+    jp ay8910_read_command_sequence
+.settings
+    dc.b AY8910_REGISTER_VOLUME_A, AY8910_FLAG_VOLUME_WITH_ENVELOPPE
+    dc.b AY8910_REGISTER_VOLUME_B, AY8910_FLAG_VOLUME_WITH_ENVELOPPE
+    dc.b AY8910_REGISTER_VOLUME_C, AY8910_FLAG_VOLUME_WITH_ENVELOPPE
+    dc.b AY8910_REGISTER_ENVELOPPE_SHAPE, AY_ENVELOPPE_TYPE_SINGLE_DECAY_THEN_OFF
+.settings_end    
+.load_and_push
+    AY_PUSH_REG 
+    ld a,(hl)
+    inc hl
+    AY_PUSH_VAL
+    ret
+
 music_play_chord_EM4: ; E4 G4# B4
     call prepare_registers_for_notes_3_voices
     ld hl,.notes
-    jp set_lower_frequency_registers_3_voices_and_play
+    jr set_lower_frequency_registers_3_voices_and_play
 .notes:
     dc.b $be, $96, $7f
-
 
 music_play_chord_AM3: ; A3 C4# E4
     call prepare_registers_for_notes_3_voices
     AYOUT AY8910_REGISTER_FREQUENCY_A_UPPER,$01
     ld hl,.notes
-    jp set_lower_frequency_registers_3_voices_and_play
+    jr set_lower_frequency_registers_3_voices_and_play
 .notes:
     dc.b $1c, $e1, $be
 
 music_play_chord_BM3: ; B3 D4# F4#
     call prepare_registers_for_notes_3_voices
     ld hl,.notes
-    jp set_lower_frequency_registers_3_voices_and_play
+    jr set_lower_frequency_registers_3_voices_and_play
 .notes:
     dc.b $fd, $c9, $a9
 
 music_play_chord_GM4: ; G4 B4 D5
     call prepare_registers_for_notes_3_voices
     ld hl,.notes
-    jp set_lower_frequency_registers_3_voices_and_play
+    jr set_lower_frequency_registers_3_voices_and_play
 .notes:
     dc.b $9f, $7f, $6a
 
 music_play_chord_AM4: ; A4 C5# E5
     call prepare_registers_for_notes_3_voices
     ld hl,.notes
-    jp set_lower_frequency_registers_3_voices_and_play
+    jr set_lower_frequency_registers_3_voices_and_play
 .notes:
     dc.b $8e, $71, $5f
 
 music_play_chord_BM4: ; B4 D5# F5#
     call prepare_registers_for_notes_3_voices
     ld hl,.notes
-    jp set_lower_frequency_registers_3_voices_and_play
+    jr set_lower_frequency_registers_3_voices_and_play
 .notes:
     dc.b $7f, $64, $54
 

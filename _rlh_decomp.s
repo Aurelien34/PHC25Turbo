@@ -162,7 +162,7 @@ decomp_rle:
 	ex af,af' ;'
 	ld a,ixh
 	or ixl
-	jp nz,.not_over_yet
+	jr nz,.not_over_yet
 	ld b,1
 .not_over_yet:
 	ex af,af' ;'

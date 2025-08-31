@@ -23,7 +23,7 @@ compute_circuit_interactions:
     and $f0
     ld (.x2x16),a
     cp c
-    jp nz,.x2_is_different
+    jr nz,.x2_is_different
     ld hl,.status
     set 6,(hl)
 .x2_is_different:
@@ -38,7 +38,7 @@ compute_circuit_interactions:
     and $f0
     ld (.y2x16),a
     cp c
-    jp nz,.y2_is_different
+    jr nz,.y2_is_different
     ld hl,.status
     set 7,(hl)
 .y2_is_different:
@@ -60,10 +60,10 @@ compute_circuit_interactions:
     add 16
     ld e,a
     call compute_collisions_xy
-    jp c,.collision_occurred
+    jr c,.collision_occurred
     ld hl,.status
     bit 6,(hl)
-    jp nz,.only_one_column1
+    jr nz,.only_one_column1
     ; tile 1,0
     ld hl,.x2x16
     ld b,(hl)
@@ -79,11 +79,11 @@ compute_circuit_interactions:
     add 16
     ld e,a
     call compute_collisions_xy
-    jp c,.collision_occurred
+    jr c,.collision_occurred
 .only_one_column1:
     ld hl,.status
     bit 7,(hl)
-    jp nz,.only_one_row
+    jr nz,.only_one_row
     ; tile 0,1
     ld hl,.x1x16
     ld b,(hl)
@@ -99,10 +99,10 @@ compute_circuit_interactions:
     and $0f
     ld e,a
     call compute_collisions_xy
-    jp c,.collision_occurred
+    jr c,.collision_occurred
     ld hl,.status
     bit 6,(hl)
-    jp nz,.only_one_column2
+    jr nz,.only_one_column2
     ; tile 1,1
     ld hl,.x2x16
     ld b,(hl)
@@ -117,7 +117,7 @@ compute_circuit_interactions:
     and $0f
     ld e,a
     call compute_collisions_xy
-    jp c,.collision_occurred
+    jr c,.collision_occurred
 .only_one_column2:
 .only_one_row:
     xor a ; clear carry
@@ -209,16 +209,16 @@ tile02:
     ; || vertical wall
     ld a,d
     cp 16
-    jp nc,.collision_right
+    jr nc,.collision_right
     cp 11
-    jp nc,.collision_left
+    jr nc,.collision_left
     ; no collision
     xor a ; clear carry
     ret
 .collision_left:
     call dec_x
     call invert_x
-    jp .collision_common
+    jr .collision_common
 .collision_right:
     call inc_x
     call invert_x
@@ -229,16 +229,16 @@ tile03:
     ; = horizontal wall
     ld a,e
     cp 16
-    jp nc,.collision_bottom
+    jr nc,.collision_bottom
     cp 11
-    jp nc,.collision_top
+    jr nc,.collision_top
     ; no collision
     xor a ; clear carry
     ret
 .collision_top:
     call dec_y
     call invert_y
-    jp .collision_common
+    jr .collision_common
 .collision_bottom:
     call inc_y
     call invert_y
@@ -251,7 +251,7 @@ tile04:
     ld a,d
     add e
     cp 48
-    jp c,.collision
+    jr c,.collision
     ; no collision
     xor a ; clear carry
     ret
@@ -267,7 +267,7 @@ tile05:
     ld a,d
     add 2
     cp e
-    jp nc,.collision
+    jr nc,.collision
     xor a ; clear carry
     ret
 .collision:
@@ -282,7 +282,7 @@ tile06:
     ld a,d
     add e
     cp 41
-    jp nc,.collision
+    jr nc,.collision
     xor a ; clear carry
     ret
 .collision:
@@ -297,7 +297,7 @@ tile07:
     ld a,e
     add 3
     cp d
-    jp nc,.collision
+    jr nc,.collision
     xor a ; clear carry
     ret
 .collision:
@@ -311,7 +311,7 @@ tile08:
     ; X|< vertical wall
     ld a,d
     cp 17
-    jp c,.collision
+    jr c,.collision
     ; no collision
 .no_collision
     xor a ; clear carry
@@ -325,7 +325,7 @@ tile09:
     ; -- /\ horizontal wall
     ld a,e
     cp 17
-    jp c,.collision
+    jr c,.collision
     ; no collision
 .no_collision
     xor a ; clear carry
@@ -339,7 +339,7 @@ tile10:
     ; >|x vertical wall
     ld a,d
     cp 28
-    jp nc,.collision
+    jr nc,.collision
     ; no collision
 .no_collision
     xor a ; clear carry
@@ -354,7 +354,7 @@ tile11:
     ; _ \/ horizontal wall
     ld a,e
     cp 28
-    jp nc,.collision
+    jr nc,.collision
     ; no collision
 .no_collision
     xor a ; clear carry
@@ -377,21 +377,21 @@ tile12: ; checkered flag
     ld b,(ix+CAR_OFFSET_REMAINING_LAPS)
     ld a,e
     cp CHECKERED_FLAG_ZONE_WHITE_TOP
-    jp c,.in_white_zone
+    jr c,.in_white_zone
     cp CHECKERED_FLAG_ZONE_WHITE_BOTTOM
-    jp nc,.in_white_zone
-    jp .check_position_in_flag
+    jr nc,.in_white_zone
+    jr .check_position_in_flag
 .in_white_zone:
     ; clear flags
     ld a,b
     and %00111111
     ld b,a
-    jp .end
+    jr .end
 .check_position_in_flag
     ; on the bottom of the flag?
     ld a,e
     cp CHECKERED_FLAG_ZONE_BOTTOM
-    jp c,.not_bottom
+    jr c,.not_bottom
     set CAR_FINISH_LINE_STATUS_BIT_BOTTOM,b
     ld a,b
     ; bottom of the flag
@@ -404,10 +404,10 @@ tile12: ; checkered flag
     inc a
     or %10000000
     ld b,a
-    jp .end
+    jr .end
 .entering_from_bottom:
     ; really entering flag from the bottom
-    jp .end
+    jr .end
 .not_bottom:
     ; on the top of the flag?
     ld a,e

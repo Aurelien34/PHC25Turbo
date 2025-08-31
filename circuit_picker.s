@@ -159,7 +159,7 @@ circuit_picker_show:
     ld (previous_input_value),a
 
     bit INPUT_BIT_LEFT,a
-    jp z,.not_left
+    jr z,.not_left
     ; Left
     ld a,(circuit_picker_circuit_index)
     or a
@@ -170,24 +170,24 @@ circuit_picker_show:
     jr .inputs_end
 .not_left:
     bit INPUT_BIT_RIGHT,a
-    jp z,.not_right
+    jr z,.not_right
     ; Right
     ld a,(circuit_picker_circuit_index)
     cp CIRCUIT_COUNT-1
-    jp z,.inputs_end
+    jr z,.inputs_end
     inc a
     ld (circuit_picker_circuit_index),a
     call select_circuit
     jr .inputs_end
 .not_right:
     bit INPUT_BIT_ESC,a
-    jp z,.not_esc
+    jr z,.not_esc
     xor a
     ld (players_count),a
     ret
 .not_esc:
     bit INPUT_BIT_START,a
-    jp z,.not_start1
+    jr z,.not_start1
     ld a,1
     ld (players_count),a
     ret
@@ -195,7 +195,7 @@ circuit_picker_show:
 .not_start1:
     ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
     bit INPUT_BIT_START,a
-    jp z,.not_start2
+    jr z,.not_start2
     ld a,2
     ld (players_count),a
     ret
@@ -204,7 +204,7 @@ circuit_picker_show:
 
     call picker_end_of_vram_access
 
-    jp .loop
+    jr .loop
 
 select_circuit:
     ; Point circuit_picker_circuit_data_address to the correct circuit tile address
@@ -364,18 +364,18 @@ draw_circuit_miniature:
     inc ixl
     ld a,ixl
     and %11
-    jp nz,.continue
+    jr nz,.continue
     inc de ; x is a multiple of 4, move to next 8 bits area
 .continue
     ld a,ixl
     cp CIRCUIT_WIDTH
-    jp nz,.loopx
+    jr nz,.loopx
     inc de
     inc de
     inc de
     inc de
     dec iyl
-    jp nz,.loopy
+    jr nz,.loopy
 
     ; Wait for VBL
     call picker_wait_for_vbl

@@ -211,10 +211,10 @@ ay8910_loop:
     add hl,bc
     ld a,h
     and 1
-    jp z,.no_reset
+    jr z,.no_reset
     ld h,0
     ld l,0
-    jp .no_reset
+    jr .no_reset
 .no_reset
     ld (audio_animation_counter),hl
     ; Z flag is still valid

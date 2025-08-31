@@ -45,21 +45,21 @@ autodrive_current_car:
     ld a,(ix+CAR_OFFSET_ANGLE)
     and $f0
     sub b
-    jp z,.ok
-    jp nc,.positive
+    jr z,.ok
+    jr nc,.positive
     ; negative
     cp $80
-    jp nc,.negative_indirect
+    jr nc,.negative_indirect
     set INPUT_BIT_LEFT,c
-    jp .ok
+    jr .ok
 .negative_indirect
     set INPUT_BIT_RIGHT,c
-    jp .ok
+    jr .ok
 .positive:
     cp $80
-    jp nc,.positive_indirect
+    jr nc,.positive_indirect
     set INPUT_BIT_LEFT,c
-    jp .ok
+    jr .ok
 .positive_indirect:
     set INPUT_BIT_RIGHT,c
 .ok:

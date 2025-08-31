@@ -312,7 +312,7 @@ erase_car:
     inc de
     add hl,bc
     dec iyl
-    jp nz,.eraseloop
+    jr nz,.eraseloop
 
     ret
 
@@ -322,9 +322,9 @@ draw_car:
     ; bc = target background backup
     ; bc' will hold the next line offset, depending on the potential sprite miroring
     bit 0,(ix+CAR_OFFSET_SHIFTED_SPRITES_DATA_ADDRESS)
-    jp z,.no_mirroring
+    jr z,.no_mirroring
     ld bc,$ffef; -17
-    jp .ok_mirroring
+    jr .ok_mirroring
 .no_mirroring:
     ld bc,15
 .ok_mirroring:
@@ -379,7 +379,7 @@ draw_car:
     pop hl
 
     dec iyl
-    jp nz,.drawloop
+    jr nz,.drawloop
 
     ret
 
@@ -404,26 +404,26 @@ update_car_position:
 update_car_angle_and_throttle:
     ; [a] contains keyboard state for this car
     bit INPUT_BIT_LEFT,a
-    jp z,.noturnleft
+    jr z,.noturnleft
     dec (ix+CAR_OFFSET_ANGLE)
     dec (ix+CAR_OFFSET_ANGLE)
     dec (ix+CAR_OFFSET_ANGLE)
 .noturnleft
     bit INPUT_BIT_RIGHT,a
-    jp z,.noturnright
+    jr z,.noturnright
     inc (ix+CAR_OFFSET_ANGLE)
     inc (ix+CAR_OFFSET_ANGLE)
     inc (ix+CAR_OFFSET_ANGLE)
 .noturnright
     bit INPUT_BIT_FIRE,a
     ld a,(ix+CAR_OFFSET_THROTTLE) ; does not change flags
-    jp z,.nothrottle
+    jr z,.nothrottle
     add THROTTLE_INCREMENT
-    jp c,.end
-    jp .savethrottle
+    jr c,.end
+    jr .savethrottle
 .nothrottle
     sub THROTTLE_DECREMENT
-    jp nc,.savethrottle
+    jr nc,.savethrottle
     xor a
 .savethrottle
     ld (ix+CAR_OFFSET_THROTTLE),a
@@ -434,14 +434,14 @@ update_car_speed:
     ; Compute speed vector address => [hl]
     ld a,(ix+CAR_OFFSET_THROTTLE) ; does not change flags
     or a ; update flags => equivalent to cp 0
-    jp nz,.not_braking
+    jr nz,.not_braking
     ; Here, the car is braking
     ; Speed vectors should be 0,0
     ld (ix+CAR_OFFSET_SPEED_X),0
     ld (ix+CAR_OFFSET_SPEED_X+1),0
     ld (ix+CAR_OFFSET_SPEED_Y),0
     ld (ix+CAR_OFFSET_SPEED_Y+1),0
-    jp .end
+    jr .end
 .not_braking:
     and %11000000 ; clear low 6 bits
     ld b,0
