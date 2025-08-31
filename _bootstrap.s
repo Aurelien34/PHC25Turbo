@@ -1,15 +1,15 @@
     section	startup,text
 
 ; Should only unmask the code and jump to its startup label
-    
+
+    ; Point to the mask byte    
+    ld hl,code_mask_byte
+    ; Load he mask to be applied
+    ld c,(hl)
     ; Point hl to the beginning of the code section
-    ld hl,code_mask_byte+1
-    ;inc hl
+    inc hl
     ; Point de to the end of the code
     ld de,phc_file_footer
-    ; Load he mask to be applied
-    ld a,(code_mask_byte)
-    ld c,a
 .unmaskloop:
     or a ; clear Carry flag
     sbc hl,de ; compare hl and de
