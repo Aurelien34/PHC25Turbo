@@ -77,6 +77,8 @@ music_init_intro:
     ld (current_music_data_base_address),hl
     ld a,music_instructions_end-music_instructions
     ld (current_music_instructions_count),a
+    ld a,37
+    ld (music_animation_speed),a
     xor a
     ld (music_animation_not_first_run),a ; first run for this music
     ret

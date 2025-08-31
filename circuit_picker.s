@@ -2,6 +2,7 @@
     include inc/screen.inc
     include inc/inputs.inc
     include inc/car.inc
+    include inc/music.inc
 
     section	code,text
 
@@ -126,6 +127,10 @@ circuit_picker_show:
 
     ; Draw current circuit miniature
     call select_circuit
+
+    ; Init music
+    ld a,MUSIC_NUMBER_CIRCUIT_PICKER
+    call music_init
 .loop
     ; Compute car/cursor display
     ld ix,data_car0 ; current car is number 0
@@ -133,11 +138,7 @@ circuit_picker_show:
     call prepare_draw_car
 
     ; Wait for VBL
-    call wait_for_vbl
-
-    ; Black on green
-    ld a,%10110110
-    out ($40),a
+    call picker_wait_for_vbl
 
     ; Erase and redraw the car/cursor sprite
     ld ix,data_car0 ; current car is number 0
@@ -197,13 +198,7 @@ circuit_picker_show:
 .not_start2:
 .inputs_end:
 
-    if DEBUG = 1
-    call emulator_security_idle;
-    endif
-
-    ; Black on white
-    ld a,%11110110
-    out ($40),a
+    call picker_end_of_vram_access
 
     jp .loop
 
@@ -318,9 +313,7 @@ draw_black_rectangle:
 
 draw_circuit_miniature:
 
-    ; Black on white
-    ld a,%11110110
-    out ($40),a
+    call picker_end_of_vram_access
 
     ; load the circuit
     ld hl,(circuit_picker_circuit_data_address)
@@ -374,15 +367,7 @@ draw_circuit_miniature:
     jp nz,.loopy
 
     ; Wait for VBL
-    call wait_for_vbl
-
-    ; Black on green
-    ld a,%10110110
-    out ($40),a
-
-    if DEBUG = 1
-    call emulator_security_idle;
-    endif
+    call picker_wait_for_vbl
 
     ; now copy the buffer to the screen
     ld de,RAM_MAP_PRECALC_VEHICLE_1
@@ -409,9 +394,7 @@ draw_circuit_miniature:
     dec iyl
     jr nz,.loopyfinal
 
-    ; Black on white
-    ld a,%11110110
-    out ($40),a
+    call picker_end_of_vram_access
 
     ret
 
@@ -567,3 +550,26 @@ write_circuits_list:
 
 trophy_res:
     incbin res_raw/trophy.raw
+
+picker_wait_for_vbl:
+
+    ; Wait for VBL
+    call wait_for_vbl
+
+    ; Black on green
+    ld a,%10110110
+    out ($40),a
+
+    call music_loop
+
+    ret
+
+picker_end_of_vram_access:
+    if DEBUG = 1
+    call emulator_security_idle;
+    endif
+
+    ; Black on white
+    ld a,%11110110
+    out ($40),a
+    ret

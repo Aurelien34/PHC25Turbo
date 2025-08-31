@@ -5,8 +5,10 @@
 
     global music_init, music_loop
     global current_music_data_base_address, current_music_instructions_count, music_animation_not_first_run
+    global music_animation_counter, music_animation_speed
 
-ANIM_COUNTER_INCREMENT equ 37 ; 125 BPM, yeah! (almost)
+music_animation_speed
+    dc.b 0
 
 music_animation_not_first_run:
     dc.b 0
@@ -39,6 +41,13 @@ music_commands: ; These should follow constants MUSIC_COMMAND_XXX in inc/music.i
     dc.w music_play_tone_A4S ; 12
     dc.w music_play_tone_F4 ; 13
     dc.w music_play_tone_F5 ; 14
+    dc.w music_play_tone_F3S ; 15
+    dc.w music_play_tone_C3S ; 16
+    dc.w music_play_tone_E3 ; 17
+    dc.w music_play_tone_B2 ; 18
+    dc.w music_play_chord_A3 ; 19
+    dc.w music_play_chord_B3 ; 20
+    dc.w music_play_chord_CS4 ; 21
 
 ; Music number in register [a]
 music_init:
@@ -52,6 +61,11 @@ music_init:
     call music_init_end_of_race
     jp .common
 .not_music_end_of_race:
+    cp MUSIC_NUMBER_CIRCUIT_PICKER
+    jp nz,.not_music_circuit_picker
+    call music_init_circuit_picker
+    jp .common
+.not_music_circuit_picker:
 
 .common
     call ay8910_init_music
@@ -63,8 +77,10 @@ music_init:
 
 music_loop:
     ; increment counter
+    ld a,(music_animation_speed)
+    ld b,a
     ld a,(music_animation_counter)
-    add ANIM_COUNTER_INCREMENT
+    add b
     jr nc,.update_counter
     ; overflow here, reset counter
     ld a,0 ; don't optimize this, as we don't want to loose the carry flag
@@ -272,5 +288,48 @@ music_play_tone_F5: ; F5
     ld a,$59
     jp set_lower_frequency_registers_1_voice_and_play
 
-;MUSIC_COMMAND_PLAY_TONE_F4 equ 13
-;MUSIC_COMMAND_PLAY_TONE_F5 equ 14
+music_play_tone_F3S: ; F3#
+    call prepare_registers_for_notes_1_voice
+    AYOUT AY8910_REGISTER_FREQUENCY_A_UPPER, 1
+    ld a,$52
+    jp set_lower_frequency_registers_1_voice_and_play
+
+music_play_tone_C3S: ; C3#
+    call prepare_registers_for_notes_1_voice
+    AYOUT AY8910_REGISTER_FREQUENCY_A_UPPER, 1
+    ld a,$c3
+    jp set_lower_frequency_registers_1_voice_and_play
+
+music_play_tone_E3: ; E3
+    call prepare_registers_for_notes_1_voice
+    AYOUT AY8910_REGISTER_FREQUENCY_A_UPPER, 1
+    ld a,$7b
+    jp set_lower_frequency_registers_1_voice_and_play
+
+music_play_tone_B2: ; B2
+    call prepare_registers_for_notes_1_voice
+    AYOUT AY8910_REGISTER_FREQUENCY_A_UPPER, 1
+    ld a,$fa
+    jp set_lower_frequency_registers_1_voice_and_play
+
+music_play_chord_A3: ; A3 C#4 F#4
+    call prepare_registers_for_notes_3_voices
+    AYOUT AY8910_REGISTER_FREQUENCY_A_UPPER, 1
+    ld hl,.notes
+    jp set_lower_frequency_registers_3_voices_and_play
+.notes:
+    dc.b $1c, $e1, $a9
+
+music_play_chord_B3: ; B3 D4 G#4
+    call prepare_registers_for_notes_3_voices
+    ld hl,.notes
+    jp set_lower_frequency_registers_3_voices_and_play
+.notes:
+    dc.b $fd, $d5, $96
+
+music_play_chord_CS4: ; C#4 E4 A4
+    call prepare_registers_for_notes_3_voices
+    ld hl,.notes
+    jp set_lower_frequency_registers_3_voices_and_play
+.notes:
+    dc.b $e1, $be, $8e

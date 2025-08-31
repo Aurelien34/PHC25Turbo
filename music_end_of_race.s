@@ -79,6 +79,8 @@ music_init_end_of_race:
     ld (current_music_data_base_address),hl
     ld a,music_instructions_end-music_instructions
     ld (current_music_instructions_count),a
+    ld a,37
+    ld (music_animation_speed),a
     ld a,1
     ld (music_animation_not_first_run),a ; no first run for this music
     ret

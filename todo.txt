@@ -10,5 +10,7 @@
 - gain RAM space in order to fit circuits, cars and tiles!
 - recompute cos/sin tables
 - music on circuit selection screen
-- Show cups and attempts
 - Show time?
+- Move BMP to PNG files
+- Add percussions
+- Find why frames do skip while playing picker music
