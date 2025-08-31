@@ -56,7 +56,7 @@ text_name_you_turn:
 text_name_daytono:
     dc.b "Daytonneaux Speedway",0
 text_name_monaco:
-    dc.b "Monaco",0
+    dc.b "Panach Monaco GP",0
 
 circuit_picker_circuit_data_address:
     dc.w $ffff
