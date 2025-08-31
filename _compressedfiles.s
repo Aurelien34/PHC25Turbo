@@ -15,6 +15,9 @@ rlh_circuit_frame:
 	global rlh_circuit_monaco  
 rlh_circuit_monaco:  
 	incbin "rlh/circuit_monaco.rlh"  
+	global rlh_circuit_monzarella  
+rlh_circuit_monzarella:  
+	incbin "rlh/circuit_monzarella.rlh"  
 	global rlh_circuit_take_it_easy  
 rlh_circuit_take_it_easy:  
 	incbin "rlh/circuit_take_it_easy.rlh"  
