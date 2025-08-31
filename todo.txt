@@ -11,4 +11,5 @@
 - Press any key on the title screen, but1P or 2P on the circuit selection screen
 - recompute cos/sin tables
 - music on circuit selection screen
-- Show cups and failures
+- Show cups and attempts
+- Show time?
