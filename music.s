@@ -70,7 +70,6 @@ music_loop:
     ld a,0 ; don't optimize this, as we don't want to loose the carry flag
 
     jp .update_counter
-    dc.b "                            BREAKPOINT                       "
 
 .update_counter:
     ld (music_animation_counter),a

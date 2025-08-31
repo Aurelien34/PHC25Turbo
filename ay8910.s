@@ -172,21 +172,12 @@ execute_command_chain:
     add hl,bc
     ld a,(hl)
     inc hl
-    ld l,(hl)
+    ld h,(hl)
     ld l,a
     ; hl points to the chain
     ld b,(hl) ; b points to actions count
     inc hl
     jr ay8910_read_command_sequence
-
-ay8910_inject_single_chain_in_queue:
-    ld (.tmp_command),a
-    ld hl,.tmp_command
-    ld b,0
-    ld c,1
-    jr ay8910_inject_chain_sequence_in_chain_queue
-.tmp_command:
-    dc.b 0
 
 clear_chain_queue:
     ld hl,command_chain_queue
@@ -196,23 +187,6 @@ clear_chain_queue:
     ld b,0
     ld c,command_chain_queue_end-command_chain_queue-1
     ldir
-    ret
-
-; [HL] points to the command list, bc contains count
-ay8910_inject_chain_sequence_in_chain_queue:
-    push hl
-    push bc
-    call clear_chain_queue
-    ; copy chain
-    pop bc
-    pop hl
-    ld de,command_chain_queue
-    ldir
-    ; Next command won't wait
-    ld a,$ff
-    ld (audio_animation_counter),a
-    xor a
-    ld (audio_animation_counter+1),a
     ret
 
 ; Return in [a]
@@ -250,6 +224,32 @@ ay8910_loop:
     or a
     dc.b $c8 ; "ret z" not assembled correctly by VASM!
     jr execute_command_chain
+
+ay8910_inject_single_chain_in_queue:
+    ld (.tmp_command),a
+    ld hl,.tmp_command
+    ld b,0
+    ld c,1
+    jr ay8910_inject_chain_sequence_in_chain_queue
+.tmp_command:
+    dc.b 0
+
+; [HL] points to the command list, bc contains count
+ay8910_inject_chain_sequence_in_chain_queue:
+    push hl
+    push bc
+    call clear_chain_queue
+    ; copy chain
+    pop bc
+    pop hl
+    ld de,command_chain_queue
+    ldir
+    ; Next command won't wait
+    ld a,$ff
+    ld (audio_animation_counter),a
+    xor a
+    ld (audio_animation_counter+1),a
+    ret
 
 ay8910_queue_sequence_keyboard_beep:
     ld bc,chain_sequence_keyboard_beep_end-chain_sequence_keyboard_beep
