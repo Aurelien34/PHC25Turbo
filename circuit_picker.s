@@ -335,7 +335,8 @@ draw_circuit_miniature:
 .loopy:
     ; loop on groups of columns
     ld ixl,0
-    bit 0,ixl
+    ld a,ixl
+    bit 0,a
     jr z,.loopx
     exx
     call picker_wait_for_vbl
