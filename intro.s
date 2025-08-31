@@ -21,34 +21,31 @@ block_texts_to_display:
     ; should end with a $0000 value
     ; Room for 32x9 characters
     dc.w 0+98*32+VRAM_ADDRESS, sz_line_0
-    dc.w 0+109*32+VRAM_ADDRESS, sz_line_1
+    dc.w 10+109*32+VRAM_ADDRESS, sz_line_1
     dc.w 0+118*32+VRAM_ADDRESS, sz_line_2
     dc.w 0+127*32+VRAM_ADDRESS, sz_line_3
-    dc.w 10+139*32+VRAM_ADDRESS, sz_line_4
-    dc.w 0+150*32+VRAM_ADDRESS, sz_line_5
+    dc.w 0+136*32+VRAM_ADDRESS, sz_line_4
+    dc.w 0+145*32+VRAM_ADDRESS, sz_line_5
     dc.w 0+160*32+VRAM_ADDRESS, sz_line_6
-    dc.w 0+170*32+VRAM_ADDRESS, sz_line_7
-    dc.w 4+184*32+VRAM_ADDRESS, sz_line_8
+    dc.w 4+184*32+VRAM_ADDRESS, sz_line_7
     dc.w 11+85*32+VRAM_ADDRESS, sz_line_ready
     dc.w $0000
 
 sz_line_0:
     dc.b "Keys are:",0
 sz_line_1:
-    dc.b "> 1 player start : 1",0
-sz_line_2:
-    dc.b "> 2 players start: 2",0
-sz_line_3:
-    dc.b "> Back to menu: X",0
-sz_line_4:
     dc.b "P1     P2",0
-sz_line_5:
+sz_line_2:
     dc.b "> Left:   D      K",0
-sz_line_6:
+sz_line_3:
     dc.b "> Right:  F      L",0
-sz_line_7:
+sz_line_4:
     dc.b "> Accel:  S      J",0
-sz_line_8:
+sz_line_5:
+    dc.b "> Back to menu: X",0
+sz_line_6:
+    dc.b "Accelerate to start;;;",0
+sz_line_7:
     dc.b "PHC25 < Bouz 2025 for RPUFOS",0
 sz_line_ready:
     dc.b "Ya=ll ready for this?",0
@@ -186,19 +183,11 @@ show_intro:
     ; Read inputs
     call update_inputs
     ld a,(RAM_MAP_CONTROLLERS_VALUES)
-    bit INPUT_BIT_START,a
-    jp z,.notStart1
-    ld a,1
-    ld (players_count),a
-    ret
-.notstart1:
+    bit INPUT_BIT_FIRE,a
+    dc.b $c0 ; "ret nz" is not assembled correctly by VASM
     ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
-    bit INPUT_BIT_START,a
-    jp z,.notStart2
-    ld a,2
-    ld (players_count),a
-    ret
-.notstart2:
+    bit INPUT_BIT_FIRE,a
+    dc.b $c0 ; "ret nz" is not assembled correctly by VASM
     jr .intro_loop
 
 animate_wheels:

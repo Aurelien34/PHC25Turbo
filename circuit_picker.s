@@ -9,10 +9,10 @@
     global circuit_picker_show
 
 CURSOR_POSITION_BASE_X equ 10
-CURSOR_POSITION_BASE_Y equ 80
+CURSOR_POSITION_BASE_Y equ 60
 
-CIRCUIT_FRAME_VRAM_ADDRESS equ 20+17*32+VRAM_ADDRESS
-CIRCUIT_VRAM_ADDRESS equ 21+22*32+VRAM_ADDRESS
+CIRCUIT_FRAME_VRAM_ADDRESS equ 25+6*32+VRAM_ADDRESS
+CIRCUIT_VRAM_ADDRESS equ CIRCUIT_FRAME_VRAM_ADDRESS+1+5*32
 CIRCUIT_WIDTH equ 16
 CIRCUIT_HEIGHT equ 12
 
@@ -32,19 +32,19 @@ block_texts_to_display:
     ; y is pixel perfect
     ; should end with a $0000 value
     ; Room for 32x9 characters
-    dc.w 2+13*32+VRAM_ADDRESS, text_title_0
-    dc.w 2+25*32+VRAM_ADDRESS, text_title_1
-    dc.w 6+80*32+VRAM_ADDRESS, text_name_take_it_easy
-    dc.w 6+96*32+VRAM_ADDRESS, text_name_daytono
-    dc.w 6+112*32+VRAM_ADDRESS, text_name_monaco
+    dc.w 2+9*32+VRAM_ADDRESS, text_title_0
+    dc.w 1+23*32+VRAM_ADDRESS, text_title_1
+    dc.w 6+(CURSOR_POSITION_BASE_Y)*32+VRAM_ADDRESS, text_name_take_it_easy
+    dc.w 6+(CURSOR_POSITION_BASE_Y+16)*32+VRAM_ADDRESS, text_name_daytono
+    dc.w 6+(CURSOR_POSITION_BASE_Y+32)*32+VRAM_ADDRESS, text_name_monaco
     dc.w $0000
 
 CIRCUIT_COUNT equ (circuits_list_end-circuits_list)/2
 
 text_title_0:
-    dc.b "Select your", 0
+    dc.b "SELECT YOUR CIRCUIT", 0
 text_title_1:
-    dc.b "circuit", 0
+    dc.b "=1= for 1P =2= for 2P", 0
 
 text_name_take_it_easy:
     dc.b "Take it easy",0
@@ -74,13 +74,13 @@ circuit_picker_show:
 
     ; draw rectangles
     ; top left
-    ld hl,0+1*32+VRAM_ADDRESS
-    ld ix,16+53<<8
+    ld hl,0+2*32+VRAM_ADDRESS
+    ld ix,23+38<<8
     call draw_black_rectangle
     
     ; top right
-    ld hl,18+11*32+VRAM_ADDRESS
-    ld ix,10+45<<8
+    ld hl,24+0*32+VRAM_ADDRESS
+    ld ix,8+45<<8
     call draw_black_rectangle
 
     ; circuit frame
@@ -88,8 +88,8 @@ circuit_picker_show:
     call draw_circuit_frame
 
     ; bottom
-    ld hl,4+71*32+VRAM_ADDRESS
-    ld ix,27+118<<8
+    ld hl,4+50*32+VRAM_ADDRESS
+    ld ix,27+(192-50)<<8
     call draw_black_rectangle
 
     ; load "cursor"
@@ -133,7 +133,7 @@ circuit_picker_show:
     call update_inputs
     ld a,(RAM_MAP_CONTROLLERS_VALUES)
     cp b
-    jr z,.no_input_change
+    jr z,.check_2p_start
     ld (previous_input_value),a
 
     bit INPUT_BIT_LEFT,a
@@ -158,14 +158,27 @@ circuit_picker_show:
     call select_circuit
     jr .inputs_end
 .not_right:
-    bit INPUT_BIT_FIRE,a
-    jp z,.not_fire
-    ; Fire
-    ;call select_circuit
+    bit INPUT_BIT_ESC,a
+    jp z,.not_esc
+    xor a
+    ld (players_count),a
     ret
-.not_fire:
+.not_esc:
+    bit INPUT_BIT_START,a
+    jp z,.not_start1
+    ld a,1
+    ld (players_count),a
+    ret
+.check_2p_start:
+.not_start1:
+    ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
+    bit INPUT_BIT_START,a
+    jp z,.not_start2
+    ld a,2
+    ld (players_count),a
+    ret
+.not_start2:
 .inputs_end:
-.no_input_change:
 
     if DEBUG = 1
     call emulator_security_idle;
@@ -175,7 +188,7 @@ circuit_picker_show:
     ld a,%11110110
     out ($40),a
 
-    jr .loop
+    jp .loop
 
 select_circuit:
     ; Point circuit_picker_circuit_data_address to the correct circuit tile address

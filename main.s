@@ -76,9 +76,9 @@ start:
     call show_intro
 
     call circuit_picker_show
-    ; Ensure a circuit has been selected
-    ld a,(circuit_picker_circuit_index)
-    cp $ff
+    ; Ensure a players count has been selected
+    ld a,(players_count)
+    or a
     jr z,.loop
 
     call start_race
