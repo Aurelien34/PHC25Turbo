@@ -29,4 +29,4 @@ Z equ 8
 ; Car 1 x, y, angle
     dc.b 226, 110, 0
 ; Lap count
-    dc.b 3
+    dc.b 5
