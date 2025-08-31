@@ -1,15 +1,17 @@
     include inc/rammap.inc
     include inc/screen.inc
     include inc/inputs.inc
+    include inc/car.inc
 
     section	code,text
 
     global circuit_picker_circuit_index, circuit_picker_circuit_data_address, circuit_picker_circuits_names
     global circuit_picker_show
 
-CURSOR_VRAM_ADDRESS equ 1+80*32+VRAM_ADDRESS
+CURSOR_POSITION_BASE_X equ 10
+CURSOR_POSITION_BASE_Y equ 80
 
-CIRUCIT_FRAME_VRAM_ADDRESS equ 20+17*32+VRAM_ADDRESS
+CIRCUIT_FRAME_VRAM_ADDRESS equ 20+17*32+VRAM_ADDRESS
 CIRCUIT_VRAM_ADDRESS equ 21+22*32+VRAM_ADDRESS
 CIRCUIT_WIDTH equ 16
 CIRCUIT_HEIGHT equ 12
@@ -82,7 +84,7 @@ circuit_picker_show:
     call draw_black_rectangle
 
     ; circuit frame
-    ld de,CIRUCIT_FRAME_VRAM_ADDRESS
+    ld de,CIRCUIT_FRAME_VRAM_ADDRESS
     call draw_circuit_frame
 
     ; bottom
@@ -91,20 +93,27 @@ circuit_picker_show:
     call draw_black_rectangle
 
     ; load "cursor"
-    ld hl,rlh_car1
-    ld de,RAM_MAP_PRECALC_VEHICLE_0
-    call decompress_rlh
-
+    call precalc_shifted_cars
+        
     ; Write text
     ld ix,block_texts_to_display
     call write_text_block
 
     ; Show cursor for current position
-    call show_cursor
+    ld ix,data_car0 ; current car is number 0
+    ld (ix+CAR_OFFSET_X+1),CURSOR_POSITION_BASE_X
+    ld a,(circuit_picker_circuit_index)
+    call compute_car_position
+    call prepare_draw_car
+    call draw_car
 
     ; Draw current circuit miniature
     call select_circuit
 .loop
+    ; Compute car/cursor display
+    ld ix,data_car0 ; current car is number 0
+    call compute_car_position
+    call prepare_draw_car
 
     ; Wait for VBL
     call wait_for_vbl
@@ -112,6 +121,11 @@ circuit_picker_show:
     ; Black on green
     ld a,%10110110
     out ($40),a
+
+    ; Erase and redraw the car/cursor sprite
+    ld ix,data_car0 ; current car is number 0
+    call erase_car
+    call draw_car
 
     ; Read inputs
     ld a,(previous_input_value)
@@ -128,10 +142,8 @@ circuit_picker_show:
     ld a,(circuit_picker_circuit_index)
     or a
     jr z,.inputs_end
-    call erase_cursor
     dec a
     ld (circuit_picker_circuit_index),a
-    call show_cursor
     call select_circuit
     jr .inputs_end
 .not_left:
@@ -141,10 +153,8 @@ circuit_picker_show:
     ld a,(circuit_picker_circuit_index)
     cp CIRCUIT_COUNT-1
     jp z,.inputs_end
-    call erase_cursor
     inc a
     ld (circuit_picker_circuit_index),a
-    call show_cursor
     call select_circuit
     jr .inputs_end
 .not_right:
@@ -182,44 +192,21 @@ select_circuit:
     call draw_circuit_miniature
     ret
 
-; Cursor position in [a]
-compute_cursor_address:
-    add a
-    add a
-    add a
-    add a
-    add a
-    ld h,0
-    ld l,a
-    add hl,hl
-    add hl,hl
-    add hl,hl
-    add hl,hl
-    ex de,hl
-    ld hl,CURSOR_VRAM_ADDRESS
-    add hl,de
-    ret
-
-; Previous cursor position in [a]
-erase_cursor:
-    push af
-    call compute_cursor_address
-    ld bc,32
-    ld d,8
-    ld a,$ff
-.loop
-    ld (hl),a
-    add hl,bc
-    dec d
-    jr nz,.loop
-    pop af
-    ret
-
-show_cursor:
+compute_car_position:
     ld a,(circuit_picker_circuit_index)
-    call compute_cursor_address
-    ld de,RAM_MAP_PRECALC_VEHICLE_0+64
-    call copy_8x8_image
+    add a
+    add a
+    add a
+    add a
+    ld d,CURSOR_POSITION_BASE_Y
+    add d
+    ld (IX+CAR_OFFSET_Y+1),a
+
+    ld hl,data_car0+CAR_OFFSET_ANGLE
+    inc (hl)
+    inc (hl)
+    inc (hl)
+
     ret
 
 ; source in [de]

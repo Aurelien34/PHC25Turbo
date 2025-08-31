@@ -3,7 +3,7 @@
 
     section	code,text
 
-    global load_circuit, draw_circuit
+    global load_circuit, dispatch_circuit_info, draw_circuit
 
 TILE_DATA_SIZE equ 16*12
 CAR_DATA_SIZE equ 3
@@ -34,7 +34,9 @@ load_circuit:
     inc hl
     ld b,(hl)
     ld (circuit_tileset_address),bc
+    ret
 
+dispatch_circuit_info:
     ; now load car positions in circuit
     ld hl,RAM_MAP_CIRCUIT_DATA+OFFSET_CAR_0_DATA
     ld de,data_car0

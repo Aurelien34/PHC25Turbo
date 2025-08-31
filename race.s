@@ -93,6 +93,7 @@ start_race:
     ; load the circuit
     ld hl,(circuit_picker_circuit_data_address)
     call load_circuit
+    call dispatch_circuit_info
 
     ; draw the HUD
     call show_hud
