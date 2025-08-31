@@ -8,6 +8,15 @@ My contribution to the summer game jam "Retro Programmers United for Obscure Sys
 
 ![image](readme_images/IntroScreen.jpg)
 
+### Time to pick a circuit:
+
+![image](readme_images/SelectCircuit.png)
+
+
 ### Ingame screen in high resolution (black and white):
 
 ![image](readme_images/InGame.png)
+
+### In the 80s, you buy an game based on its cover
+
+![image](readme_images/Cover.jpg)
