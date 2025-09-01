@@ -9,6 +9,8 @@
     global circuit_picker_circuit_index, circuit_picker_circuit_data_address, circuit_picker_circuits_names, victory_list
     global circuit_picker_show
 
+MINI_TILES_BEFORE_VBL equ 24
+
 CURSOR_POSITION_BASE_X equ 10
 CURSOR_POSITION_BASE_Y equ 60
 
@@ -334,19 +336,24 @@ draw_circuit_miniature:
     ld hl,RAM_MAP_CIRCUIT_DATA
     ld de,RAM_MAP_PRECALC_VEHICLE_1
 
+    ; tile counter before vbl
+    ld iyh,1
+
     ; loop on rows
     ld iyl,CIRCUIT_HEIGHT
 .loopy:
     ; loop on groups of columns
     ld ixl,0
-    ld a,ixl
-    bit 0,a
-    jr z,.loopx
+.loopx:
+    dec iyh
+    jr nz,.continue_without_vbl_wait
+    ld iyh,MINI_TILES_BEFORE_VBL
     exx
     call picker_wait_for_vbl
     call picker_end_of_vram_access
     exx
-.loopx:
+.continue_without_vbl_wait:
+
     ; load circuit tile info
     ld b,0
     ld c,(hl)
@@ -358,7 +365,9 @@ draw_circuit_miniature:
     add hl,bc
     ld a,(hl)
     pop hl
+    push de
     call draw_tile
+    pop de
     
     inc hl
     inc ixl
@@ -415,10 +424,6 @@ draw_circuit_miniature:
 ; [ixl] = x
 ; [iyl] = y
 draw_tile:
-    push hl
-    push bc
-    push de
-    
     ld c,a ; backup tile data
 
     ld a,ixl
@@ -426,6 +431,7 @@ draw_tile:
     neg
     and %11
     ld b,a ; b contains shift count
+    ld ixh,a
 
     ld a,c
     call .common_processing
@@ -435,20 +441,12 @@ draw_tile:
     inc de
     inc de
 
-    ld a,ixl
-    inc a
-    neg
-    and %11
-    ld b,a ; b contains shift count
+    ld b,ixh
 
     ld a,c
     srl a
     srl a
     call .common_processing
-
-    pop de
-    pop bc
-    pop hl
     ret
 
 .common_processing:
