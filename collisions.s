@@ -550,6 +550,9 @@ compute_cars_interactions:
     cp 4
     jp p,.no_collision_after_vertical_check
     ; vertical collision
+
+    ; We have a collision!
+    ; separate cars
     dec (hl)
     ex de,hl
     inc (hl)
@@ -557,6 +560,13 @@ compute_cars_interactions:
     inc (hl)
     pop hl
     dec (hl)
+
+    ; reduce throttle
+    ld hl,data_car0+CAR_OFFSET_THROTTLE
+    call .throttle_times3_4
+    ld hl,data_car1+CAR_OFFSET_THROTTLE
+    call .throttle_times3_4
+
     scf ; set carry
     ret
 .no_collision_after_vertical_check:
@@ -565,7 +575,11 @@ compute_cars_interactions:
 .no_collision:
     xor a ; clear carry
     ret
-.offset_to_increment_x
-    dc.w 0
-.offset_to_decrement_x
-    dc.w 0
+.throttle_times3_4
+    ld a,(hl)
+    ld b,a
+    srl b
+    srl b
+    sub b
+    ld (hl),a
+    ret
