@@ -194,6 +194,10 @@ start_race:
     call update_car_engine_sound
 .skip_engine_count_p2:
     
+    ; Compute cars interactions
+    call compute_cars_interactions
+    call handle_collision_noises
+
     ; Compute circuit tiles interactions
     ld ix,data_car0 ; current car is number 0
     call compute_circuit_interactions

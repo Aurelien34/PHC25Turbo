@@ -3,7 +3,7 @@
 
     section	code,text
 
-    global compute_circuit_interactions
+    global compute_circuit_interactions, compute_cars_interactions
 
 
 ; ix points to current car
@@ -515,3 +515,57 @@ swap_and_invert_vectors:
     ld (ix+CAR_OFFSET_SPEED_Y),l
     ld (ix+CAR_OFFSET_SPEED_Y+1),h
     ret
+
+compute_cars_interactions:
+    ; compare X coordinates
+    ld hl,data_car0+CAR_OFFSET_X+1 ; bc contains car 0 position address
+    ld a,(hl)
+    ld b,a
+    ld de,data_car1+CAR_OFFSET_X+1 ; de contains car 1 position address
+    ld a,(de)
+    sub b
+    jp p,.car_0_is_on_the_left_distance_is_positive
+    ; car 0 is on the right
+    neg ; get a positive distance
+    ex de,hl
+.car_0_is_on_the_left_distance_is_positive
+    cp 4
+    jp p,.no_collision
+    ; potential horizontal collision
+    push hl
+    push de
+    ; search for vertical collision
+    ; compare Y coordinates
+    ld hl,data_car0+CAR_OFFSET_Y+1 ; bc contains car 0 position address
+    ld a,(hl)
+    ld b,a
+    ld de,data_car1+CAR_OFFSET_Y+1 ; de contains car 1 position address
+    ld a,(de)
+    sub b
+    jp p,.car_0_is_on_top_distance_is_positive
+    ; car 0 is on the bottom
+    neg ; get a positive distance
+    ex de,hl
+.car_0_is_on_top_distance_is_positive
+    cp 4
+    jp p,.no_collision_after_vertical_check
+    ; vertical collision
+    dec (hl)
+    ex de,hl
+    inc (hl)
+    pop hl
+    inc (hl)
+    pop hl
+    dec (hl)
+    scf ; set carry
+    ret
+.no_collision_after_vertical_check:
+    pop de
+    pop hl
+.no_collision:
+    xor a ; clear carry
+    ret
+.offset_to_increment_x
+    dc.w 0
+.offset_to_decrement_x
+    dc.w 0
