@@ -1,7 +1,6 @@
 - fix joystick handling
 - car profiles (rotation speed, acceleration profiles, drifting profiles)
 - drift factor depending on speed?
-- car collisions
 - add greetings!
 - forest stage? (run, forest!)
 - rolling start stage?
