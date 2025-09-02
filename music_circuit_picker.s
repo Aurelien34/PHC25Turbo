@@ -68,7 +68,7 @@ music_init_circuit_picker:
     ld (current_music_data_base_address),hl
     ld a,music_instructions_end-music_instructions
     ld (current_music_instructions_count),a
-    ld a,14 ; 118 bpm
+    ld a,18 ; 118 bpm
     ld (music_animation_speed),a
     ld a,1
     ld (music_animation_not_first_run),a ; no first run for this music
