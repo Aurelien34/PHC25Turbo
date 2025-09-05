@@ -33,6 +33,7 @@ circuits_list:
     dc.w rlh_circuit_daytono
     dc.w rlh_circuit_monaco
     dc.w rlh_circuit_monzarella
+    dc.w rlh_circuit_holiday_on_ice
 circuits_list_end:
 
 circuit_picker_circuits_names:
@@ -41,6 +42,7 @@ circuit_picker_circuits_names:
     dc.w text_name_daytono
     dc.w text_name_monaco
     dc.w text_name_monzarella
+    dc.w text_name_holiday_on_ice
 
 block_texts_to_display:
     ; x is in 8 pixels increments, 32 increments for one row
@@ -68,6 +70,8 @@ text_name_monaco:
     dc.b "Panach Monaco GP",0
 text_name_monzarella:
     dc.b "Monzarella",0
+text_name_holiday_on_ice:
+    dc.b "Holiday on ice",0
 
 circuit_picker_circuit_data_address:
     dc.w $ffff

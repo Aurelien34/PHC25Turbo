@@ -3,7 +3,7 @@
 
     section	code,text
 
-    global compute_circuit_interactions, compute_cars_interactions
+    global compute_circuit_interactions, compute_cars_interactions, neg_hl
 
 
 ; ix points to current car

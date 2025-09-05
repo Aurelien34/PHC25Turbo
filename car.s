@@ -3,6 +3,7 @@
     include inc/inputs.inc
     include inc/car.inc
     include inc/ay8910.inc
+    include inc/circuit.inc
 
     section	code,text
 
@@ -494,75 +495,38 @@ update_car_speed:
 
 ; hl <- (3 x bc + de)/4
 .add_vectors
-    ;; Times 15
-    ;ld h,b
-    ;ld l,c
-    ;push de
-    ;ld d,h
-    ;ld e,l
-    ;; de contains 1 x bc
-    ;add hl,hl
-    ;ex de,hl
-    ;add hl,de
-    ;ex de,hl
-    ;; de contains 3x bc
-    ;add hl,hl
-    ;ex de,hl
-    ;add hl,de
-    ;ex de,hl
-    ;; de contains 7x bc
-    ;add hl,hl
-    ;ex de,hl
-    ;add hl,de
-    ;; hl contains 15x bc
-    ;pop de
-    ;add hl,de
-    ;; hl contains 15 x bc + de
-    ;; Divide by 16 (easy :/)
-    ;sra h
-    ;rr l
-    ;sra h
-    ;rr l
-    ;sra h
-    ;rr l
-    ;sra h
-    ;rr l
-    ;ret
+    ld a,(RAM_MAP_CIRCUIT_DATA+CIRCUIT_OFFSET_CIRCUIT_OPTIONS)
+    and 1<<CIRCUIT_OPTION_BIT_ICE
+    ex af,af' ;'
 
-
-
-    ; Times 31
+    ;; Times 63 (x64-1)
+    push bc
     ld h,b
     ld l,c
-    push de
-    ld d,h
-    ld e,l
-    ; de contains 1 x bc
+    call neg_hl
+    ex (sp),hl
+    ex af,af' ;'
+    jr z,.times31
     add hl,hl
-    ex de,hl
-    add hl,de
-    ex de,hl
-    ; de contains 3x bc
+.times31
+    ex af,af' ;'
     add hl,hl
-    ex de,hl
-    add hl,de
-    ex de,hl
-    ; de contains 7x bc
     add hl,hl
-    ex de,hl
-    add hl,de
-    ex de,hl
-    ; de contains 15x bc
     add hl,hl
-    ex de,hl
+    add hl,hl
+    add hl,hl
+    pop bc
+    add hl,bc
     add hl,de
-    ; hl contains 31x bc
-    pop de
-    add hl,de
-    ; hl contains 31 x bc + de
-    ; Divide by 32 (easy :/)
+    ; hl contains 63 x bc + de
+    ; Divide by 64 (easy :/)
     sra h
     rr l
+    ex af,af' ;'
+    jr z,.divide_32
+    sra h
+    rr l
+.divide_32
     sra h
     rr l
     sra h
@@ -572,20 +536,6 @@ update_car_speed:
     sra h
     rr l
     ret
-
-    ; Times 3!
-    ;ld h,b
-    ;ld l,c
-    ;add hl,hl
-    ;add hl,bc
-    ; Add new vector
-    ;add hl,de
-    ; Divide by 4 (easy :/)
-    ;sra h
-    ;rr l
-    ;sra h
-    ;rr l
-    ;ret
 
 update_car_engine_sound:
     ld c,(ix+CAR_OFFSET_THROTTLE)

@@ -1,20 +1,16 @@
     include inc/rammap.inc
     include inc/screen.inc
+    include inc/circuit.inc
 
     section	code,text
 
     global load_circuit, dispatch_circuit_info, draw_circuit
 
-TILE_DATA_SIZE equ 16*12
-CAR_DATA_SIZE equ 3
-OFFSET_DATA_TILESET equ TILE_DATA_SIZE
-OFFSET_CAR_0_DATA equ OFFSET_DATA_TILESET+1
-OFFSET_CAR_1_DATA equ OFFSET_CAR_0_DATA+CAR_DATA_SIZE
-OFFSSET_CIRCUIT_LAPS_TOTAL equ OFFSET_CAR_1_DATA+CAR_DATA_SIZE
 
 tilesets_list:
     dc.w rlh_circuit_tiles_0
     dc.w rlh_circuit_tiles_1
+    dc.w rlh_circuit_tiles_2
 
 circuit_tileset_address:
     dc.w 0
@@ -25,7 +21,7 @@ load_circuit:
     call decompress_rlh
 
     ld b,0
-    ld a,(RAM_MAP_CIRCUIT_DATA+OFFSET_DATA_TILESET)
+    ld a,(RAM_MAP_CIRCUIT_DATA+CIRCUIT_OFFSET_DATA_TILESET)
     add a
     ld c,a
     ld hl,tilesets_list
@@ -38,15 +34,15 @@ load_circuit:
 
 dispatch_circuit_info:
     ; now load car positions in circuit
-    ld hl,RAM_MAP_CIRCUIT_DATA+OFFSET_CAR_0_DATA
+    ld hl,RAM_MAP_CIRCUIT_DATA+CIRCUIT_OFFSET_CAR_0_DATA
     ld de,data_car0
     call copy_car_characteristics
-    ld hl,RAM_MAP_CIRCUIT_DATA+OFFSET_CAR_1_DATA
+    ld hl,RAM_MAP_CIRCUIT_DATA+CIRCUIT_OFFSET_CAR_1_DATA
     ld de,data_car1
     call copy_car_characteristics
 
     ; Load lap count
-    ld a,(RAM_MAP_CIRCUIT_DATA+OFFSSET_CIRCUIT_LAPS_TOTAL)
+    ld a,(RAM_MAP_CIRCUIT_DATA+CIRCUIT_OFFSET_CIRCUIT_LAPS_TOTAL)
     inc a ; increment count, as it will be decremented when the cars will cross the line the first time
     ld (current_laps_to_go),a
     call car_set_lap_count

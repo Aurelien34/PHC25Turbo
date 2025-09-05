@@ -28,3 +28,5 @@ Z equ 8
     dc.b 230, 115, 0
 ; Lap count
     dc.b 4
+; Circuit options
+    dc.b 0
