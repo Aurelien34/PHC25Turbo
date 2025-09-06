@@ -58,6 +58,11 @@ update_inputs:
     jr nz,.p1notesc
     set INPUT_BIT_ESC,b
 .p1notesc
+    in a,($85)
+    bit 2,a
+    jr nz,.p1nogreetings
+    set INPUT_BIT_GREETINGS,b
+.p1nogreetings
     ld a,b
     ld (RAM_MAP_CONTROLLERS_VALUES),a ; store values
 

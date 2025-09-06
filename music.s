@@ -48,6 +48,10 @@ music_commands: ; These should follow constants MUSIC_COMMAND_XXX in inc/music.i
     dc.w music_play_chord_A3 ; 19
     dc.w music_play_chord_B3 ; 20
     dc.w music_play_chord_CS4 ; 21
+    dc.w music_play_chord_B3x1 ; 22
+    dc.w music_play_chord_B3M ; 23
+    dc.w music_play_chord_C4Sx1 ; 24
+    dc.w music_play_tone_B1 ; 25
 
 ; Music number in register [a]
 music_init:
@@ -66,8 +70,13 @@ music_init:
     call music_init_circuit_picker
     jp .common
 .not_music_circuit_picker:
+    cp MUSIC_NUMBER_GREETINGS
+    jp nz,.not_music_greetings
+    call music_init_greetings
+    jp .common
+.not_music_greetings:
 
-.common
+.common:
     call ay8910_init_music
     ld a,$ff ; ensure we trigger the carry flag on next round
     ld (music_animation_counter),a
@@ -332,3 +341,30 @@ music_play_chord_CS4: ; C#4 E4 A4
     jp set_lower_frequency_registers_3_voices_and_play
 .notes:
     dc.b $e1, $be, $8e
+
+music_play_chord_B3x1: ; B3 E4 G4#
+    call prepare_registers_for_notes_3_voices
+    ld hl,.notes
+    jp set_lower_frequency_registers_3_voices_and_play
+.notes:
+    dc.b $fd, $be, $96
+
+music_play_chord_B3M: ; B3 D4# F4#
+    call prepare_registers_for_notes_3_voices
+    ld hl,.notes
+    jp set_lower_frequency_registers_3_voices_and_play
+.notes:
+    dc.b $fd, $c9, $a9
+
+music_play_chord_C4Sx1: ; C4# F4# A4
+    call prepare_registers_for_notes_3_voices
+    ld hl,.notes
+    jp set_lower_frequency_registers_3_voices_and_play
+.notes:
+    dc.b $e1, $a9, $8e
+
+music_play_tone_B1: ; B1
+    call prepare_registers_for_notes_1_voice
+    AYOUT AY8910_REGISTER_FREQUENCY_A_UPPER, 3
+    ld a,$f4
+    jp set_lower_frequency_registers_1_voice_and_play

@@ -39,6 +39,9 @@ STUFFING_SAVESTATE=stuffing.sta
 SECTION_MAP_FILE=sectionmap.txt
 RLH_COMPRESSOR_SOURCE_FILE=_rlh_decomp.s
 COMPRESSED_FILES_INCLUDER=_compressedfiles.s
+GREETINGS_TEXT_BIN=$(TO_COMPRESS_PATH)/greetingstext.bin
+GREETINGS_TEXT_SOURCE=greetingstext.special
+GREETINGS_OBJ=$(OBJ)/greetings.o
 
 # Makefile targets definition
 OBJ = $(patsubst %.s,$(OBJ_PATH)/%.o,$(wildcard *.s))
@@ -59,7 +62,6 @@ COLOR_IMAGES_BMP = $(wildcard $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/*.png)
 COLOR_IMAGES_RAW = $(patsubst $(TO_EXTRACT_AND_COMPRESS_COLOR_PATH)/%.png,$(TO_COMPRESS_PATH)/%.raw,$(COLOR_IMAGES_BMP))
 CIRCUITS_DATA = $(wildcard $(CIRCUITS_PATH)/*)
 CIRCUITS_BIN = $(patsubst $(CIRCUITS_PATH)/%.data,$(TO_COMPRESS_PATH)/%.bin,$(CIRCUITS_DATA))
-
 
 define RESOURCE_FILE_TEMPLATE
 echo 	global rlh_$(basename $(FILE)) >> $(GENERATED_RESOURCE_CODE_FILE) &
@@ -95,6 +97,11 @@ rebuild:
 	make clean
 	make all
 
+$(GREETINGS_TEXT_BIN): $(GREETINGS_TEXT_SOURCE) $(TO_COMPRESS_PATH)
+	$(AS) $< -Fbin -o $@ -quiet
+
+$(GREETINGS_OBJ): $(GREETINGS_TEXT_BIN)
+
 $(TO_COMPRESS_PATH)/%.bin: $(CIRCUITS_PATH)/%.data $(TO_COMPRESS_PATH)
 	$(AS) $< -Fbin -o $@ -quiet
 
@@ -120,7 +127,7 @@ $(OUTPUT_PATH)/$(TARGET): $(OUTPUT_PATH) $(OBJ_PATH) $(OBJ) main.ld
 	$(LD) $(LDFLAGS) -o $(OUTPUT_PATH)/$(TARGET) $(OBJ) -M > $(SECTION_MAP_FILE)
 	$(APPLY_PHC_MASK) $(OUTPUT_PATH)/$(TARGET) $(OUTPUT_PATH)/$(SECTION_MAP_FILE)
 
-$(COMPRESSED_FILES_INCLUDER): $(EXTRACTED_TO_COMPRESS) $(CIRCUITS_BIN) $(GS_IMAGES_RAW) $(COLOR_IMAGES_RAW)
+$(COMPRESSED_FILES_INCLUDER): $(EXTRACTED_TO_COMPRESS) $(CIRCUITS_BIN) $(GS_IMAGES_RAW) $(COLOR_IMAGES_RAW) $(GREETINGS_TEXT_BIN)
 
 $(OBJ_PATH)/%.o: %.s $(INC) $(PRECOMP_PATH)
 	$(AS) $(ASFLAGS) -L $(PRECOMP_PATH)/$<.txt -o $@ $< -DDEBUG=$(DEBUG) -DJOYSTICK=$(JOYSTICK)
@@ -173,4 +180,5 @@ endif
 	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(COLOR_IMAGES_RAW),del $(notdir $(FILE)) &)
 	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(GS_IMAGES_RAW),del $(notdir $(FILE)) &)
 	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(CIRCUITS_BIN),del $(notdir $(FILE)) &)
+	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(GREETINGS_TEXT_BIN),del $(notdir $(FILE)) &)
 	cd $(RESOURCES_RAW) & $(foreach FILE,$(EXTRACTED_BMP),del $(notdir $(FILE)) &)

@@ -42,6 +42,9 @@ rlh_circuit_tiles_2:
 	global rlh_circuit_you_turn  
 rlh_circuit_you_turn:  
 	incbin "rlh/circuit_you_turn.rlh"  
+	global rlh_greetingstext  
+rlh_greetingstext:  
+	incbin "rlh/greetingstext.rlh"  
 	global rlh_hdd  
 rlh_hdd:  
 	incbin "rlh/hdd.rlh"  
