@@ -34,6 +34,7 @@ circuits_list:
     dc.w rlh_circuit_monaco
     dc.w rlh_circuit_monzarella
     dc.w rlh_circuit_holiday_on_ice
+    dc.w rlh_circuit_ice_cube_system
 circuits_list_end:
 
 circuit_picker_circuits_names:
@@ -43,6 +44,7 @@ circuit_picker_circuits_names:
     dc.w text_name_monaco
     dc.w text_name_monzarella
     dc.w text_name_holiday_on_ice
+    dc.w text_name_ice_cube_system
 
 block_texts_to_display:
     ; x is in 8 pixels increments, 32 increments for one row
@@ -72,6 +74,8 @@ text_name_monzarella:
     dc.b "Monzarella",0
 text_name_holiday_on_ice:
     dc.b "Holiday on ice",0
+text_name_ice_cube_system:
+    dc.b "Ice Cube System",0
 
 circuit_picker_circuit_data_address:
     dc.w $ffff

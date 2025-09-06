@@ -15,6 +15,9 @@ rlh_circuit_frame:
 	global rlh_circuit_holiday_on_ice  
 rlh_circuit_holiday_on_ice:  
 	incbin "rlh/circuit_holiday_on_ice.rlh"  
+	global rlh_circuit_ice_cube_system  
+rlh_circuit_ice_cube_system:  
+	incbin "rlh/circuit_ice_cube_system.rlh"  
 	global rlh_circuit_monaco  
 rlh_circuit_monaco:  
 	incbin "rlh/circuit_monaco.rlh"  
