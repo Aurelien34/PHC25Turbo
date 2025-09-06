@@ -1,7 +1,5 @@
 - fix joystick handling
-- different car designs
 - add greetings!
 - gain RAM space in order to fit circuits, cars and tiles!
 - recompute cos/sin tables?
 - compress music data?
-- car collisions => exchange speed vectors test!

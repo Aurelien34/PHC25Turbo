@@ -567,6 +567,15 @@ compute_cars_interactions:
     ld hl,data_car1+CAR_OFFSET_THROTTLE
     call .throttle_times3_4
 
+    ; exchange speed vectors
+    ld hl,data_car0+CAR_OFFSET_SPEED_X
+    ld de,data_car1+CAR_OFFSET_SPEED_X
+    ld b,4
+.exchange_speed_vectors_loop:
+    call .exchange_vectors_step
+    dec b
+    jr nz,.exchange_speed_vectors_loop
+
     scf ; set carry
     ret
 .no_collision_after_vertical_check:
@@ -575,6 +584,7 @@ compute_cars_interactions:
 .no_collision:
     xor a ; clear carry
     ret
+
 .throttle_times3_4
     ld a,(hl)
     ld b,a
@@ -582,4 +592,15 @@ compute_cars_interactions:
     srl b
     sub b
     ld (hl),a
+    ret
+
+.exchange_vectors_step:
+    ld c,(hl)
+    ld a,(de)
+    ex de,hl
+    ld (hl),c
+    ld (de),a
+    ex de,hl
+    inc hl
+    inc de
     ret
