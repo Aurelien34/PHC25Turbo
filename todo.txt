@@ -1,11 +1,8 @@
 - fix joystick handling
-- car profiles (rotation speed, acceleration profiles, drifting profiles)
-- drift factor depending on speed?
+- different car designs
 - add greetings!
 - forest stage? (run, forest!)
-- rolling start stage?
-- superpose images to the circuits
 - gain RAM space in order to fit circuits, cars and tiles!
-- recompute cos/sin tables
-- Show time?
-- Add percussions
+- recompute cos/sin tables?
+- compress music data?
+- Remove first and last rows from circuits data
