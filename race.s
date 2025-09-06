@@ -3,7 +3,8 @@
     include inc/screen.inc
     include inc/car.inc
     include inc/music.inc
-    
+    include inc/circuit.inc
+
     section	code,text
 
 RES_GUYS_IMAGE_HEIGHT equ 13
@@ -291,9 +292,19 @@ start_race:
     call emulator_security_idle;
     endif
 
+    ; End of VBL processing
+    ld a,(RAM_MAP_CIRCUIT_DATA+CIRCUIT_OFFSET_CIRCUIT_OPTIONS)
+    and 1<<CIRCUIT_OPTION_BIT_GREEN
+    jr z,.background_is_white
+    ; Black on green
+    ld a,%10110110
+    out ($40),a
+    jr .end_of_vbl
+.background_is_white:
     ; Black on white
     ld a,%11110110
     out ($40),a
+.end_of_vbl:
 
     jp .loop
 

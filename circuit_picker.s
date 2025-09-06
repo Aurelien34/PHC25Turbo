@@ -32,6 +32,7 @@ circuits_list:
     dc.w rlh_circuit_you_turn
     dc.w rlh_circuit_daytono
     dc.w rlh_circuit_monaco
+    dc.w rlh_circuit_run_forest
     dc.w rlh_circuit_monzarella
     dc.w rlh_circuit_holiday_on_ice
     dc.w rlh_circuit_ice_cube_system
@@ -42,6 +43,7 @@ circuit_picker_circuits_names:
     dc.w text_name_you_turn
     dc.w text_name_daytono
     dc.w text_name_monaco
+    dc.w text_name_run_forest
     dc.w text_name_monzarella
     dc.w text_name_holiday_on_ice
     dc.w text_name_ice_cube_system
@@ -70,6 +72,8 @@ text_name_daytono:
     dc.b "Daytonneaux Speedway",0
 text_name_monaco:
     dc.b "Panach Monaco GP",0
+text_name_run_forest:
+    dc.b "Run Forest",0
 text_name_monzarella:
     dc.b "Monzarella",0
 text_name_holiday_on_ice:

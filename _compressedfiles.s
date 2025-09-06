@@ -24,6 +24,9 @@ rlh_circuit_monaco:
 	global rlh_circuit_monzarella  
 rlh_circuit_monzarella:  
 	incbin "rlh/circuit_monzarella.rlh"  
+	global rlh_circuit_run_forest  
+rlh_circuit_run_forest:  
+	incbin "rlh/circuit_run_forest.rlh"  
 	global rlh_circuit_take_it_easy  
 rlh_circuit_take_it_easy:  
 	incbin "rlh/circuit_take_it_easy.rlh"  

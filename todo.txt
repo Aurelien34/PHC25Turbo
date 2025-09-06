@@ -1,8 +1,7 @@
 - fix joystick handling
 - different car designs
 - add greetings!
-- forest stage? (run, forest!)
 - gain RAM space in order to fit circuits, cars and tiles!
 - recompute cos/sin tables?
 - compress music data?
-- Remove first and last rows from circuits data
+- car collisions => exchange speed vectors test!
