@@ -17,9 +17,20 @@ circuit_tileset_address:
 
 load_circuit:
     ; hl points to compressed circuit data
-    ld de,RAM_MAP_CIRCUIT_DATA
+    ld de,RAM_MAP_CIRCUIT_DATA+16
     call decompress_rlh
-
+    ; Offset for last row
+    ld hl,RAM_MAP_CIRCUIT_DATA+CIRCUIT_OFFSET_DATA_END-1-16
+    ld de,RAM_MAP_CIRCUIT_DATA+CIRCUIT_OFFSET_DATA_END-1
+    ld bc,CIRCUIT_OFFSET_DATA_END-CIRCUIT_OFFSET_DATA_START
+    lddr
+    ; Walls on first row
+    ld hl,RAM_MAP_CIRCUIT_DATA
+    call .generate_horizontal_wall
+    ; Walls on last row
+    ld hl,RAM_MAP_CIRCUIT_DATA+16*11
+    call .generate_horizontal_wall
+    ; Configure tile set
     ld b,0
     ld a,(RAM_MAP_CIRCUIT_DATA+CIRCUIT_OFFSET_DATA_TILESET)
     add a
@@ -30,6 +41,14 @@ load_circuit:
     inc hl
     ld b,(hl)
     ld (circuit_tileset_address),bc
+    ret
+.generate_horizontal_wall:
+    ld d,h
+    ld e,l
+    inc de
+    ld bc,15
+    ld (hl),3<<3
+    ldir
     ret
 
 dispatch_circuit_info:
