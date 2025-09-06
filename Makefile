@@ -17,7 +17,6 @@ COMPRESSION_PATH = rlh
 TOOLS_PATH = tools
 OBJ_PATH = obj
 INC_PATH = inc
-COMPRESSION_STRATEGY_CACHE_FILE = _rlh_decomp.strat
 
 # Tools
 AS="$(TOOLS_PATH)/vasmz80_mot_win32.exe"
@@ -86,6 +85,11 @@ phc:
 
 sta:
 	make $(OUTPUT_PATH)/$(SAVESTATE)
+	@echo ************************************
+	@echo *                                  *
+	@echo *            DONE!                 *
+	@echo *                                  *
+	@echo ************************************
 
 rebuild:
 	make clean
@@ -164,9 +168,6 @@ ifneq ($(wildcard $(TARGET)),)
 endif
 ifneq ($(wildcard $(SAVESTATE)),)
 	del $(SAVESTATE)
-endif
-ifneq ($(wildcard $(COMPRESSION_STRATEGY_CACHE_FILE)),)
-	del $(COMPRESSION_STRATEGY_CACHE_FILE)
 endif
 	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(EXTRACTED_TO_COMPRESS),del $(notdir $(FILE)) &)
 	cd $(TO_COMPRESS_PATH) & $(foreach FILE,$(COLOR_IMAGES_RAW),del $(notdir $(FILE)) &)
