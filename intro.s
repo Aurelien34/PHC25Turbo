@@ -42,7 +42,7 @@ sz_line_3:
 sz_line_4:
     dc.b "> Accel:  S      J",0
 sz_line_5:
-    dc.b "> Back to menu: X",0
+    dc.b "> Back to menu: RETURN",0
 sz_line_6:
     dc.b "Accelerate to start;;;",0
 sz_line_7:
