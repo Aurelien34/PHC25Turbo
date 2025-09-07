@@ -20,32 +20,44 @@ block_texts_to_display:
     ; y is pixel perfect
     ; should end with a $0000 value
     ; Room for 32x9 characters
-    dc.w 0+98*32+VRAM_ADDRESS, sz_line_0
-    dc.w 10+109*32+VRAM_ADDRESS, sz_line_1
-    dc.w 0+118*32+VRAM_ADDRESS, sz_line_2
-    dc.w 0+127*32+VRAM_ADDRESS, sz_line_3
-    dc.w 0+136*32+VRAM_ADDRESS, sz_line_4
-    dc.w 0+145*32+VRAM_ADDRESS, sz_line_5
-    dc.w 0+160*32+VRAM_ADDRESS, sz_line_6
-    dc.w 4+184*32+VRAM_ADDRESS, sz_line_7
-    dc.w 10+85*32+VRAM_ADDRESS, sz_line_ready
+    dc.w 0+94*32+VRAM_ADDRESS, sz_line_0
+    dc.w 9+105*32+VRAM_ADDRESS, sz_line_1
+    dc.w 0+114*32+VRAM_ADDRESS, sz_line_2
+    dc.w 19+114*32+VRAM_ADDRESS, sz_line_2b
+    dc.w 0+124*32+VRAM_ADDRESS, sz_line_3
+    dc.w 19+124*32+VRAM_ADDRESS, sz_line_3b
+    dc.w 0+134*32+VRAM_ADDRESS, sz_line_4
+    dc.w 19+134*32+VRAM_ADDRESS, sz_line_4b
+    dc.w 0+144*32+VRAM_ADDRESS, sz_line_5
+    dc.w 0+154*32+VRAM_ADDRESS, sz_line_6
+    dc.w 0+164*32+VRAM_ADDRESS, sz_line_7
+    dc.w 4+182*32+VRAM_ADDRESS, sz_line_8
+    dc.w 10+82*32+VRAM_ADDRESS, sz_line_ready
     dc.w $0000
 
 sz_line_0:
     dc.b "Keys are:",0
 sz_line_1:
-    dc.b "P1     P2",0
+    dc.b "Player 1  Player 2",0
 sz_line_2:
-    dc.b "> Left:   D      K",0
+    dc.b "> Left:  D",0
+sz_line_2b:
+    dc.b "K",0
 sz_line_3:
-    dc.b "> Right:  F      L",0
+    dc.b "> Right: F",0
+sz_line_3b:
+    dc.b "L",0
 sz_line_4:
-    dc.b "> Accel:  S      J",0
+    dc.b "> Accel: S",0
+sz_line_4b:
+    dc.b "J",0
 sz_line_5:
     dc.b "> Back to menu: RETURN",0
 sz_line_6:
-    dc.b "Accelerate to start;;;",0
+    dc.b "> G for greetings",0
 sz_line_7:
+    dc.b "Accelerate to start;;;",0
+sz_line_8:
     dc.b "PHC25 < Bouz 2025 for RPUFOS",0
 sz_line_ready:
     dc.b "Ignite your engines;;;",0
