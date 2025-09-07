@@ -27,6 +27,6 @@ Z equ 8
 ; Car 1 x, y, angle
     dc.b 226, 110, 0
 ; Lap count
-    dc.b 5
+    dc.b 3
 ; Circuit options
     dc.b 1
