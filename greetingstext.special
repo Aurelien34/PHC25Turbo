@@ -13,4 +13,4 @@
 	dc.b "- My girls for testing every    "
 	dc.b "step of the project in MAME     "
 	dc.b "- My wife who did not see me a  "
-	dc.b "lot in the last few weeks       "
+	dc.b "lot in the last few weeks ", 129, 129, 129, 129, 129, 129
