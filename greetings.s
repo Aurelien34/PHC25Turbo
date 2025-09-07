@@ -6,6 +6,11 @@
 
     global show_greetings
 
+VRAM_TEXT equ VRAM_ADDRESS ; $6000
+VRAM_ATTRIBUTES equ $6800
+WAVE_DATA equ RAM_MAP_CIRCUIT_DATA
+
+
 show_greetings:
     call ay8910_mute
 
@@ -19,7 +24,6 @@ show_greetings:
     or a
     jr nz,.wait_for_no_inputs
 
-
     call clear_screen
 
     ; switch to text mode
@@ -28,11 +32,16 @@ show_greetings:
 
     ; load text
     ld hl,rlh_greetingstext
-    ld de,VRAM_ADDRESS
+    ld de,VRAM_TEXT
     call decompress_rlh
 
     ; Fill half of the screen in red
     call half_fill_screen
+
+    ; uncompress wave data
+    ld hl,rlh_greetingsdata
+    ld de,WAVE_DATA
+    call decompress_rlh
 
     ; wave index
     ld ixh,0
@@ -73,8 +82,8 @@ show_greetings:
 
 half_fill_screen:
 
-    ld hl,$6800+16
-    ld de,$6800+17
+    ld hl,VRAM_ATTRIBUTES+16
+    ld de,VRAM_ATTRIBUTES+17
     ld a,%100
     ld iyl,16
 .loopy
@@ -91,11 +100,11 @@ half_fill_screen:
     ret
 
 wave:
-    ld de,$6800+16-3
+    ld de,VRAM_ATTRIBUTES+16-3
     ld iyl,16
 .loopy:
     ld a,ixh
-    ld hl,wavedata
+    ld hl,WAVE_DATA
     ld b,0
     ld c,a
     add hl,bc
@@ -113,24 +122,6 @@ wave:
     dec iyl
     jr nz,.loopy
     ret
-
-wavedata:
-    dc.b 4,4,4,4,4,4
-    dc.b 0,4,4,4,4,4
-    dc.b 0,0,4,4,4,4
-    dc.b 0,0,0,4,4,4
-    dc.b 0,0,0,0,4,4
-    dc.b 0,0,0,0,4,4
-    dc.b 0,0,0,0,0,4
-    dc.b 0,0,0,0,0,0
-    dc.b 0,0,0,0,0,0
-    dc.b 0,0,0,0,0,4
-    dc.b 0,0,0,0,4,4
-    dc.b 0,0,0,4,4,4
-    dc.b 0,0,4,4,4,4
-    dc.b 0,0,4,4,4,4
-    dc.b 0,4,4,4,4,4
-    dc.b 4,4,4,4,4,4
 
 increment_wave_index:
     ld a,ixh
