@@ -103,13 +103,12 @@ wave:
     ld de,VRAM_ATTRIBUTES+16-3
     ld iyl,16
 .loopy:
-    ld a,ixh
     ld hl,WAVE_DATA
     ld b,0
-    ld c,a
+    ld c,ixh
     add hl,bc
 
-    ld bc,6
+    ld c,6 ; b is already 0 !
     ldir
 
     ex de,hl
