@@ -194,9 +194,9 @@ precalc_shifted_cars:
     ld de,(.ram_precalc_address)
     inc de
     inc de
-    ld ixh,9*8 ; 9 sprites times 8 rows
+    ld b,9*8 ; 9 sprites times 8 rows
 .loop_shift_sprites:
-    ld ixl,7 ; 7 shifts
+    ld c,7 ; 7 shifts
 .loop_shift_1_sprite:
         ld a,(hl)
         inc hl ; move to next source byte
@@ -209,14 +209,14 @@ precalc_shifted_cars:
         rra ; inject the carry on the left
         ld (de),a
         inc de
-        dec ixl
+        dec c
         jr nz,.loop_shift_1_sprite
     ; skip unshifted sprite, get ready for the next one!
     inc hl
     inc hl
     inc de
     inc de
-    dec ixh
+    dec b
     jr nz,.loop_shift_sprites
     ret
 
