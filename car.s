@@ -302,8 +302,8 @@ erase_car:
     ld d,(ix+CAR_OFFSET_BACKGROUND_BACKUP_DATA_ADDRESS+1)
     
     ld iyl,8
-.eraseloop:
     ld bc,31
+.eraseloop:
     ld a,(de)
     ld (hl),a
     inc de
