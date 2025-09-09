@@ -45,22 +45,10 @@ show_greetings:
     ld a,MUSIC_NUMBER_GREETINGS
     call music_init
 
-.loop:
+    jp loop
 
-    call wait_for_vbl
-    call wave
-    call increment_wave_index
-
-    if DEBUG = 1
-    ; detect "out of VBL" VRAM accesses
-    in a,($40)
-    bit 4,a
-.stop
-    jr z,.stop
-    endif
-
-    ; Play music!
-    call music_loop
+loop:
+    call display_and_music_loop_iteration
 
     ; Read inputs
     call keyboard_update_key_pressed
@@ -81,17 +69,46 @@ show_greetings:
     or a
     jr z,konami_done
 .wait_for_no_inputs_after_1_konami_key_press
+    call display_and_music_loop_iteration
     ; wait for keys release
     call keyboard_update_key_pressed
     jr c,.wait_for_no_inputs_after_1_konami_key_press
 .end_loop:
-    jr .loop
+    jr loop
 
 reset_code:
     ld hl,konami_code_data
     ld (konami_code_ptr),hl
     ret
 
+konami_done:
+    ; activate mirror mode
+    ld hl,circuit_mirror_mode
+    ld a,(hl)
+    cpl
+    ld (hl),a
+
+    jr reset_code
+    ret
+
+display_and_music_loop_iteration:
+
+    call wait_for_vbl
+    call wave
+    call increment_wave_index
+
+    if DEBUG = 1
+    ; detect "out of VBL" VRAM accesses
+    in a,($40)
+    bit 4,a
+.stop
+    jr z,.stop
+    endif
+
+    ; Play music!
+    call music_loop
+
+    ret
 
 half_fill_screen:
 
@@ -150,13 +167,3 @@ konami_code_ptr:
 
 konami_code_data:
     dc.b $80,~$10,$80,~$10,$81,~$10,$81,~$10,$82,~$10,$83,~$10,$82,~$10,$83,~$10,$85,~$08,$81,~$04,$00
-
-konami_done:
-    ; activate mirror mode
-    ld hl,circuit_mirror_mode
-    ld a,(hl)
-    cpl
-    ld (hl),a
-
-    jr reset_code
-    ret
