@@ -64,9 +64,34 @@ show_greetings:
 
     ; Read inputs
     call keyboard_update_key_pressed
-	dc.b $d8 ; "ret c" not assembled correctly by VASM!
-
+	jr nc,.end_loop
+    ; A key has been pressed
+    ; check Konami code state
+    ld hl,(konami_code_ptr)
+    ld a,(keyboard_last_key_pressed_port)
+    cp (hl)
+    jr nz,reset_code
+    inc hl
+    ld a,(keyboard_last_key_pressed_bitmask)
+    cp (hl)
+    jr nz,reset_code
+    inc hl
+    ld (konami_code_ptr),hl
+    ld a,(hl)
+    or a
+    jr z,konami_done
+.wait_for_no_inputs_after_1_konami_key_press
+    ; wait for keys release
+    call keyboard_update_key_pressed
+    jr c,.wait_for_no_inputs_after_1_konami_key_press
+.end_loop:
     jr .loop
+
+reset_code:
+    ld hl,konami_code_data
+    ld (konami_code_ptr),hl
+    ret
+
 
 half_fill_screen:
 
@@ -124,4 +149,14 @@ konami_code_ptr:
     dc.w konami_code_data
 
 konami_code_data:
-    dc.b $80,$10,$80,$10,$81,$10,$81,$10,$82,$10,$83,$10,$82,$10,$83,$10,$85,$08,$81,$04,$00
+    dc.b $80,~$10,$80,~$10,$81,~$10,$81,~$10,$82,~$10,$83,~$10,$82,~$10,$83,~$10,$85,~$08,$81,~$04,$00
+
+konami_done:
+    ; activate mirror mode
+    ld hl,circuit_mirror_mode
+    ld a,(hl)
+    cpl
+    ld (hl),a
+
+    jr reset_code
+    ret

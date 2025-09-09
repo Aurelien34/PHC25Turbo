@@ -5,6 +5,7 @@
     section	code,text
 
     global load_circuit, dispatch_circuit_info, draw_circuit
+    global circuit_mirror_mode
 
 
 tilesets_list:

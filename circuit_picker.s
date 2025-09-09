@@ -48,19 +48,12 @@ circuit_picker_circuits_names:
     dc.w text_name_holiday_on_ice
     dc.w text_name_ice_cube_system
 
-block_texts_to_display:
-    ; x is in 8 pixels increments, 32 increments for one row
-    ; y is pixel perfect
-    ; should end with a $0000 value
-    ; Room for 32x9 characters
-    dc.w 2+9*32+VRAM_ADDRESS, text_title_0
-    dc.w 1+23*32+VRAM_ADDRESS, text_title_1
-    dc.w $0000
-
 CIRCUIT_COUNT equ (circuits_list_end-circuits_list)/2
 
 text_title_0:
     dc.b "SELECT YOUR CIRCUIT", 0
+text_title_0_mirror:
+    dc.b "MIRROR MODE ACTIVE;",0
 text_title_1:
     dc.b "=1= for 1P =2= for 2P", 0
 
@@ -129,8 +122,19 @@ circuit_picker_show:
     call precalc_shifted_cars
         
     ; Write text
-    ld ix,block_texts_to_display
-    call write_text_block
+    ld de,1+23*32+VRAM_ADDRESS
+    ld bc,text_title_1
+    call write_string
+    ld de,2+9*32+VRAM_ADDRESS
+    ld a,(circuit_mirror_mode)
+    or a
+    jr nz,.mirror_mode
+    ld bc,text_title_0
+    jr .mode_done
+.mirror_mode:
+    ld bc,text_title_0_mirror
+.mode_done:
+    call write_string
 
     ; Write circuits names
     call write_circuits_list

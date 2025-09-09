@@ -122,6 +122,11 @@ wheel2_address_down:
 show_intro:
     call ay8910_mute
 
+.wait_for_no_inputs
+    ; wait for keys release
+    call keyboard_update_key_pressed
+    jr c,.wait_for_no_inputs
+
     xor a
     call clear_screen ; clear whole screen, but we don't have the color we want for the bottom of the screen
     call switch_to_mode_graphics_sd_white
@@ -192,6 +197,13 @@ show_intro:
     call update_animation
     call music_loop
 
+    ; Read inputs
+    call update_inputs
+    ld a,(RAM_MAP_CONTROLLERS_VALUES)
+    bit INPUT_BIT_GREETINGS,a
+    jr nz,.greetings
+
+    ; Handle all other keys
     call keyboard_update_key_pressed
 	dc.b $d8 ; "ret c" not assembled correctly by VASM!
 
