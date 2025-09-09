@@ -3,10 +3,42 @@
 
     section	code,text
 
+    global keyboard_update_key_pressed, keyboard_last_key_pressed_port, keyboard_last_key_pressed_bitmask
     global update_inputs
 
 ; Mapping is here: https://github.com/mamedev/mame/blob/master/src/mame/sanyo/phc25.cpp (line 323...)
 ; Joystick ports (registers for ports A and B) are here: https://github.com/mamedev/mame/blob/master/src/devices/sound/ay8910.h
+
+keyboard_last_key_pressed:
+keyboard_last_key_pressed_port:
+    dc.b 0
+keyboard_last_key_pressed_bitmask:
+    dc.b 0
+
+; return key port and bitmask @last_key_pressed + carry flag is a key has been pressed
+keyboard_update_key_pressed:
+    ld c,$80
+.loop
+    in a,(c) ; also set Z flag!
+    cp $ff
+    jr nz,.key_pressed
+
+    inc c
+    ld a,c
+    cp $89
+    jr nz,.loop
+
+    ; no key detected
+    xor a ; clear carry and set last key pressed port all at once
+    ld (keyboard_last_key_pressed_port),a
+    ret
+.key_pressed:
+    ld (keyboard_last_key_pressed_bitmask),a
+    ld a,c
+    ld (keyboard_last_key_pressed_port),a
+    scf ; set carry flag
+    ret
+
 update_inputs:
     push bc
 

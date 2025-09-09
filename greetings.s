@@ -16,13 +16,8 @@ show_greetings:
 
 .wait_for_no_inputs
     ; wait for keys release
-    call update_inputs
-    ld a,(RAM_MAP_CONTROLLERS_VALUES)
-    or a
-    jr nz,.wait_for_no_inputs
-    ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
-    or a
-    jr nz,.wait_for_no_inputs
+    call keyboard_update_key_pressed
+    jr c,.wait_for_no_inputs
 
     call clear_screen
 
@@ -68,17 +63,10 @@ show_greetings:
     call music_loop
 
     ; Read inputs
-    call update_inputs
-    ld a,(RAM_MAP_CONTROLLERS_VALUES)
-    or a
-    dc.b $c0 ; "ret nz" is not assembled correctly by VASM
-    ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
-    or a
-    dc.b $c0 ; "ret nz" is not assembled correctly by VASM
+    call keyboard_update_key_pressed
+	dc.b $d8 ; "ret c" not assembled correctly by VASM!
 
     jr .loop
-
-    ret
 
 half_fill_screen:
 
@@ -131,3 +119,9 @@ increment_wave_index:
 .continue
     ld ixh,a
     ret
+
+konami_code_ptr:
+    dc.w konami_code_data
+
+konami_code_data:
+    dc.b $80,$10,$80,$10,$81,$10,$81,$10,$82,$10,$83,$10,$82,$10,$83,$10,$85,$08,$81,$04,$00

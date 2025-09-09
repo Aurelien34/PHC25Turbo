@@ -15,6 +15,9 @@ tilesets_list:
 circuit_tileset_address:
     dc.w 0
 
+circuit_mirror_mode:
+    dc.b 0
+
 load_circuit:
     ; hl points to compressed circuit data
     ld de,RAM_MAP_CIRCUIT_DATA+16
@@ -41,6 +44,7 @@ load_circuit:
     inc hl
     ld b,(hl)
     ld (circuit_tileset_address),bc
+    call mirror_circuit
     ret
 .generate_horizontal_wall:
     ld d,h
@@ -50,6 +54,68 @@ load_circuit:
     ld (hl),3<<3
     ldir
     ret
+
+mirror_circuit:
+    ld a,(circuit_mirror_mode)
+    or a
+	dc.b $c8 ; "ret z" not assembled correctly by VASM!
+    ; compute circuit mirror version
+    ld hl,RAM_MAP_CIRCUIT_DATA+16
+    ld de,RAM_MAP_CIRCUIT_DATA+16+15
+    ld iyl,10
+.loopy
+    ld ixl,8
+    push hl
+    push de
+.loopx
+    ld a,(hl)
+    call mirror_tile
+    ld c,a
+    ld a,(de)
+    call mirror_tile
+    ld (hl),a
+    ld a,c
+    ld (de),a
+    inc hl
+    dec de
+    dec ixl
+    jr nz,.loopx
+    pop hl ; reverse order on purpose
+    pop de
+    ld bc,16
+    add hl,bc
+    ex de,hl
+    add hl,bc
+    dec iyl
+    jr nz,.loopy
+    ret
+
+    ;dc.b "            BREAKPOINT              "
+mirror_tile:
+    push hl
+    push bc
+    push af
+    ld hl,.tile_data
+    ld b,0
+    srl a
+    srl a
+    srl a
+    ld c,a
+    add hl,bc
+    ld b,(hl)
+    pop af
+    and %111
+    ld c,a
+    ld a,8
+    sub c
+    and %111
+    add b
+    pop bc
+    pop hl
+    ret
+.tile_data:
+    dc.b 0<<3,1<<3,2<<3,3<<3,5<<3,4<<3,7<<3,6<<3,10<<3,9<<3,8<<3,11<<3,12<<3
+
 
 dispatch_circuit_info:
     ; now load car positions in circuit
@@ -71,8 +137,16 @@ copy_car_characteristics
     xor a
     ld (de),a   ; x lower
     inc de
-    ld a,(hl)   ; x upper
+    ld c,(hl)   ; x upper
+
     inc hl
+    ld a,(circuit_mirror_mode)
+    or a
+    ld a,c
+    jr z,.no_mirror
+    ld a,255-8
+    sub c
+.no_mirror:
     ld (de),a
     inc de
     xor a
