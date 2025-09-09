@@ -192,16 +192,9 @@ show_intro:
     call update_animation
     call music_loop
 
-    ; Read inputs
-    call update_inputs
-    ld a,(RAM_MAP_CONTROLLERS_VALUES)
-    bit INPUT_BIT_FIRE,a
-    dc.b $c0 ; "ret nz" is not assembled correctly by VASM
-    bit INPUT_BIT_GREETINGS,a
-    jr nz,.greetings
-    ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
-    bit INPUT_BIT_FIRE,a
-    dc.b $c0 ; "ret nz" is not assembled correctly by VASM
+    call keyboard_update_key_pressed
+	dc.b $d8 ; "ret c" not assembled correctly by VASM!
+
     jr .end_controls
 
 .greetings:
