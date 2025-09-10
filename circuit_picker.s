@@ -6,7 +6,7 @@
 
     section	code,text
 
-    global circuit_picker_circuit_index, circuit_picker_circuit_data_address, circuit_picker_circuits_names, victory_list
+    global circuit_picker_circuit_index, circuit_picker_circuit_data_address, circuit_picker_circuits_names, victory_list, clear_victory_list
     global circuit_picker_show
 
 MINI_TILES_BEFORE_VBL equ 24
@@ -24,8 +24,7 @@ CIRCUITS_NAMES_INITIAL_POSITION equ 7+(CURSOR_POSITION_BASE_Y)*32+VRAM_ADDRESS
 victory_list:
     dc.b 0, 0, 0, 0
     dc.b 0, 0, 0, 0
-    dc.b 0, 0, 0, 0
-    dc.b 0, 0, 0, 0
+victory_list_end:
 
 circuits_list:
     dc.w rlh_circuit_take_it_easy
@@ -597,4 +596,13 @@ picker_end_of_vram_access:
     ; Black on white
     ld a,%11110110
     out ($40),a
+    ret
+
+clear_victory_list:
+    ld hl,victory_list
+    ld de,victory_list+1
+    xor a
+    ld (hl),a
+    ld bc,victory_list_end-victory_list-1
+    ldir
     ret

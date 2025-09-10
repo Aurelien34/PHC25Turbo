@@ -87,7 +87,8 @@ konami_done:
     ld a,(hl)
     cpl
     ld (hl),a
-
+    ; clear victories
+    call clear_victory_list
     jr reset_code
     ret
 

@@ -1,7 +1,5 @@
 - fix joystick handling
 - gain RAM space in order to fit circuits, cars and tiles!
 - recompute cos/sin tables?
-- reset trophies when switching to mirror mode
 - victory counter in 2 players mode
-- welcome screen in suicide RAM
 - switch .Net code to CSX files?
