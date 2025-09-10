@@ -167,8 +167,7 @@ decomp_rle:
 .not_over_yet:
 	ex af,af' ;'
 	; shadow
-	dec b
-	jr nz,.loop_multi_instances
+	djnz .loop_multi_instances
 	push de
 	exx
 	; Regular
@@ -210,8 +209,7 @@ decomp_huffman:
 get_next_bit:
     sll c; shift left and store bit of interest in carry flag
     ex af,af' ; '; backup status flags to shadow registers
-    dec b ; point to the next bit
-    jr nz,.end ; still some bits to process
+    djnz .end ; still some bits to process
 
     ld b,8 ; back to first bit
     inc hl ; point to next byte

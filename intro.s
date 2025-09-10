@@ -261,8 +261,7 @@ animate_wheels:
     exx
     ld (hl),a
     add hl,de
-    dec b
-    jr nz,.copy_loop
+    djnz .copy_loop
 
 .introscreenwheels_swap_end:
 

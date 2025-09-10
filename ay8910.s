@@ -136,8 +136,7 @@ ay8910_read_command_sequence:
     ld a,(hl)
     inc hl
     AY_PUSH_VAL
-    dec b
-    jr nz,.command_loop
+    djnz .command_loop
     ret
 
 ay8910_init:

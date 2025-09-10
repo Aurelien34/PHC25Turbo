@@ -112,7 +112,6 @@ emulator_security_idle:
 .innerloop
     dec c
     jr nz,.innerloop
-    dec b
-    jr nz,.innerloop
+    djnz .innerloop
     ret
     endif

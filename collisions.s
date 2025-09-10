@@ -573,8 +573,7 @@ compute_cars_interactions:
     ld b,4
 .exchange_speed_vectors_loop:
     call .exchange_vectors_step
-    dec b
-    jr nz,.exchange_speed_vectors_loop
+    djnz .exchange_speed_vectors_loop
 
     scf ; set carry
     ret

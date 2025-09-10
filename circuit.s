@@ -165,8 +165,7 @@ copy_car_characteristics
 .loopclear
     ld (de),a
     inc de
-    dec b
-    jr nz,.loopclear
+    djnz .loopclear
     ret
 
 last_tile_drawn:
@@ -221,8 +220,7 @@ get_max_tile_index:
     jr c,.lower
     ld c,a
 .lower:
-    dec b
-    jr nz,.loop
+    djnz .loop
     ld a,c ; transfer result to [a] register
     ret
 
@@ -276,8 +274,7 @@ draw_circuit_tile:
     ex de,hl
     pop hl
 
-    dec b
-    jr nz,.loop
+    djnz .loop
 
 .enddraw:
     pop de

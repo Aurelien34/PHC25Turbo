@@ -216,8 +216,7 @@ precalc_shifted_cars:
     inc hl
     inc de
     inc de
-    dec b
-    jr nz,.loop_shift_sprites
+    djnz .loop_shift_sprites
     ret
 
 prepare_draw_car:
