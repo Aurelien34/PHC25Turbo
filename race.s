@@ -22,7 +22,7 @@ res_guy_loose_2:
     global current_laps_to_go, race_winner_id, startup_count_down_counter
 
 ; duration in VBL count for the race to end after a player crosses the line
-END_OF_RACE_EXIT_DURATION equ 60*7+30 ; 60*n seconds
+END_OF_RACE_EXIT_DURATION equ 60*7+27 ; 60*n seconds
 STARTUP_COUNT_DOWN_SPEED equ 2
 
 
