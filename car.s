@@ -551,70 +551,70 @@ update_car_engine_sound:
 speed_vectors:
 ; 4 groups of 64 bytes, one for each speed range
 ; Radius $40
-    dc.w $0000, $ffc0
-    dc.w $0019, $ffc5
-    dc.w $002d, $ffd3
-    dc.w $003b, $ffe7
+    dc.w $0000, $FFC0
+    dc.w $0018, $FFC4
+    dc.w $002D, $FFD2
+    dc.w $003B, $FFE7
     dc.w $0040, $0000
-    dc.w $003b, $0019
-    dc.w $002d, $002d
-    dc.w $0019, $003b
+    dc.w $003B, $0018
+    dc.w $002D, $002D
+    dc.w $0018, $003B
     dc.w $0000, $0040
-    dc.w $ffe7, $003b
-    dc.w $ffd3, $002d
-    dc.w $ffc5, $0019
-    dc.w $ffc0, $0000
-    dc.w $ffc5, $ffe7
-    dc.w $ffd3, $ffd3
-    dc.w $ffe7, $ffc5
+    dc.w $FFE7, $003B
+    dc.w $FFD2, $002D
+    dc.w $FFC4, $0018
+    dc.w $FFC0, $0000
+    dc.w $FFC4, $FFE7
+    dc.w $FFD2, $FFD2
+    dc.w $FFE7, $FFC4
 ; Radius $80
-    dc.w $0000, $ff80
-    dc.w $0031, $ff8a
-    dc.w $005b, $ff45
-    dc.w $0076, $ffcf
+    dc.w $0000, $FF80
+    dc.w $0030, $FF89
+    dc.w $005A, $FFA5
+    dc.w $0076, $FFCF
     dc.w $0080, $0000
-    dc.w $0076, $0031
-    dc.w $005b, $005b
-    dc.w $0031, $0076
+    dc.w $0076, $0030
+    dc.w $005A, $005A
+    dc.w $0030, $0076
     dc.w $0000, $0080
-    dc.w $ffcf, $0076
-    dc.w $ff45, $005b
-    dc.w $ff8a, $0031
-    dc.w $ff80, $0000
-    dc.w $ff8a, $ffcf
-    dc.w $ff45, $ff45
-    dc.w $ffcf, $ff8a
+    dc.w $FFCF, $0076
+    dc.w $FFA5, $005A
+    dc.w $FF89, $0030
+    dc.w $FF80, $0000
+    dc.w $FF89, $FFCF
+    dc.w $FFA5, $FFA5
+    dc.w $FFCF, $FF89
 ; Radius $c0
-    dc.w $0000, $ff40
-    dc.w $0049, $ff4f
-    dc.w $0088, $ff78
-    dc.w $00b1, $ffb7
-    dc.w $00c0, $0000
-    dc.w $00b1, $0049
-    dc.w $0088, $0088
-    dc.w $0049, $00b1
-    dc.w $0000, $00c0
-    dc.w $ffb7, $00b1
-    dc.w $ff78, $0088
-    dc.w $ff4f, $0049
-    dc.w $ff40, $0000
-    dc.w $ff4f, $ffb7
-    dc.w $ff78, $ff78
-    dc.w $ffb7, $ff4f
+    dc.w $0000, $FF40
+    dc.w $0049, $FF4E
+    dc.w $0087, $FF78
+    dc.w $00B1, $FFB6
+    dc.w $00C0, $0000
+    dc.w $00B1, $0049
+    dc.w $0087, $0087
+    dc.w $0049, $00B1
+    dc.w $0000, $00C0
+    dc.w $FFB6, $00B1
+    dc.w $FF78, $0087
+    dc.w $FF4E, $0049
+    dc.w $FF40, $0000
+    dc.w $FF4E, $FFB6
+    dc.w $FF78, $FF78
+    dc.w $FFB6, $FF4E
 ; Radius $100
-    dc.w $0000, $ff00
-    dc.w $0062, $ff13
-    dc.w $00b5, $ff4b
-    dc.w $00ec, $ff9e
+    dc.w $0000, $FF00
+    dc.w $0061, $FF13
+    dc.w $00B5, $FF4A
+    dc.w $00EC, $FF9E
     dc.w $0100, $0000
-    dc.w $00ec, $0062
-    dc.w $00b5, $00b5
-    dc.w $0062, $00ec
+    dc.w $00EC, $0061
+    dc.w $00B5, $00B5
+    dc.w $0061, $00EC
     dc.w $0000, $0100
-    dc.w $ff9e, $00ec
-    dc.w $ff4b, $00b5
-    dc.w $ff13, $0062
-    dc.w $ff00, $0000
-    dc.w $ff13, $ff9e
-    dc.w $ff4b, $ff4b
-    dc.w $ff9e, $ff13
+    dc.w $FF9E, $00EC
+    dc.w $FF4A, $00B5
+    dc.w $FF13, $0061
+    dc.w $FF00, $0000
+    dc.w $FF13, $FF9E
+    dc.w $FF4A, $FF4A
+    dc.w $FF9E, $FF13
