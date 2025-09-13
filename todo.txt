@@ -1,4 +1,2 @@
-- add version on title screen
-- center circuit name in hdd
 - fix joystick handling
 - switch .Net code to CSX files?

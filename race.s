@@ -577,11 +577,36 @@ show_hdd:
     ld b,0
     ld c,a
     add hl,bc
-    ld c,(hl)
+    ld e,(hl)
     inc hl
-    ld b,(hl)
-    ld de,3+32*(192-16+4)+VRAM_ADDRESS
-
+    ld d,(hl)
+    ex de,hl
+    call get_string_length
+    ld b,a
+    ld a,32
+    sub b
+    srl a
+    ld b,0
+    ld c,a
+    ex de,hl
+    ld hl,32*(192-16+4)+VRAM_ADDRESS
+    add hl,bc
+    ex de,hl
+    ld b,h
+    ld c,l
     call write_string
 
+    ret
+
+; string address in [hl]
+; result in [a]
+get_string_length:
+    push hl
+    xor a
+    ld bc,$ffff
+    cpir
+    inc bc
+    ld a,c
+    neg
+    pop hl
     ret
