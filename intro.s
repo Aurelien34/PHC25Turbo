@@ -54,11 +54,11 @@ sz_line_4:
 sz_line_4b:
     dc.b "J",0
 sz_line_5:
-    dc.b "> Back to menu: RETURN",0
-sz_line_6:
     dc.b "> G for greetings",0
+sz_line_6:
+    dc.b "> Back to menu: RETURN",0
 sz_line_7:
-    dc.b "Accelerate to start;;;",0
+    dc.b "> Accelerate to start;;;",0
 sz_line_8:
     dc.b "Aurelien < Bouz 2025 for RPUFOS",0
 sz_line_ready:
