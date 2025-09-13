@@ -6,7 +6,7 @@ My contribution to the summer game jam "Retro Programmers United for Obscure Sys
 
 ### Title screen showing some technical hacks to show unusual colors (2000) and transparency (on the helmet):
 
-![image](readme_images/IntroScreen.jpg)
+![image](readme_images/IntroScreen.png)
 
 ### Time to pick a circuit:
 
