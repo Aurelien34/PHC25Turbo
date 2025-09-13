@@ -12,9 +12,9 @@ rlh_circuit_daytono:
 	global rlh_circuit_frame  
 rlh_circuit_frame:  
 	incbin "rlh/circuit_frame.rlh"  
-	global rlh_circuit_holiday_on_ice  
-rlh_circuit_holiday_on_ice:  
-	incbin "rlh/circuit_holiday_on_ice.rlh"  
+	global rlh_circuit_frozen  
+rlh_circuit_frozen:  
+	incbin "rlh/circuit_frozen.rlh"  
 	global rlh_circuit_ice_cube_system  
 rlh_circuit_ice_cube_system:  
 	incbin "rlh/circuit_ice_cube_system.rlh"  
@@ -39,9 +39,15 @@ rlh_circuit_tiles_1:
 	global rlh_circuit_tiles_2  
 rlh_circuit_tiles_2:  
 	incbin "rlh/circuit_tiles_2.rlh"  
+	global rlh_circuit_wetstone  
+rlh_circuit_wetstone:  
+	incbin "rlh/circuit_wetstone.rlh"  
 	global rlh_circuit_you_turn  
 rlh_circuit_you_turn:  
 	incbin "rlh/circuit_you_turn.rlh"  
+	global rlh_circuit_you_turn_easy  
+rlh_circuit_you_turn_easy:  
+	incbin "rlh/circuit_you_turn_easy.rlh"  
 	global rlh_greetingsdata  
 rlh_greetingsdata:  
 	incbin "rlh/greetingsdata.rlh"  

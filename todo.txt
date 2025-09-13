@@ -1,5 +1,4 @@
+- add version on title screen
+- center circuit name in hdd
 - fix joystick handling
-- gain RAM space in order to fit circuits, cars and tiles!
-- recompute cos/sin tables?
-- victory counter in 2 players mode
 - switch .Net code to CSX files?

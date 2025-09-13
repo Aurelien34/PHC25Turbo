@@ -12,7 +12,7 @@
 MINI_TILES_BEFORE_VBL equ 24
 
 CURSOR_POSITION_BASE_X equ 10
-CURSOR_POSITION_BASE_Y equ 60
+CURSOR_POSITION_BASE_Y equ 58
 
 CIRCUIT_FRAME_VRAM_ADDRESS equ 25+6*32+VRAM_ADDRESS
 CIRCUIT_VRAM_ADDRESS equ CIRCUIT_FRAME_VRAM_ADDRESS+1+5*32
@@ -24,27 +24,32 @@ CIRCUITS_NAMES_INITIAL_POSITION equ 7+(CURSOR_POSITION_BASE_Y)*32+VRAM_ADDRESS
 victory_list:
     dc.b 0, 0, 0, 0
     dc.b 0, 0, 0, 0
+    dc.b 0, 0
 victory_list_end:
 
 circuits_list:
     dc.w rlh_circuit_take_it_easy
-    dc.w rlh_circuit_you_turn
+    dc.w rlh_circuit_you_turn_easy
+    dc.w rlh_circuit_frozen
     dc.w rlh_circuit_daytono
-    dc.w rlh_circuit_monaco
+    dc.w rlh_circuit_you_turn
     dc.w rlh_circuit_run_forest
+    dc.w rlh_circuit_monaco
+    dc.w rlh_circuit_wetstone
     dc.w rlh_circuit_monzarella
-    dc.w rlh_circuit_holiday_on_ice
     dc.w rlh_circuit_ice_cube_system
 circuits_list_end:
 
 circuit_picker_circuits_names:
     dc.w text_name_take_it_easy
-    dc.w text_name_you_turn
+    dc.w text_name_you_turn_easy
+    dc.w text_name_frozen
     dc.w text_name_daytono
-    dc.w text_name_monaco
+    dc.w text_name_you_turn
     dc.w text_name_run_forest
+    dc.w text_name_monaco
+    dc.w text_name_wetstone
     dc.w text_name_monzarella
-    dc.w text_name_holiday_on_ice
     dc.w text_name_ice_cube_system
 
 CIRCUIT_COUNT equ (circuits_list_end-circuits_list)/2
@@ -58,6 +63,8 @@ text_title_1:
 
 text_name_take_it_easy:
     dc.b "Take it easy",0
+text_name_you_turn_easy:
+    dc.b "You turn easy",0
 text_name_you_turn:
     dc.b "You turn",0
 text_name_daytono:
@@ -68,10 +75,12 @@ text_name_run_forest:
     dc.b "Run Forest",0
 text_name_monzarella:
     dc.b "Monzarella",0
-text_name_holiday_on_ice:
-    dc.b "Holiday on ice",0
+text_name_frozen:
+    dc.b "Frozen",0
 text_name_ice_cube_system:
     dc.b "Ice Cube System",0
+text_name_wetstone:
+    dc.b "Wetstone",0
 
 circuit_picker_circuit_data_address:
     dc.w $ffff
@@ -114,7 +123,7 @@ circuit_picker_show:
 
     ; bottom
     ld hl,4+50*32+VRAM_ADDRESS
-    ld ix,27+(192-50)<<8
+    ld ix,25+(192-55)<<8
     call draw_black_rectangle
 
     ; load "cursor"
@@ -242,8 +251,10 @@ compute_car_position:
     ld a,(circuit_picker_circuit_index)
     add a
     add a
+    ld b,a
     add a
     add a
+    sub b
     ld d,CURSOR_POSITION_BASE_Y
     add d
     ld (IX+CAR_OFFSET_Y+1),a
@@ -536,7 +547,7 @@ write_circuits_list:
     pop de
 
     ex de,hl
-    ld bc,32*16
+    ld bc,32*12
     add hl,bc
     ex de,hl
 
