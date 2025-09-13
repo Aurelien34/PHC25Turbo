@@ -31,8 +31,10 @@ block_texts_to_display:
     dc.w 0+144*32+VRAM_ADDRESS, sz_line_5
     dc.w 0+154*32+VRAM_ADDRESS, sz_line_6
     dc.w 0+164*32+VRAM_ADDRESS, sz_line_7
-    dc.w 4+182*32+VRAM_ADDRESS, sz_line_8
+    dc.w 1+182*32+VRAM_ADDRESS, sz_line_8
     dc.w 10+82*32+VRAM_ADDRESS, sz_line_ready
+    dc.w 32-4+125*32+VRAM_ADDRESS, sz_line_version_1
+    dc.w 32-5+135*32+VRAM_ADDRESS, sz_line_version_2
     dc.w $0000
 
 sz_line_0:
@@ -58,9 +60,13 @@ sz_line_6:
 sz_line_7:
     dc.b "Accelerate to start;;;",0
 sz_line_8:
-    dc.b "PHC25 < Bouz 2025 for RPUFOS",0
+    dc.b "Aurelien < Bouz 2025 for RPUFOS",0
 sz_line_ready:
     dc.b "Ignite your engines;;;",0
+sz_line_version_1:
+    dc.b "V1@0",0
+sz_line_version_2:
+    dc.b "PHC25",0
 
 DIGIT_COUNT equ 3
 DIGIT_IMAGE_SEQUENCE_COUNT equ 3
