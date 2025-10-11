@@ -35,7 +35,7 @@ AY_ENVELOPPE_TYPE_REPEATED_DECAY_ATTACK equ 10  ; \/\/\/\/\/\     repeated decay
 AY_ENVELOPPE_TYPE_SINGLE_DECAY_THEN_HOLD equ 11 ; \|              single decay then hold
 AY_ENVELOPPE_TYPE_REPEATED_ATTACK equ 12        ; /|/|/|/|/|/     repeated attack
 AY_ENVELOPPE_TYPE_SINGLE_ATTACK_THEN_HOLD equ 13; /               single attack then hold
-AY_ENVELOPPE_TYPE_REPEATED_ATTACK_DECAY equ 1   ; /\/\/\/\/\/     repeated attack-decay
+AY_ENVELOPPE_TYPE_REPEATED_ATTACK_DECAY equ 14  ; /\/\/\/\/\/     repeated attack-decay
 
 
 ; AY Register value in Z80 register A
