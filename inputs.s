@@ -85,11 +85,16 @@ update_inputs:
     jr nz,.p1notstart
     set INPUT_BIT_START,b
 .p1notstart
-    in a,($81)
-    bit 5,a
-    jr nz,.p1notesc
+    in a,($80)
+    bit 5,a             ; DEL
+    jr nz,.p1notesc1
     set INPUT_BIT_ESC,b
-.p1notesc
+.p1notesc1
+    in a,($81)
+    bit 0,a             ; ESC
+    jr nz,.p1notesc2
+    set INPUT_BIT_ESC,b
+.p1notesc2
     in a,($85)
     bit 2,a
     jr nz,.p1nogreetings
