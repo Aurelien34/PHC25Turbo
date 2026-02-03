@@ -1,8 +1,9 @@
 # Debug
 DEBUG = 0
-JOYSTICK = 0
+JOYSTICK = 1
 
 # Path
+MEGA_USB_COM_PORT = COM3
 MAME_SAVESTATE_PATH = C:\MameNew\sta\phc25
 TO_COMPRESS_PATH = res_to_compress
 TO_EXTRACT_AND_COMPRESS_PATH = bmp_to_extract_and_compress
@@ -27,6 +28,7 @@ APPLY_PHC_MASK=dotnet $(TOOLS_PATH)/ApplyPhcFileBitMask.dll
 EXTRACT_RAW_IMAGE_DATA=dotnet $(TOOLS_PATH)/ExtractRawImageData.dll
 EXTRACT_COLOR_IMAGE_DATA=dotnet $(TOOLS_PATH)/Extract2BitColorImage.dll
 EXTRACT_GS_IMAGE_DATA=dotnet $(TOOLS_PATH)/Extract2BitGrayScaleImage.dll
+PHC2USB=dotnet $(TOOLS_PATH)/PHC2USB.dll
 
 # Assembler flags
 ASFLAGS=-chklabels -nocase -Fvobj -Dvasm=1 -quiet
@@ -34,6 +36,7 @@ LDFLAGS=-brawbin1 -Tmain.ld
 
 # Target and intermediate files
 TARGET=turbo.phc
+TARGET_USB=turbo.usb
 SAVESTATE=turbo.sta
 STUFFING_SAVESTATE=stuffing.sta
 SECTION_MAP_FILE=sectionmap.txt
@@ -83,6 +86,12 @@ endef
 
 all:
 	make sta
+
+run: $(OUTPUT_PATH)/$(TARGET_USB)
+	cmd /C "type $(TARGET_USB) > $(MEGA_USB_COM_PORT)"
+
+$(OUTPUT_PATH)/$(TARGET_USB): $(OUTPUT_PATH)/$(TARGET)
+	$(PHC2USB) $(OUTPUT_PATH)/$(TARGET) $(OUTPUT_PATH)/$(TARGET_USB)
 
 phc:
 	make $(OUTPUT_PATH)/$(TARGET)
@@ -176,6 +185,9 @@ ifneq ($(wildcard $(SECTION_MAP_FILE)),)
 endif
 ifneq ($(wildcard $(TARGET)),)
 	del $(TARGET)
+endif
+ifneq ($(wildcard $(TARGET_USB)),)
+	del $(TARGET_USB)
 endif
 ifneq ($(wildcard $(SAVESTATE)),)
 	del $(SAVESTATE)

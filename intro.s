@@ -58,13 +58,13 @@ sz_line_5:
 sz_line_6:
     dc.b "> Back to menu: ESC or DEL",0
 sz_line_7:
-    dc.b "> Accelerate to start;;;",0
+    dc.b "> Press any key to start;;;",0
 sz_line_8:
-    dc.b "Aurelien < Bouz 2025 for RPUFOS",0
+    dc.b "Aurelien < Bouz 2026 for RPUFOS",0
 sz_line_ready:
     dc.b "Ignite your engines;;;",0
 sz_line_version_1:
-    dc.b "V1@1",0
+    dc.b "V1@2",0
 sz_line_version_2:
     dc.b "PHC25",0
 
