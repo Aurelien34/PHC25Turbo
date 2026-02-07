@@ -29,6 +29,7 @@ EXTRACT_RAW_IMAGE_DATA=dotnet $(TOOLS_PATH)/ExtractRawImageData.dll
 EXTRACT_COLOR_IMAGE_DATA=dotnet $(TOOLS_PATH)/Extract2BitColorImage.dll
 EXTRACT_GS_IMAGE_DATA=dotnet $(TOOLS_PATH)/Extract2BitGrayScaleImage.dll
 PHC2USB=dotnet $(TOOLS_PATH)/PHC2USB.dll
+PHC2WAV=dotnet $(TOOLS_PATH)/PHC2WAV.dll
 
 # Assembler flags
 ASFLAGS=-chklabels -nocase -Fvobj -Dvasm=1 -quiet
@@ -37,6 +38,7 @@ LDFLAGS=-brawbin1 -Tmain.ld
 # Target and intermediate files
 TARGET=turbo.phc
 TARGET_USB=turbo.usb
+TARGET_WAV=turbo.wav
 SAVESTATE=turbo.sta
 STUFFING_SAVESTATE=stuffing.sta
 SECTION_MAP_FILE=sectionmap.txt
@@ -92,6 +94,12 @@ run: $(OUTPUT_PATH)/$(TARGET_USB)
 
 $(OUTPUT_PATH)/$(TARGET_USB): $(OUTPUT_PATH)/$(TARGET)
 	$(PHC2USB) $(OUTPUT_PATH)/$(TARGET) $(OUTPUT_PATH)/$(TARGET_USB)
+
+$(OUTPUT_PATH)/$(TARGET_WAV): $(OUTPUT_PATH)/$(TARGET)
+	$(PHC2WAV) $(OUTPUT_PATH)/$(TARGET) $(OUTPUT_PATH)/$(TARGET_WAV)
+
+wav:
+	make $(OUTPUT_PATH)/$(TARGET_WAV)
 
 phc:
 	make $(OUTPUT_PATH)/$(TARGET)
