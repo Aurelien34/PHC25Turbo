@@ -20,37 +20,39 @@ block_texts_to_display:
     ; y is pixel perfect
     ; should end with a $0000 value
     ; Room for 32x9 characters
-    dc.w 0+94*32+VRAM_ADDRESS, sz_line_0
-    dc.w 9+105*32+VRAM_ADDRESS, sz_line_1
+    dc.w 0+105*32+VRAM_ADDRESS, sz_line_0
+    dc.w 10+105*32+VRAM_ADDRESS, sz_line_1
     dc.w 0+114*32+VRAM_ADDRESS, sz_line_2
-    dc.w 19+114*32+VRAM_ADDRESS, sz_line_2b
+    dc.w 13+114*32+VRAM_ADDRESS, sz_line_2b
     dc.w 0+124*32+VRAM_ADDRESS, sz_line_3
-    dc.w 19+124*32+VRAM_ADDRESS, sz_line_3b
+    dc.w 13+124*32+VRAM_ADDRESS, sz_line_3b
     dc.w 0+134*32+VRAM_ADDRESS, sz_line_4
-    dc.w 19+134*32+VRAM_ADDRESS, sz_line_4b
+    dc.w 13+134*32+VRAM_ADDRESS, sz_line_4b
     dc.w 0+144*32+VRAM_ADDRESS, sz_line_5
     dc.w 0+154*32+VRAM_ADDRESS, sz_line_6
     dc.w 0+164*32+VRAM_ADDRESS, sz_line_7
     dc.w 1+182*32+VRAM_ADDRESS, sz_line_8
     dc.w 10+82*32+VRAM_ADDRESS, sz_line_ready
-    dc.w 32-4+125*32+VRAM_ADDRESS, sz_line_version_1
-    dc.w 32-5+135*32+VRAM_ADDRESS, sz_line_version_2
+    dc.w 32-5+130*32+VRAM_ADDRESS, sz_line_version_2
+    dc.w 32-4+140*32+VRAM_ADDRESS, sz_line_version_1
+    dc.w 32-9+100*32+VRAM_ADDRESS, sz_line_joysticks
+    dc.w 32-9+110*32+VRAM_ADDRESS, sz_line_supported
     dc.w $0000
 
 sz_line_0:
     dc.b "Keys are:",0
 sz_line_1:
-    dc.b "Player 1  Player 2",0
+    dc.b "P1 P2",0
 sz_line_2:
-    dc.b "> Left:  D",0
+    dc.b "> Left:   D",0 
 sz_line_2b:
     dc.b "K",0
 sz_line_3:
-    dc.b "> Right: F",0
+    dc.b "> Right:  F",0
 sz_line_3b:
     dc.b "L",0
 sz_line_4:
-    dc.b "> Accel: S",0
+    dc.b "> Accel:  S",0
 sz_line_4b:
     dc.b "J",0
 sz_line_5:
@@ -67,6 +69,10 @@ sz_line_version_1:
     dc.b "V1@2",0
 sz_line_version_2:
     dc.b "PHC25",0
+sz_line_joysticks:
+    dc.b "Joysticks",0
+sz_line_supported:
+    dc.b "supported",0
 
 DIGIT_COUNT equ 3
 DIGIT_IMAGE_SEQUENCE_COUNT equ 3
