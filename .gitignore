@@ -5,5 +5,6 @@ obj/*
 precomp/*
 turbo.phc
 turbo.sta
+turbo.usb
 sectionmap.txt
 *.ods#
