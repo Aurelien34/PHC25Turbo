@@ -12,6 +12,7 @@
     global prepare_draw_car, draw_car, erase_car, update_car_position, update_car_angle_and_throttle, update_car_speed, update_car_engine_sound
     global compute_engine_enveloppe
     global car_set_lap_count
+    global spinner_delta_0, spinner_delta_1, spinner_active_0, spinner_active_1
 
 THROTTLE_INCREMENT equ 2
 THROTTLE_DECREMENT equ 4
@@ -46,8 +47,12 @@ data_car0:
     dc.w 0 ; sprite VRAM address (precomp)
     dc.w 0 ; shifted sprite data address (precomp) => lower bit says we have to use mirror display
     dc.w 0 ; background VRAM address (precomp)
-    dc.w .background_data ; background backup data address (constant)
-.background_data:
+    dc.w background_data_0 ; background backup data address (constant)
+spinner_active_0:
+    dc.b 0 ; spinner active?
+spinner_delta_0:
+    dc.b 0 ; spinner delta value
+background_data_0:
     dc.w 0, 0, 0, 0, 0, 0, 0, 0 ; background backup data
 
 data_car1:
@@ -65,8 +70,12 @@ data_car1:
     dc.w 0 ; sprite VRAM address (precomp)
     dc.w 0 ; shifted sprite data address (precomp)
     dc.w 0 ; background VRAM address (precomp)
-    dc.w .background_data ; background backup data address (constant)
-.background_data:
+    dc.w background_data_1 ; background backup data address (constant)
+spinner_active_1:
+    dc.b 0 ; spinner active?
+spinner_delta_1:
+    dc.b 0 ; spinner delta value
+background_data_1:
     dc.w 0, 0, 0, 0, 0, 0, 0, 0 ; background backup data
 
 compute_engine_enveloppe:
@@ -403,6 +412,37 @@ update_car_position:
 
 update_car_angle_and_throttle:
     ; [a] contains keyboard state for this car
+    ld b,a
+
+    bit INPUT_BIT_FIRE,a
+    ld a,(ix+CAR_OFFSET_THROTTLE) ; does not change flags
+    jr z,.nothrottle
+    add THROTTLE_INCREMENT
+    jr c,.endthrottle
+    jr .savethrottle
+.nothrottle
+    sub THROTTLE_DECREMENT
+    jr nc,.savethrottle
+    xor a
+.savethrottle
+    ld (ix+CAR_OFFSET_THROTTLE),a
+.endthrottle
+
+    ld a,(IX+CAR_OFFSET_SPINNER_ACTIVE)
+    or a
+    jr z,.nospinner
+    ld a,(IX+CAR_OFFSET_SPINNER_DELTA)
+    
+    sla a
+    sla a
+    sla a
+    sla a
+    add (ix+CAR_OFFSET_ANGLE)
+    ld (ix+CAR_OFFSET_ANGLE),a
+    jr .endangle
+
+.nospinner
+    ld a,b
     bit INPUT_BIT_LEFT,a
     jr z,.noturnleft
     dec (ix+CAR_OFFSET_ANGLE)
@@ -415,19 +455,8 @@ update_car_angle_and_throttle:
     inc (ix+CAR_OFFSET_ANGLE)
     inc (ix+CAR_OFFSET_ANGLE)
 .noturnright
-    bit INPUT_BIT_FIRE,a
-    ld a,(ix+CAR_OFFSET_THROTTLE) ; does not change flags
-    jr z,.nothrottle
-    add THROTTLE_INCREMENT
-    jr c,.end
-    jr .savethrottle
-.nothrottle
-    sub THROTTLE_DECREMENT
-    jr nc,.savethrottle
-    xor a
-.savethrottle
-    ld (ix+CAR_OFFSET_THROTTLE),a
-.end
+
+.endangle
     ret
 
 update_car_speed:

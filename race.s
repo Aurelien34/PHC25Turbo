@@ -288,10 +288,6 @@ start_race:
     call update_startup_countdown
 .no_countdown:
 
-    if DEBUG = 1
-    call emulator_security_idle;
-    endif
-
     ; End of VBL processing
     ld a,(RAM_MAP_CIRCUIT_DATA+CIRCUIT_OFFSET_CIRCUIT_OPTIONS)
     and 1<<CIRCUIT_OPTION_BIT_GREEN

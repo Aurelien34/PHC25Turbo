@@ -88,9 +88,6 @@ circuit_picker_circuit_data_address:
 circuit_picker_circuit_index:
     dc.b 0
 
-previous_input_value:
-    dc.b 0
-
 circuit_picker_show:
 
     ; shut the audio chip
@@ -176,14 +173,8 @@ circuit_picker_show:
     call draw_car
 
     ; Read inputs
-    ld a,(previous_input_value)
-    ld b,a
     call update_inputs
     ld a,(RAM_MAP_CONTROLLERS_VALUES)
-    cp b
-    jr z,.check_2p_start
-    ld (previous_input_value),a
-
     bit INPUT_BIT_LEFT,a
     jr z,.not_left
     ; Left
@@ -600,10 +591,6 @@ picker_wait_for_vbl:
     ret
 
 picker_end_of_vram_access:
-    if DEBUG = 1
-    call emulator_security_idle;
-    endif
-
     ; Black on white
     ld a,%11110110
     out ($40),a

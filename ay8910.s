@@ -53,11 +53,6 @@ command_chain_queue:
     dc.b 0,0,0,0,0,0
 command_chain_queue_end:
 
-
-chain_sequence_keyboard_beep:
-    dc.b AY_SOUND_CHAIN_NUMBER_PLAY_TONE, AY_SOUND_CHAIN_NUMBER_SILENCE
-chain_sequence_keyboard_beep_end:
-
 chain_sequence_wall_collision:
     dc.b AY_SOUND_CHAIN_NUMBER_PLAY_CRASH, AY_SOUND_CHAIN_NUMBER_SILENCE
 chain_sequence_wall_collision_end:
@@ -249,11 +244,6 @@ ay8910_inject_chain_sequence_in_chain_queue:
     xor a
     ld (audio_animation_counter+1),a
     ret
-
-ay8910_queue_sequence_keyboard_beep:
-    ld bc,chain_sequence_keyboard_beep_end-chain_sequence_keyboard_beep
-    ld hl,chain_sequence_keyboard_beep
-    jr ay8910_inject_chain_sequence_in_chain_queue
 
 ay8910_queue_sequence_wall_collision:
     ld bc,chain_sequence_wall_collision_end-chain_sequence_wall_collision

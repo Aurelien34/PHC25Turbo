@@ -14,6 +14,10 @@ keyboard_last_key_pressed_port:
     dc.b 0
 keyboard_last_key_pressed_bitmask:
     dc.b 0
+spinner_prev_position_0:
+    dc.b 0
+spinner_prev_position_1:
+    dc.b 0
 
 ; return key port and bitmask @last_key_pressed + carry flag is a key has been pressed
 keyboard_update_key_pressed:
@@ -41,19 +45,53 @@ keyboard_update_key_pressed:
 
 update_inputs:
     push bc
+    push de
 
     ; Player 1 / s, d, f
     ld b,0 ; b <- 0
 
-    ;  Joystick
-    if JOYSTICK = 1
+    ; Spinner / Joystick
+    xor a
+    ld (spinner_active_0),a
+    ld a,(spinner_prev_position_0)
+    ld d,a
+
     ld a,$0e
     out ($c1),a
     in a,($c0)
+    ld e,a
     bit 4,a
     jr nz,.jp1notfire
     set INPUT_BIT_FIRE,b
 .jp1notfire
+    bit 5,a
+    jr nz,.jp1_nospinner
+
+    and $0f
+    ld c,a ; backup spinner position
+    ld a,d
+    neg a
+    add c
+    ld e,a
+    ld (spinner_delta_0),a
+    ld a,c
+    ld (spinner_prev_position_0),a
+    ld a,1
+    ld (spinner_active_0),a
+
+    ld a,e
+    or a
+    jr z,.p1keyboard
+    bit 3,a
+    jr z,.p1_spin_positive
+    set INPUT_BIT_LEFT,b
+    jr .p1keyboard
+.p1_spin_positive:
+    set INPUT_BIT_RIGHT,b
+    jr .p1keyboard;
+
+.jp1_nospinner:
+    ld a,e
     bit 2,a
     jr nz,.jp1notleft
     set INPUT_BIT_LEFT,b
@@ -62,7 +100,8 @@ update_inputs:
     jr nz,.jp1notright
     set INPUT_BIT_RIGHT,b
 .jp1notright
-    endif
+
+.p1keyboard:
 
     ; Keyboard
     in a,($80)
@@ -105,13 +144,35 @@ update_inputs:
 
 
     ; Player 2 / j, k, l
-    ld b,0 ; b <- 0
+    ; Spinner
+    xor a
+    ld (spinner_active_1),a
+    ld a,(spinner_prev_position_1)
+    ld b,a
 
-    ;  Joystick
-    if JOYSTICK = 1
     ld a,$0f
     out ($c1),a
     in a,($c0)
+    ld  e,a
+    bit 5,a
+    jr nz,.jp2_nospinner
+
+    and $0f
+    ld c,a ; backup spinner position
+    ld a,b
+    neg a
+    add c
+    ld (spinner_delta_1),a
+    ld a,c
+    ld (spinner_prev_position_1),a
+    ld a,1
+    ld (spinner_active_1),a
+
+.jp2_nospinner:
+    ld b,0 ; b <- 0
+
+    ;  Joystick
+    ld a,e
     bit 4,a
     jr nz,.jp2notfire
     set INPUT_BIT_FIRE,b
@@ -124,7 +185,6 @@ update_inputs:
     jr nz,.jp2notright
     set INPUT_BIT_RIGHT,b
 .jp2notright
-    endif
 
     in a,($86)
     bit 2,a
@@ -149,5 +209,6 @@ update_inputs:
     ld a,b
     ld (RAM_MAP_CONTROLLERS_VALUES+1),a ; store values
 
+    pop de
     pop bc
     ret

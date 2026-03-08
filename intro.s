@@ -199,10 +199,6 @@ show_intro:
     call animate_wheels
     call animate_digits
     call animate_helmet
-
-    if DEBUG = 1
-    call emulator_security_idle
-    endif
     
     call switch_to_mode_graphics_sd_white
 

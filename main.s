@@ -4,10 +4,6 @@
 
     global start, players_count, get_opponent_name
 
-    if DEBUG = 1
-    global emulator_security_idle
-    endif
-
 opponent_names:
     dc.w opponent_name_0
     dc.w opponent_name_1    
@@ -38,7 +34,6 @@ opponent_name_7:
 ; returns opponent name in [bc]
 get_opponent_name:
     push hl
-    ;ld hl,(opponent_number)
 
     ; random for now
     ld h,0
@@ -55,14 +50,8 @@ get_opponent_name:
     pop hl 
     ret
 
-opponent_number:
-    dc.w 2
-
 players_count:
     dc.b 0
-
-opponent_name_pointer:
-    
 
 start:
     di ; Disable interrupts
@@ -103,15 +92,3 @@ start:
     jr .loop
 
     ret
-
-    if DEBUG = 1
-emulator_security_idle:
-    ; wait for a known amount of cycles to mimic the real hardware => 29 lines
-    ld b,2
-    ld c,125
-.innerloop
-    dec c
-    jr nz,.innerloop
-    djnz .innerloop
-    ret
-    endif
