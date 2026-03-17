@@ -33,10 +33,11 @@ block_texts_to_display:
     dc.w 0+164*32+VRAM_ADDRESS, sz_line_7
     dc.w 1+182*32+VRAM_ADDRESS, sz_line_8
     dc.w 10+82*32+VRAM_ADDRESS, sz_line_ready
-    dc.w 32-5+130*32+VRAM_ADDRESS, sz_line_version_2
-    dc.w 32-4+140*32+VRAM_ADDRESS, sz_line_version_1
+    dc.w 32-5+138*32+VRAM_ADDRESS, sz_line_version_2
+    dc.w 32-4+148*32+VRAM_ADDRESS, sz_line_version_1
     dc.w 32-9+100*32+VRAM_ADDRESS, sz_line_joysticks
-    dc.w 32-9+110*32+VRAM_ADDRESS, sz_line_supported
+    dc.w 32-12+110*32+VRAM_ADDRESS, sz_line_spinners
+    dc.w 32-9+120*32+VRAM_ADDRESS, sz_line_supported
     dc.w $0000
 
 sz_line_0:
@@ -66,11 +67,13 @@ sz_line_8:
 sz_line_ready:
     dc.b "Ignite your engines;;;",0
 sz_line_version_1:
-    dc.b "V1@2",0
+    dc.b "V1@3",0
 sz_line_version_2:
     dc.b "PHC25",0
 sz_line_joysticks:
     dc.b "Joysticks",0
+sz_line_spinners:
+    dc.b "and spinners",0
 sz_line_supported:
     dc.b "supported",0
 
