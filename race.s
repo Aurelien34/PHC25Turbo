@@ -128,10 +128,15 @@ start_race:
     ld a,(race_state)
     and a,1<<RACE_STATE_RACE_OVER
     jp z,.not_finished
+    ; Race complete => disable spinners
+    xor a
+    ld (spinner_active_0),a
+    ld (spinner_active_1),a
     ; Play victory music loop
     call music_loop
     jp .continue_state_tests
 .not_finished:
+    call update_inputs;
     ; play engine sounds
     call ay8910_loop
 .continue_state_tests:
@@ -139,8 +144,6 @@ start_race:
     call check_for_end_of_race
     dc.b $d0 ; "ret nc" not assembled correctly by VASM!
     ; Back to parent screen
-
-    call update_inputs;
 
     ; Compute car speed vector
     ld ix,data_car0 ; current car is number 0
