@@ -207,6 +207,11 @@ show_intro:
     ld a,(RAM_MAP_CONTROLLERS_VALUES)
     bit INPUT_BIT_GREETINGS,a
     jr nz,.greetings
+    bit INPUT_BIT_FIRE,a
+    dc.b $c0 ; "ret nz" is not assembled correctly by VASM
+    ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
+    bit INPUT_BIT_FIRE,a
+    dc.b $c0 ; "ret nz" is not assembled correctly by VASM
 
     ; Handle all other keys
     call keyboard_update_key_pressed
