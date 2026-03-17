@@ -194,14 +194,11 @@ show_intro:
 .intro_loop:
 
     call wait_for_vbl
-    call switch_to_mode_graphics_sd_green
 
     call animate_wheels
     call animate_digits
     call animate_helmet
     
-    call switch_to_mode_graphics_sd_white
-
     call update_animation
     call music_loop
 
