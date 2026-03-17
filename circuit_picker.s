@@ -601,6 +601,6 @@ clear_victory_list:
     ld de,victory_list+1
     xor a
     ld (hl),a
-    ld bc,victory_list_end-victory_list-1
+    ld bc,CIRCUIT_COUNT
     ldir
     ret

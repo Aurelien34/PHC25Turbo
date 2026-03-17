@@ -47,13 +47,11 @@ data_car0:
     dc.w 0 ; sprite VRAM address (precomp)
     dc.w 0 ; shifted sprite data address (precomp) => lower bit says we have to use mirror display
     dc.w 0 ; background VRAM address (precomp)
-    dc.w background_data_0 ; background backup data address (constant)
+    dc.w background_data_0 ; background backup data address (constant) - need 16 bytes
 spinner_active_0:
     dc.b 0 ; spinner active?
 spinner_delta_0:
     dc.b 0 ; spinner delta value
-background_data_0:
-    dc.w 0, 0, 0, 0, 0, 0, 0, 0 ; background backup data
 
 data_car1:
     dc.w $ffff ; x
@@ -70,13 +68,11 @@ data_car1:
     dc.w 0 ; sprite VRAM address (precomp)
     dc.w 0 ; shifted sprite data address (precomp)
     dc.w 0 ; background VRAM address (precomp)
-    dc.w background_data_1 ; background backup data address (constant)
+    dc.w background_data_1 ; background backup data address (constant) - need 16 bytes
 spinner_active_1:
     dc.b 0 ; spinner active?
 spinner_delta_1:
     dc.b 0 ; spinner delta value
-background_data_1:
-    dc.w 0, 0, 0, 0, 0, 0, 0, 0 ; background backup data
 
 compute_engine_enveloppe:
     ; load enveloppe counter

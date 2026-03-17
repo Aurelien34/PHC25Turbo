@@ -1,6 +1,7 @@
 ; PHC file should not exceed 14208 bytes - linker script is configured to limit code to this size
 
     global phc_file_footer
+    global background_data_1
 
     section	header,data
 
@@ -22,6 +23,7 @@ phc_file_footer:
     ; --- [6] Footer PHC (20 octets)
     dc.b $00, $00
     dc.b $01, $c0
+background_data_1: ; label used for car data at run time - 16 bytes
     dc.b $01, $00
     dc.b $00
     dc.b $ff, $ff, $ff, $ff

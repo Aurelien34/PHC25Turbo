@@ -1,7 +1,10 @@
     section	startup,text
 
+    global background_data_0
+
 ; Should only unmask the code and jump to its startup label
 
+background_data_0: ; label used for car data at run time - 16 bytes
     ; Point to the mask byte    
     ld hl,code_mask_byte
     ; Load he mask to be applied
@@ -17,6 +20,7 @@
     jr z,.endloop
     ld a,(hl)
     xor c
+    ; end of 16 bytes bloc for background data
     ld (hl),a
     inc hl
     jr .unmaskloop
