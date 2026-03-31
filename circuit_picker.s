@@ -203,7 +203,7 @@ circuit_picker_show:
     ld (players_count),a
     ret
 .not_esc:
-    and INPUT_BIT_START|INPUT_BIT_FIRE
+    and INPUT_VALUE_START|INPUT_VALUE_FIRE
     jr z,.not_start1
     ld a,1
     ld (players_count),a
@@ -211,7 +211,7 @@ circuit_picker_show:
 .check_2p_start:
 .not_start1:
     ld a,(RAM_MAP_CONTROLLERS_VALUES+1)
-    and INPUT_BIT_START|INPUT_BIT_FIRE
+    and INPUT_VALUE_START|INPUT_VALUE_FIRE
     jr z,.not_start2
     ld a,2
     ld (players_count),a
